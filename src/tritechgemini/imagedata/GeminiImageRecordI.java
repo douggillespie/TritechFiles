@@ -1,18 +1,7 @@
 package tritechgemini.imagedata;
 
-/**
- * Interface for Gemini data record which can support data read from ECD or GLF files. 
- * @author dg50
- *
- */
-public interface GeminiRecord {
+public interface GeminiImageRecordI extends GeminiRecordI {
 
-	/**
-	 * 
-	 * @return Image time in milliseconds UTC. 
-	 */
-	public long getImageTime();
-	
 	/**
 	 * Get decompressed image data. 
 	 * @return decompressed image data in a single array
@@ -38,6 +27,12 @@ public interface GeminiRecord {
 	public double getMaxRange();
 	
 	/**
+	 * 
+	 * @return the total number of beams
+	 */
+	public int getnBeam();
+	
+	/**
 	 * Path to the image file
 	 * @return path name of file
 	 */
@@ -58,24 +53,15 @@ public interface GeminiRecord {
 	public int getSonarType();
 	
 	/**
-	 * Specific type of sonar<br>
-	 * 720is=1<br>
-	 * 720ik=2<br>
-	 * 720im=3<br>
-	 * 1200ik=4<br>
-	 * @return type of sonar
+	 * Get the speed of sound in m/s
+	 * @return speed of sound
 	 */
-	public int getSonarPlatform();
+	public double getSoS();
 	
 	/**
-	 * 
-	 * @return the index (0 if only one sonar, 0,1,etc for multiple sonars)
+	 * Is record fully loaded ?
+	 * @return true if record is fully loaded. 
 	 */
-	public int getSonarIndex();
+	public boolean isFullyLoaded();
 	
-	/**
-	 * 
-	 * @return the sonar unique id,
-	 */
-	public int getDeviceId();
 }
