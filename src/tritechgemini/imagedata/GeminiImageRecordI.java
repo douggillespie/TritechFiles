@@ -63,5 +63,10 @@ public interface GeminiImageRecordI extends GeminiRecordI {
 	 * @return true if record is fully loaded. 
 	 */
 	public boolean isFullyLoaded();
+
+	/**
+	 * Free the data to save memory. 
+	 */
+	public void freeImageData();
 	
 }

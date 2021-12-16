@@ -1,6 +1,7 @@
 package tritechgemini.imagedata;
 
 import tritechgemini.fileio.GeminiAcousticZoom;
+import tritechgemini.fileio.GeminiFileCatalog;
 import tritechgemini.fileio.GeminiPingTail;
 
 public class ECDImageRecord extends GeminiImageRecord {
@@ -20,11 +21,13 @@ public class ECDImageRecord extends GeminiImageRecord {
 	public static final int END_TAG = 0xDEDE;
 	
 	public static final int HALF_END_TAG = 0xDE;
+	
 	public short m_version;
 	public int m_pid;
 	public int m_halfArr;
 	public int m_txLength;
 	public int m_scanRate;
+	public float m_sosAtXd;
 	public short m_shading;
 	public short m_mainGain;
 	public short m_gainBlank;
@@ -56,6 +59,7 @@ public class ECDImageRecord extends GeminiImageRecord {
 	public double m_sosAvg;
 	public int mask;
 	public int m_bpp;
+	public int m_nRngs;
 	public int m_b0;
 	public int m_b1;
 	public int m_r0;
@@ -106,7 +110,7 @@ public class ECDImageRecord extends GeminiImageRecord {
 (CTgtImg->m_nRngs * (CPing->m_sosAtXD/2.0) / CPing->m_modFreq
 I would try to avoid using the PingTail Extension record, unless you think there is something vital in there.
 		 */
-		return getnRange() * (speedOfSound/2.)/m_modFreq;
+		return getnRange() * (m_sosAtXd/2.)/m_modFreq;
 	}
 
 	@Override
@@ -143,8 +147,8 @@ I would try to avoid using the PingTail Extension record, unless you think there
 		
 	}
 	public byte[] uncompressData() {
-		int m_dataSize = m_nBrgs*maxRangeBin*m_bpp;
-		byte[] pData = new byte[m_nBrgs*maxRangeBin*m_bpp]; // have to use short ?
+		int m_dataSize = m_nBrgs*m_nRngs*m_bpp;
+		byte[] pData = new byte[m_nBrgs*m_nRngs*m_bpp]; // have to use short ?
 		//		byte[] pBlockLn = cData;
 		if (cData == null) {
 			return null;
@@ -199,5 +203,32 @@ I would try to avoid using the PingTail Extension record, unless you think there
 		imageData = uncompressData();
 		return imageData;
 	}
-	
+
+
+	@Override
+	public void freeImageData() {
+	  cData = null;
+	  imageData = null;
+	  bearingTable = null;
+	}
+
+	@Override
+	public int getnRange() {
+		return m_nRngs;
+	}
+
+	@Override
+	public int getnBeam() {
+		return m_b1-m_b0;
+	}
+
+	@Override
+	public double getSoS() {
+		return m_sosAtXd;
+	}
+
+	@Override
+	public long getRecordTime() {
+		return GeminiFileCatalog.cDateToMillis(m_txTime);
+	}
 }

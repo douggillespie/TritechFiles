@@ -1,7 +1,10 @@
 package tritechgemini.fileio;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.xml.catalog.CatalogException;
 
 import tritechgemini.imagedata.GeminiImageRecordI;
 
@@ -17,9 +20,44 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	private ArrayList<RecordClass> imageRecords = null;
 	
 	private Exception catalogException;
+	
+	public static final String ECDEND = ".ecd"; 
+	public static final String GLFEND = ".glf"; 
+	public static final String DATEND = ".dat"; 
 		
 	public GeminiFileCatalog(String filePath) {
 		this.filePath = filePath;
+	}
+	
+	/**
+	 * 
+	 * Preferred way of getting a file catalogue, since it will automatically 
+	 * handle ECD, GLF and DAT files. 
+	 * @param filePath 
+	 * @param create build the catalogue for the file immediately. 
+	 * @return file catalogue of null if the file doesn't exist or is an unknown type. 
+	 * @throws CatalogException if file is null or there is a failure cataloguing it. 
+	 */
+	public static GeminiFileCatalog getFileCatalog(String filePath, boolean create)  throws CatalogException {
+		File file = new File(filePath);
+		if (file.exists() == false) {
+			throw new CatalogException("File " + filePath + " does not exist");
+		}
+		String fEnd = filePath.substring(filePath.length()-4, filePath.length());
+		GeminiFileCatalog fileCatalog = null;
+		switch (fEnd) {
+		case ECDEND:
+			fileCatalog = new ECDFileCatalog(filePath);
+			break;
+		case GLFEND:
+		case DATEND:
+			fileCatalog = new GLFFileCatalog(filePath);
+			break;
+		}
+		if (fileCatalog != null && create) {
+			fileCatalog.createCatalogue();
+		}
+		return fileCatalog;
 	}
 	
 	/**
@@ -153,6 +191,13 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 			loadFullRecord(rec);
 		}
 		return rec;
+	}
+
+	public static long cDateToMillis(double cDate) {
+//		cDate is ref's to 1980 in secs, Java in millis from 1970. 
+		int days = 3652;
+		int secsPerDay = 3600*24;
+		return (long) ((cDate+days*secsPerDay)*1000.);
 	}
 	
 	

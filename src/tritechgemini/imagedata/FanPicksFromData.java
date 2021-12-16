@@ -1,5 +1,6 @@
 package tritechgemini.imagedata;
 
+import java.util.Arrays;
 
 /**
  * Fan maker where a LUT is used to work through each point in the fan image and take 
@@ -46,7 +47,7 @@ public class FanPicksFromData extends ImageFanMaker {
 	
 	@Override
 	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, int nPixY) {
-		if (dataPickLUT == null) {
+		if (needNewLUT(nPixX, nPixY)) {
 			createLUTs(geminiRecord, nPixX, nPixY);
 		}
 		
@@ -64,6 +65,7 @@ public class FanPicksFromData extends ImageFanMaker {
 						int[] putLUT = dataPutLUT[ix];
 						double[][] lutScale = dataLUTScale[ix];
 						short[] imRow = image[ix]; 
+						Arrays.fill(imRow, (short)-1);
 						for (int p = 0; p < usedColumnLength[ix]; p++) {
 							int[] pickLUTRow = pickLUT[p];
 							double[] scaleRow = lutScale[p];
@@ -86,9 +88,24 @@ public class FanPicksFromData extends ImageFanMaker {
 				e.printStackTrace();
 			}
 		}
-		
-		return null;
+		double mPerPixY = geminiRecord.getMaxRange() / nPixY;
+		double mPerPixX = geminiRecord.getMaxRange() * Math.abs(Math.sin(geminiRecord.getBearingTable()[0])) / (nPixX/2);
+		return new FanImageData(geminiRecord, image, mPerPixX, mPerPixY);
 	}
+
+	private boolean needNewLUT(int nPixX, int nPixY) {
+		if (dataPickLUT == null) {
+			return true;
+		}
+		if (dataPickLUT.length != nPixX) {
+			return true;
+		}
+		if (dataPickLUT[0].length != nPixY) {
+			return true;
+		}
+		return false;
+	}
+
 
 	/**
 	 * Create the lookup tables required to link points in the image to points in the data
@@ -97,16 +114,20 @@ public class FanPicksFromData extends ImageFanMaker {
 	 * @param nPixY n y Pixels in image
 	 */
 	private void createLUTs(GeminiImageRecordI geminiRecord, int nPixX, int nPixY) {
+		double[] bearingTable = geminiRecord.getBearingTable();
+		if (bearingTable == null) {
+			return;
+		}
 		int nP = nNearPoints == 2 ? 2 : 4;
 		dataPickLUT = new int[nPixX][nPixY][nP];
 		dataPutLUT = new int[nPixX][nPixY];
 		usedColumnLength = new int[nPixX];
 		dataLUTScale = new double[nPixX][nPixY][2];
-		double[] bearingTable = geminiRecord.getBearingTable();
 		xCent = (int) Math.ceil(nPixX/2.);
 		int nBearing = bearingTable.length;
 		int nRange = geminiRecord.getnRange();
-		double imageScale = (double) nRange / (double) nPixY ;
+		double imageScaleY = (double) nRange / (double) nPixY;
+		double imageScaleX = (double) nRange * Math.abs(Math.sin(bearingTable[0])) / (double) nPixX * 2;
 		Thread[] threads = new Thread[nThread];
 		int totalData = geminiRecord.getnBeam() * geminiRecord.getnRange();
 		for (int t = 0; t < nThread; t++) {
@@ -117,11 +138,11 @@ public class FanPicksFromData extends ImageFanMaker {
 					for (int ix = pos; ix < nPixX; ix += nThread) {
 						int x = ix-xCent;
 						for (int iy = 0; iy < nPixY; iy++) {
-							double pixRng = Math.sqrt(iy*iy+x*x)*imageScale;
+							double pixRng = Math.sqrt(iy*iy*imageScaleY*imageScaleY+x*x*imageScaleX*imageScaleX);
 							if (pixRng >= nRange) {
 								continue; // too far away
 							}
-							double pixAng = Math.atan2(x, iy); // backward !
+							double pixAng = Math.atan2(-x*imageScaleX, iy*imageScaleY); // backward !
 							int bearInd1 = findClosestBearings(bearingTable, pixAng);
 							if (bearInd1 < 0) {
 								continue; // angle out of range
@@ -182,13 +203,6 @@ public class FanPicksFromData extends ImageFanMaker {
 		// the bearing table is in ascending order. (I think they are always other way around).
 		int nBear = bearingTable.length;
 		boolean isAsc = bearingTable[nBear-1] > bearingTable[0];
-//		double m = isAsc ? 1. : -1.;
-//		double minB, maxB;
-//		minB = bearingTable[0]*m;
-//		maxB = bearingTable[nBear-1]*m;
-//		if (bearing < minB || bearing > maxB) {
-//			return -1;
-//		}
 		/*
 		 * This should fine a position where a bearing is exactly equal to the one
 		 * we want, or we have one > and one < giving opposite signs. 

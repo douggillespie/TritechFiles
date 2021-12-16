@@ -131,7 +131,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		ecdRecord.m_halfArr = dis.readInt(); 
 		ecdRecord.m_txLength = dis.readUnsignedByte(); 
 		ecdRecord.m_scanRate = dis.readUnsignedByte(); 
-		ecdRecord.speedOfSound = dis.readFloat(); 
+		ecdRecord.m_sosAtXd = dis.readFloat(); 
 		ecdRecord.m_shading = dis.readShort(); 
 		ecdRecord.m_mainGain = dis.readShort(); 
 		ecdRecord.m_gainBlank = dis.readShort(); 
@@ -167,7 +167,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		ecdRecord.m_sosAvg = dis.readDouble();  //End of data from CTgtRec - looks like a reasonable value for speed of sound
 		ecdRecord.mask = dis.readInt();  //From CTgtImg
 		ecdRecord.m_bpp = dis.readUnsignedByte(); 
-		ecdRecord.maxRangeBin = dis.readInt();  // this changes with set range. On old Gemini's 1m=122, 5.1m=677 101m=1545 , New gemini 50.1m 763 ranges. 
+		ecdRecord.m_nRngs = dis.readInt();  // this changes with set range. On old Gemini's 1m=122, 5.1m=677 101m=1545 , New gemini 50.1m 763 ranges. 
 		ecdRecord.m_b0 = dis.readInt(); 
 		ecdRecord.m_b1 = dis.readInt(); 
 		ecdRecord.m_r0 = dis.readInt(); 
@@ -216,12 +216,6 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		return ok ? acousticZoom : null;
 	}
 	
-	private long cDateToMillis(double cDate) {
-//		cDate is ref's to 1980 in secs, Java in millis from 1970. 
-		int days = 3652;
-		int secsPerDay = 3600*24;
-		return (long) ((cDate+days*secsPerDay)*1000.);
-	}
 	
 	private static String readUnicodeString(DataInput dis, int nChar) throws IOException {
 		byte[] bytes = new byte[nChar*2];
@@ -251,5 +245,5 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		}
 		return nRead;
 	}
-
+	
 }

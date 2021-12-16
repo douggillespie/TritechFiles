@@ -37,40 +37,10 @@ abstract public class GeminiImageRecord implements GeminiImageRecordI {
 	public double[] bearingTable;
 	
 	/**
-	 * Minimum range bin (probably always 0)
-	 */
-	public int minRangeBin;
-	
-	/**
-	 * Maximum range bin (actually one more than the index of the bin)
-	 * so that nBins = maxBin-minBin
-	 */
-	public int maxRangeBin;
-	
-	/**
-	 * minimum beam bin (probably always 0);
-	 */
-	public int minBeamBin;
-	
-	/**
-	 * Maximum beam bin (generally bearingTable.leength)
-	 */
-	public int maxBeamBin;
-	
-	/**
 	 * Full file path for this record
 	 */
 	private String filePath;
 	
-	/**
-	 * Speed of sound
-	 */
-	public double speedOfSound;
-	
-	@Override
-	public long getRecordTime() {
-		return recordTimeMillis;
-	}
 
 	/**
 	 * 
@@ -80,23 +50,10 @@ abstract public class GeminiImageRecord implements GeminiImageRecordI {
 		return bearingTable == null ? 0 : bearingTable.length;
 	}
 	
-	/**
-	 * 
-	 * @return the number of range bins.
-	 */
-	@Override
-	public int getnRange() {
-		return maxRangeBin-minRangeBin;
-	}
 
 	@Override
 	public double[] getBearingTable() {
 		return bearingTable;
-	}
-
-	@Override
-	public int getnBeam() {
-		return maxBeamBin-minBeamBin;
 	}
 
 	@Override
@@ -107,11 +64,6 @@ abstract public class GeminiImageRecord implements GeminiImageRecordI {
 	@Override
 	public int getRecordNumber() {
 		return recordIndex;
-	}
-
-	@Override
-	public double getSoS() {
-		return speedOfSound;
 	}
 
 	@Override

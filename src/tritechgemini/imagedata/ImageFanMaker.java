@@ -26,7 +26,7 @@ abstract public class ImageFanMaker {
 	 * @return default image width
 	 */
 	public int getDefaultXbins(GeminiImageRecordI geminiRecord) {
-		return geminiRecord.getBearingTable().length;
+		return geminiRecord.getnBeam();
 	}
 	
 	/**
@@ -38,6 +38,9 @@ abstract public class ImageFanMaker {
 	 */
 	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX) {
 		double[] bearingTable = geminiRecord.getBearingTable();
+		if (bearingTable == null) {
+			return null;
+		}
 		double b1 = Math.abs(bearingTable[0]);
 		int nPixY = (int) Math.ceil(nPixX/(2.*Math.sin(b1)));
 		return createFanData(geminiRecord, nPixX, nPixY);
