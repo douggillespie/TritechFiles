@@ -104,7 +104,8 @@ public class GLFFastInputStream extends InputStream {
 				}
 				int fNameLen = glfInputStream.readUnsignedShort();
 				int exf = glfInputStream.readUnsignedShort(); // no idea !
-				byte[] nameData = glfInputStream.readNBytes(fNameLen);
+				byte[] nameData = new byte[fNameLen];
+				glfInputStream.read(nameData);
 				String fileName = new String(nameData);
 				if (fileName.endsWith(".cfg")) {
 					cfgFileName = fileName;
@@ -200,22 +201,22 @@ public class GLFFastInputStream extends InputStream {
 		return bytesRead;
 	}
 
-	@Override
-	public byte[] readAllBytes() throws IOException {
-		return super.readNBytes(available());
-	}
-
-	@Override
-	public byte[] readNBytes(int len) throws IOException {
-		byte[] rData  = new byte[len];
-		read(rData, 0, len);
-		return rData;
-	}
-
-	@Override
-	public int readNBytes(byte[] b, int off, int len) throws IOException {
-		return read(b, off, len);
-	}
+//	@Override
+//	public byte[] readAllBytes() throws IOException {
+//		return super.readNBytes(available());
+//	}
+//
+//	@Override
+//	public byte[] readNBytes(int len) throws IOException {
+//		byte[] rData  = new byte[len];
+//		read(rData, 0, len);
+//		return rData;
+//	}
+//
+//	@Override
+//	public int readNBytes(byte[] b, int off, int len) throws IOException {
+//		return read(b, off, len);
+//	}
 
 	@Override
 	public long skip(long n) throws IOException {
@@ -236,10 +237,10 @@ public class GLFFastInputStream extends InputStream {
 		return n;
 	}
 
-	@Override
-	public void skipNBytes(long n) throws IOException {
-		super.skip(n);
-	}
+//	@Override
+//	public void skipNBytes(long n) throws IOException {
+//		super.skip(n);
+//	}
 
 	@Override
 	public int available() throws IOException {

@@ -1,6 +1,5 @@
 package tritechgemini.fileio;
 
-import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.File;
@@ -12,8 +11,6 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.xml.catalog.CatalogException;
 
 import tritechgemini.imagedata.GLFImageRecord;
 

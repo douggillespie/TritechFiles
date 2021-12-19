@@ -12,7 +12,7 @@ public class FanPicksFromData extends ImageFanMaker {
 
 	private int nNearPoints = 2;
 	
-	private int nThread = 2;
+	private int nThread = 3;
 	
 	/**
 	 * LUT which tells us where to take data from in the raw data array. 
@@ -42,16 +42,15 @@ public class FanPicksFromData extends ImageFanMaker {
 
 	
 	public FanPicksFromData(int nNearPoints) {
-		nNearPoints = 2;
+		this.nNearPoints = checkNPoints(nNearPoints);
 	}
 	
 	@Override
-	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, int nPixY) {
+	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, int nPixY, byte[] data) {
 		if (needNewLUT(nPixX, nPixY)) {
 			createLUTs(geminiRecord, nPixX, nPixY);
 		}
 		
-		byte[] data = geminiRecord.getImageData();
 		short[][] image = new short[nPixX][nPixY];
 
 		Thread[] threads = new Thread[nThread];
@@ -69,10 +68,14 @@ public class FanPicksFromData extends ImageFanMaker {
 						for (int p = 0; p < usedColumnLength[ix]; p++) {
 							int[] pickLUTRow = pickLUT[p];
 							double[] scaleRow = lutScale[p];
-							int val = Byte.toUnsignedInt(data[pickLUTRow[0]]) +  Byte.toUnsignedInt(data[pickLUTRow[1]]);
-							if (pickLUTRow.length ==4) {
-								val += Byte.toUnsignedInt(data[pickLUTRow[2]]) +  Byte.toUnsignedInt(data[pickLUTRow[3]]);
+							double val = 0;
+							for (int i = 0; i < scaleRow.length; i++) {
+								val += Byte.toUnsignedInt(data[pickLUTRow[i]]) *scaleRow[i];
 							}
+//							Byte.toUnsignedInt(data[pickLUTRow[0]]) *scaleRow[0] +  Byte.toUnsignedInt(data[pickLUTRow[1]])*scaleRow[1];
+//							if (pickLUTRow.length ==4) {
+//								val += Byte.toUnsignedInt(data[pickLUTRow[2]])*scaleRow[0] +  Byte.toUnsignedInt(data[pickLUTRow[3]])*scaleRow[1];
+//							}
 							imRow[putLUT[p]] = (short) val;
 						}
 					}
@@ -118,11 +121,11 @@ public class FanPicksFromData extends ImageFanMaker {
 		if (bearingTable == null) {
 			return;
 		}
-		int nP = nNearPoints == 2 ? 2 : 4;
+		int nP = checkNPoints(nNearPoints);
 		dataPickLUT = new int[nPixX][nPixY][nP];
 		dataPutLUT = new int[nPixX][nPixY];
 		usedColumnLength = new int[nPixX];
-		dataLUTScale = new double[nPixX][nPixY][2];
+		dataLUTScale = new double[nPixX][nPixY][nP];
 		xCent = (int) Math.ceil(nPixX/2.);
 		int nBearing = bearingTable.length;
 		int nRange = geminiRecord.getnRange();
@@ -149,18 +152,34 @@ public class FanPicksFromData extends ImageFanMaker {
 							}
 							double db1 = Math.abs(pixAng-bearingTable[bearInd1]);
 							double db2 = Math.abs(pixAng-bearingTable[bearInd1]);
-							dataLUTScale[ix][usedColumnLength[ix]][0] = db2/(db1+db2);
-							dataLUTScale[ix][usedColumnLength[ix]][1] = db1/(db1+db2);
-							if (nP == 2) {
+							if (nP == 1) {
 								int iR = (int) Math.round(pixRng);
+								dataPutLUT[ix][usedColumnLength[ix]] = iy;
+								if (iR >= nRange) {
+									continue;
+								}
+								dataPutLUT[ix][usedColumnLength[ix]] = iy;
+								if (db1 < db2) {
+									dataPickLUT[ix][usedColumnLength[ix]][0] = iR*nBearing + bearInd1;									
+								}
+								else {
+									dataPickLUT[ix][usedColumnLength[ix]][0] = iR*nBearing + bearInd1 + 1;
+								}
+								dataLUTScale[ix][usedColumnLength[ix]][0] = 1.;
+							}
+							else if (nP == 2) {
+								int iR = (int) Math.round(pixRng);
+								dataPutLUT[ix][usedColumnLength[ix]] = iy;
 								if (iR >= nRange) {
 									continue;
 								}
 								dataPutLUT[ix][usedColumnLength[ix]] = iy;
 								dataPickLUT[ix][usedColumnLength[ix]][0] = iR*nBearing + bearInd1;
 								dataPickLUT[ix][usedColumnLength[ix]][1] = iR*nBearing + bearInd1+1;
+								dataLUTScale[ix][usedColumnLength[ix]][0] = db2/(db1+db2);
+								dataLUTScale[ix][usedColumnLength[ix]][1] = db1/(db1+db2);
 							}
-							else {
+							else { // nP = 4;
 								int iR = (int) Math.floor(pixRng);
 								if (iR >= nRange) {
 									continue;
@@ -174,6 +193,10 @@ public class FanPicksFromData extends ImageFanMaker {
 								}
 								dataPickLUT[ix][usedColumnLength[ix]][2] = iR*nBearing + bearInd1;
 								dataPickLUT[ix][usedColumnLength[ix]][3] = iR*nBearing + bearInd1+1;
+								dataLUTScale[ix][usedColumnLength[ix]][0] = db2/(db1+db2)/2.;
+								dataLUTScale[ix][usedColumnLength[ix]][1] = db1/(db1+db2)/2.;
+								dataLUTScale[ix][usedColumnLength[ix]][2] = dataLUTScale[ix][usedColumnLength[ix]][0];
+								dataLUTScale[ix][usedColumnLength[ix]][3] = dataLUTScale[ix][usedColumnLength[ix]][1];
 							}
 							usedColumnLength[ix]++;
 						}
@@ -188,6 +211,20 @@ public class FanPicksFromData extends ImageFanMaker {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	// check the number of points is something we can handle. 
+	private int checkNPoints(int nPoints) {
+		switch (nPoints) {
+		case 1:
+			return 1;
+		case 2:
+			return 2;
+		case 4:
+			return 4;
+		default:
+			return 2;
 		}
 	}
 	
@@ -220,6 +257,8 @@ public class FanPicksFromData extends ImageFanMaker {
 	public void clearTables() {
 		dataPickLUT = null;
 		dataPutLUT = null;
+		dataLUTScale = null;
+		usedColumnLength = null;
 	}
 
 }

@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.xml.catalog.CatalogException;
-
 import tritechgemini.imagedata.GeminiImageRecordI;
 
 /**

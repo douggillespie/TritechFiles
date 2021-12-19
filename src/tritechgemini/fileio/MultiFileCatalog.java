@@ -25,7 +25,13 @@ public class MultiFileCatalog {
 	public void catalogFiles(String[] fileList) {
 		catalogList.clear();
 		for (int i = 0; i < fileList.length; i++) {
-			GeminiFileCatalog cat = GeminiFileCatalog.getFileCatalog(fileList[i], true);
+			GeminiFileCatalog cat = null;
+			try {
+				cat = GeminiFileCatalog.getFileCatalog(fileList[i], true);
+			} catch (CatalogException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (cat != null) {
 				catalogList.add(cat);
 			}
