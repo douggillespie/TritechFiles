@@ -127,14 +127,12 @@ I would try to avoid using the PingTail Extension record, unless you think there
 
 	@Override
 	public int getSonarIndex() {
-		// TODO Auto-generated method stub
-		return 0;
+		return m_pid2;
 	}
 
 	@Override
 	public int getDeviceId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return m_tx1;
 	}
 
 	public void setPingTail(GeminiPingTail pingTail) {

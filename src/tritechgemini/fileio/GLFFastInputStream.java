@@ -6,11 +6,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
-public class GLFFastInputStream extends InputStream {
+public class GLFFastInputStream extends InputStream implements Serializable {
 
-	private LittleEndianDataInputStream glfInputStream;
-	private CountingInputStream countingInputStream;
+
+	private static final long serialVersionUID = 1L;
+
+	private transient LittleEndianDataInputStream glfInputStream;
+	private transient CountingInputStream countingInputStream;
 
 	boolean isOk;
 
@@ -258,7 +262,7 @@ public class GLFFastInputStream extends InputStream {
 		return super.toString();
 	}
 
-	public void resetDatStream() throws IOException {
+	public void resetDataStream() throws IOException {
 		if (glfInputStream != null) {
 			glfInputStream.close();
 		}

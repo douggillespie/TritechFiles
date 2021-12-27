@@ -1,11 +1,13 @@
 package tritechgemini.imagedata;
 
+import java.io.Serializable;
+
 /**
  * Interface for Gemini data record which can support data read from ECD or GLF files. 
  * @author dg50
  *
  */
-public interface GeminiRecordI {
+public interface GeminiRecordI extends Serializable {
 
 	/**
 	 * 

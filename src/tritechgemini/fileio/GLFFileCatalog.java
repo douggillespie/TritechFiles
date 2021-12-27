@@ -16,9 +16,12 @@ import tritechgemini.imagedata.GLFImageRecord;
 
 public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
+
+	private static final long serialVersionUID = 1L;
+
 	private static final int DE = 0xDE;
 
-	private Inflater inflater = new Inflater();
+	private transient Inflater inflater;
 	
 	private int zippedDataSize = 0;
 
@@ -71,7 +74,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	boolean loadFullRecord(GLFImageRecord geminiRecord) throws IOException {
 		InputStream inputStream;
 		if (fastInput != null) {
-			fastInput.resetDatStream();
+			fastInput.resetDataStream();
 			inputStream = fastInput;
 		}
 		else {
@@ -95,6 +98,11 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	 */
 	boolean readGlfRecord(GLFImageRecord glfImage, DataInput dis, boolean readFully) throws CatalogException {
 
+//		if (glfImage.getRecordNumber() >= 341) {
+//			System.out.println("Record " + glfImage.getRecordNumber());
+//			readFully = true;
+//		}
+		
 		try {
 			glfImage.m_idChar = dis.readByte();
 			glfImage.m_version = dis.readUnsignedByte();
@@ -185,7 +193,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	 * @throws DataFormatException Exception thrown by the unzipper. 
 	 */
 	private byte[] inflateData(byte[] zippedData, int nRange, int nBearing) throws DataFormatException{
-//		inflater = new Inflater();
+		inflater = getInflater();
 		inflater.reset();
 		inflater.setInput(zippedData);
 		int outSize = nRange*nBearing;
@@ -196,6 +204,17 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	/**
+	 * getter for inflater to call to make sure it's there since it's not
+	 * serialised. 
+	 * @return inflater
+	 */
+	private Inflater getInflater() {
+		if (inflater == null) {
+			inflater = new Inflater();
+		}
+		return inflater;
+	}
+	/**
 	 * Find the input stream. normally it's a GLF file, which is a zipped archive 
 	 * containing the dat file. The dat file contains the actual data and is the thing
 	 * we want to read. Java ZipInputStream provides direct access to this without unpacking
@@ -205,7 +224,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	 */
 	private InputStream findDataInputStream() throws IOException {
 		if (fastInput != null) {
-			fastInput.resetDatStream();
+			fastInput.resetDataStream();
 			return fastInput;
 		}
 		
@@ -219,7 +238,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		if (glf) {
 			fastInput = new GLFFastInputStream(file);
 			if (fastInput.isOk) {
-				fastInput.resetDatStream();
+				fastInput.resetDataStream();
 				return fastInput;
 			}
 			else {

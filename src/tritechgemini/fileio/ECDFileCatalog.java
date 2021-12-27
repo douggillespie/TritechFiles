@@ -128,52 +128,68 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		// start of record CPing
 		ecdRecord.m_version = dis.readShort(); // def 0
 		ecdRecord.m_pid = dis.readUnsignedByte(); // unique id for ping
-		ecdRecord.m_halfArr = dis.readInt(); 
-		ecdRecord.m_txLength = dis.readUnsignedByte(); 
-		ecdRecord.m_scanRate = dis.readUnsignedByte(); 
-		ecdRecord.m_sosAtXd = dis.readFloat(); 
-		ecdRecord.m_shading = dis.readShort(); 
-		ecdRecord.m_mainGain = dis.readShort(); 
-		ecdRecord.m_gainBlank = dis.readShort(); 
-		ecdRecord.m_adcInput = dis.readShort(); 
-		ecdRecord.m_spreadGain = dis.readShort(); 
-		ecdRecord.m_absorbGain = dis.readShort(); 
-		ecdRecord.m_bfFocus = dis.readInt(); 
-		ecdRecord.m_bfGain = dis.readShort(); 
-		ecdRecord.m_bfAperture = dis.readFloat(); 
-		ecdRecord.m_txStart = dis.readShort();
-		ecdRecord.m_txLen = dis.readShort(); // correct to here. 
-		ecdRecord.m_txRadius = dis.readFloat(); 
-		ecdRecord.m_txRng = dis.readFloat(); 
-		ecdRecord.m_modFreq = dis.readInt(); 
-		short m_numBeams = dis.readShort(); 
-		ecdRecord.m_sosAtXd_2 = dis.readFloat(); // speed of sound
-		ecdRecord.m_rx1 = dis.readShort(); 
-		ecdRecord.m_rx2 = dis.readShort(); 
-		ecdRecord.m_tx1 = dis.readShort(); 
-		ecdRecord.m_pingFlags = dis.readShort(); 
-		ecdRecord.m_rx1Arr = dis.readUnsignedByte(); 
-		ecdRecord.m_rx2Arr = dis.readUnsignedByte(); 
-		ecdRecord.m_tx1Arr = dis.readUnsignedByte(); 
-		ecdRecord.m_tx2Arr = dis.readUnsignedByte();  
-		//End of data from CPing
-		ecdRecord.m_tid = dis.readUnsignedShort();  //From CTgtRec
+		boolean superQuick = readFully;
+		if (superQuick) {
+			ecdRecord.m_halfArr = dis.readInt(); // 4
+			ecdRecord.m_txLength = dis.readUnsignedByte(); 
+			ecdRecord.m_scanRate = dis.readUnsignedByte(); //6
+			ecdRecord.m_sosAtXd = dis.readFloat(); // 10
+			ecdRecord.m_shading = dis.readShort(); //12
+			ecdRecord.m_mainGain = dis.readShort(); 
+			ecdRecord.m_gainBlank = dis.readShort(); 
+			ecdRecord.m_adcInput = dis.readShort(); 
+			ecdRecord.m_spreadGain = dis.readShort(); 
+			ecdRecord.m_absorbGain = dis.readShort(); //22
+			ecdRecord.m_bfFocus = dis.readInt(); 
+			ecdRecord.m_bfGain = dis.readShort(); //28
+			ecdRecord.m_bfAperture = dis.readFloat(); //32
+			ecdRecord.m_txStart = dis.readShort(); 
+			ecdRecord.m_txLen = dis.readShort(); // correct to here. // 36
+			ecdRecord.m_txRadius = dis.readFloat(); //40
+			ecdRecord.m_txRng = dis.readFloat();  
+			ecdRecord.m_modFreq = dis.readInt(); //48
+		}
+		else {
+			dis.skipBytes(48);
+		}
+		short m_numBeams = dis.readShort(); // need this !
+		if (superQuick) {
+			ecdRecord.m_sosAtXd_2 = dis.readFloat(); // speed of sound
+			ecdRecord.m_rx1 = dis.readShort(); 
+			ecdRecord.m_rx2 = dis.readShort(); //58
+			ecdRecord.m_tx1 = dis.readShort(); 
+			ecdRecord.m_pingFlags = dis.readShort(); 
+			ecdRecord.m_rx1Arr = dis.readUnsignedByte(); 
+			ecdRecord.m_rx2Arr = dis.readUnsignedByte(); 
+			ecdRecord.m_tx1Arr = dis.readUnsignedByte(); 
+			ecdRecord.m_tx2Arr = dis.readUnsignedByte();  
+			//End of data from CPing
+			ecdRecord.m_tid = dis.readUnsignedShort();  //From CTgtRec
+		}
+		else {
+			dis.skipBytes(18);
+		}
 		ecdRecord.m_pid2 = dis.readUnsignedShort(); // oscillates between 2 and 1. Is this the sonar number ? 
 		ecdRecord.m_txTime = dis.readDouble(); // typical 1.2894707737033613E9
 		ecdRecord.m_endTime = dis.readDouble(); 
 		ecdRecord.recordTimeMillis = cDateToMillis(ecdRecord.m_txTime);
 //		double dt = m_endTime-m_txTime; // comes out at 0 every time. 
-		ecdRecord.m_txAngle = dis.readDouble(); 
-		ecdRecord.m_sosAvg = dis.readDouble();  //End of data from CTgtRec - looks like a reasonable value for speed of sound
-		ecdRecord.mask = dis.readInt();  //From CTgtImg
-		ecdRecord.m_bpp = dis.readUnsignedByte(); 
-		ecdRecord.m_nRngs = dis.readInt();  // this changes with set range. On old Gemini's 1m=122, 5.1m=677 101m=1545 , New gemini 50.1m 763 ranges. 
-		ecdRecord.m_b0 = dis.readInt(); 
-		ecdRecord.m_b1 = dis.readInt(); 
-		ecdRecord.m_r0 = dis.readInt(); 
-		ecdRecord.m_r1 = dis.readInt(); 
-		ecdRecord.dual = dis.readInt(); 
-		ecdRecord.m_nBrgs = dis.readInt();
+		if (superQuick) {
+			ecdRecord.m_txAngle = dis.readDouble(); 
+			ecdRecord.m_sosAvg = dis.readDouble();  //End of data from CTgtRec - looks like a reasonable value for speed of sound
+			ecdRecord.mask = dis.readInt();  //From CTgtImg
+			ecdRecord.m_bpp = dis.readUnsignedByte(); 
+			ecdRecord.m_nRngs = dis.readInt();  // 25 this changes with set range. On old Gemini's 1m=122, 5.1m=677 101m=1545 , New gemini 50.1m 763 ranges. 
+			ecdRecord.m_b0 = dis.readInt(); 
+			ecdRecord.m_b1 = dis.readInt(); 
+			ecdRecord.m_r0 = dis.readInt(); 
+			ecdRecord.m_r1 = dis.readInt(); 
+			ecdRecord.dual = dis.readInt(); 
+			ecdRecord.m_nBrgs = dis.readInt();
+		}
+		else {
+			dis.skipBytes(49);
+		}
 		if (readFully) {
 			ecdRecord.bearingTable = new double[m_numBeams];
 			for (int i = 0; i < m_numBeams; i++) {
@@ -190,8 +206,8 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		ecdRecord.m_Brgs_2 = dis.readInt();
 		int cSize = dis.readInt();
 		if (readFully) {
-		ecdRecord.cData = new byte[cSize];
-		dis.readFully(ecdRecord.cData);
+			ecdRecord.cData = new byte[cSize];
+			dis.readFully(ecdRecord.cData);
 		}
 		else {
 			dis.skipBytes(cSize);
