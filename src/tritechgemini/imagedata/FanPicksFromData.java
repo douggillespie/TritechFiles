@@ -31,6 +31,11 @@ public class FanPicksFromData extends ImageFanMaker {
 	private double[][][] dataLUTScale;
 	
 	/**
+	 * Length of gemini records used with LUT's
+	 */
+	private int geminiRecordLength;
+	
+	/**
 	 * Number of points in each column actually used. 
 	 */
 	private int[] usedColumnLength;
@@ -47,7 +52,7 @@ public class FanPicksFromData extends ImageFanMaker {
 	
 	@Override
 	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, int nPixY, byte[] data) {
-		if (needNewLUT(nPixX, nPixY)) {
+		if (needNewLUT(geminiRecord, nPixX, nPixY)) {
 			createLUTs(geminiRecord, nPixX, nPixY);
 		}
 		
@@ -96,7 +101,10 @@ public class FanPicksFromData extends ImageFanMaker {
 		return new FanImageData(geminiRecord, image, mPerPixX, mPerPixY);
 	}
 
-	private boolean needNewLUT(int nPixX, int nPixY) {
+	private boolean needNewLUT(GeminiImageRecordI geminiRecord, int nPixX, int nPixY) {
+		if (geminiRecordLength != geminiRecord.getImageData().length) {
+			return true;
+		}
 		if (dataPickLUT == null) {
 			return true;
 		}
@@ -132,7 +140,7 @@ public class FanPicksFromData extends ImageFanMaker {
 		double imageScaleY = (double) nRange / (double) nPixY;
 		double imageScaleX = (double) nRange * Math.abs(Math.sin(bearingTable[0])) / (double) nPixX * 2;
 		Thread[] threads = new Thread[nThread];
-		int totalData = geminiRecord.getnBeam() * geminiRecord.getnRange();
+		geminiRecordLength = geminiRecord.getnBeam() * geminiRecord.getnRange();
 		for (int t = 0; t < nThread; t++) {
 			int pos = t;
 			threads[t] = new Thread(new Runnable() {

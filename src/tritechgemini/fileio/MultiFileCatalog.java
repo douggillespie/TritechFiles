@@ -1,6 +1,7 @@
 package tritechgemini.fileio;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,11 +13,13 @@ import tritechgemini.imagedata.GeminiImageRecordI;
  * @author dg50
  *
  */
-public class MultiFileCatalog {
+public class MultiFileCatalog implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private ArrayList<GeminiFileCatalog> catalogList;
 	
-	private ArrayList<CatalogObserver> catalogObservers;
+	private transient ArrayList<CatalogObserver> catalogObservers;
 	
 	private HashMap<Integer, CatalogSonarInfo> allSonarInfo = new HashMap<Integer, CatalogSonarInfo>();
 
@@ -155,7 +158,7 @@ public class MultiFileCatalog {
 			if (timeMillis > catalog.getLastRecordTime()) {
 				break;
 			}
-			return catalog.findRecordForTime(sonarID, timeMillis);
+			return catalog.findRecordForIDandTime(sonarID, timeMillis);
 		}
 		return null;
 	}

@@ -2,6 +2,7 @@ package tritechgemini.fileio;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import tritechgemini.imagedata.FanPicksFromData;
 import tritechgemini.imagedata.GeminiImageRecordI;
@@ -15,8 +16,8 @@ public class ECDFileTest {
 	//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\glfexamples\\log_2021-04-10-085615.glf";
 //		private static final String ecdFile = "C:\\Meygen\\DavyPierTest\\Gemini\\20201110\\100016_IMG.ecd";
 //	private static final String ecdFile = "E:\\RobSonar2021\\20210410";//
-//	private static final String ecdFile = "C:\\Meygen\\DavyPierTest\\Gemini\\20201110";
-	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\glfexamples";
+	private static final String ecdFile = "C:\\Meygen\\DavyPierTest\\Gemini\\20201110";
+//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\glfexamples";
 	//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\glfexamples\\data_2021-04-10-085615.dat";
 	//	private static String ecdFile = "C:\\ProjectData\\RobRiver\\ecdexamples\\data_2021-04-12-124025.ecd";
 	// Office desktop
@@ -39,25 +40,33 @@ public class ECDFileTest {
 		long maxTime = 0;
 		if (fileList.isDirectory()) {
 			File[] files = fileList.listFiles();
+			String[] gemFiles = new String[files.length];
+			
 			for (int i = 0; i < files.length; i++) {
 				String path = files[i].getAbsolutePath();
 				if (path.endsWith(".ecd") == false && path.endsWith("glf") == false)  {
 					continue;
 				}
-				nFile++;
+				gemFiles[nFile++] = path;
 
-				try {
-//					System.out.println(path);
-					ecdCatalog = catalogFile(path);
-				} catch (CatalogException e) {
-					e.printStackTrace();
-				}
-				if (minTime == 0) {
-					minTime = ecdCatalog.getFirstRecordTime();
-				}
-				maxTime = ecdCatalog.getLastRecordTime();
-				nRec += ecdCatalog.getNumRecords();
+//				try {
+////					System.out.println(path);
+//					ecdCatalog = catalogFile(path);
+//				} catch (CatalogException e) {
+//					e.printStackTrace();
+//				}
+//				if (minTime == 0) {
+//					minTime = ecdCatalog.getFirstRecordTime();
+//				}
+//				maxTime = ecdCatalog.getLastRecordTime();
+//				nRec += ecdCatalog.getNumRecords();
 			}
+			gemFiles = Arrays.copyOf(gemFiles, nFile);
+			MultiFileCatalog mfc = new MultiFileCatalog();
+			mfc.catalogFiles(gemFiles);
+			minTime = mfc.getRecord(0).getRecordTime();
+			nRec = mfc.getTotalRecords();
+			maxTime = mfc.getRecord(nRec-1).getRecordTime();
 		}
 		else {
 			nFile = 1;

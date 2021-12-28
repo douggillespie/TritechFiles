@@ -381,7 +381,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @param timeMillis time in milliseconds 
 	 * @return closest record or null
 	 */
-	public GeminiImageRecordI findRecordForTime(int sonarID, long timeMillis) {
+	public GeminiImageRecordI findRecordForIDandTime(int sonarID, long timeMillis) {
 		long dT = Long.MIN_VALUE;
 		RecordClass bestRec = null;
 		for (RecordClass aRec : imageRecords) {
@@ -408,6 +408,47 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 			}
 		}
 		return bestRec;
+	}
+	/**
+	 * find the closest record to the given time for the sonar Index
+	 * @param sonarIndex sonar Index (1, 2, 3 ...)
+	 * @param timeMillis time in milliseconds 
+	 * @return closest record or null
+	 */
+	public GeminiImageRecordI findRecordForIndexandTime(int sonarIndex, long timeMillis) {
+		long dT = Long.MAX_VALUE;
+		RecordClass bestRec = null;
+		for (RecordClass aRec : imageRecords) {
+			if (aRec.getSonarIndex() != sonarIndex) {
+				continue;
+			}
+			long t = aRec.getRecordTime()-timeMillis;
+			if (Math.abs(t) < Math.abs(dT)) {
+				bestRec = aRec;
+				dT = t;
+			}
+			if (t > 0) {
+				break;
+			}
+		}
+		if (bestRec == null) {
+			return null;
+		}
+		if (bestRec.isFullyLoaded() == false) {
+			try {
+				loadFullRecord(bestRec);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return bestRec;
+	}
+
+	public void freeAllImageData() {
+		for (RecordClass aRec : imageRecords) {
+			aRec.freeImageData();
+		}
+		
 	}
 	
 	
