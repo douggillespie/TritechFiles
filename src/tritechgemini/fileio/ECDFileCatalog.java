@@ -128,8 +128,8 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		// start of record CPing
 		ecdRecord.m_version = dis.readShort(); // def 0
 		ecdRecord.m_pid = dis.readUnsignedByte(); // unique id for ping
-		boolean superQuick = readFully;
-		if (superQuick) {
+		boolean notSuperQuick = true;
+		if (notSuperQuick) {
 			ecdRecord.m_halfArr = dis.readInt(); // 4
 			ecdRecord.m_txLength = dis.readUnsignedByte(); 
 			ecdRecord.m_scanRate = dis.readUnsignedByte(); //6
@@ -153,7 +153,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 			dis.skipBytes(48);
 		}
 		short m_numBeams = dis.readShort(); // need this !
-		if (superQuick) {
+		if (notSuperQuick) {
 			ecdRecord.m_sosAtXd_2 = dis.readFloat(); // speed of sound
 			ecdRecord.m_rx1 = dis.readShort(); 
 			ecdRecord.m_rx2 = dis.readShort(); //58
@@ -174,7 +174,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		ecdRecord.m_endTime = dis.readDouble(); 
 		ecdRecord.recordTimeMillis = cDateToMillis(ecdRecord.m_txTime);
 //		double dt = m_endTime-m_txTime; // comes out at 0 every time. 
-		if (superQuick) {
+		if (notSuperQuick) {
 			ecdRecord.m_txAngle = dis.readDouble(); 
 			ecdRecord.m_sosAvg = dis.readDouble();  //End of data from CTgtRec - looks like a reasonable value for speed of sound
 			ecdRecord.mask = dis.readInt();  //From CTgtImg

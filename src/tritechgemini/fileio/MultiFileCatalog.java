@@ -128,6 +128,9 @@ public class MultiFileCatalog implements Serializable {
 			if (iRecord >= counted1 && iRecord < counted2) {
 				try {
 					GeminiImageRecordI record = catalog.getSonarRecord(sonarID, iRecord-counted1);
+					if (record == null) {
+						return null;
+					}
 					if (record.isFullyLoaded() == false) {
 						catalog.loadFullRecord(record);
 					}
