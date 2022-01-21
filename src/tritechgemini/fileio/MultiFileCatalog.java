@@ -34,6 +34,7 @@ public class MultiFileCatalog implements Serializable {
 		for (int i = 0; i < fileList.length; i++) {
 			GeminiFileCatalog cat = null;
 			try {
+				System.out.println("Catalog " + fileList[i]);
 				cat = GeminiFileCatalog.getFileCatalog(fileList[i], true);
 			} catch (CatalogException e) {
 				// TODO Auto-generated catch block

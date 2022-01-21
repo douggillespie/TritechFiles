@@ -1,5 +1,6 @@
 package tritechgemini.fileio;
 
+import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.File;
@@ -24,6 +25,12 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	private transient Inflater inflater;
 	
 	private int zippedDataSize = 0;
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+//		System.out.println("Finalise GLFFileCatalog");
+	}
 
 	private GLFFastInputStream fastInput;
 
@@ -81,8 +88,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			inputStream = findDataInputStream();
 		}
 //		BufferedInputStream bis = new BufferedInputStream(inputStream);
-		DataInput dis = new LittleEndianDataInputStream(inputStream);
-		dis.skipBytes(geminiRecord.filePos);
+		LittleEndianDataInputStream dis = new LittleEndianDataInputStream(inputStream);
+		dis.skip(geminiRecord.filePos);
 		boolean ok = readGlfRecord(geminiRecord, dis, true);
 		inputStream.close();
 		return ok;
@@ -223,10 +230,10 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	 * @throws IOException if the input stream cannot be found / opened. 
 	 */
 	private InputStream findDataInputStream() throws IOException {
-		if (fastInput != null) {
-			fastInput.resetDataStream();
-			return fastInput;
-		}
+//		if (fastInput != null) {
+//			fastInput.resetDataStream();
+//			return fastInput;
+//		}
 		
 		String filePath = getFilePath().toLowerCase();
 		File file = new File(filePath);
@@ -251,7 +258,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	private InputStream openZippedinputStream() throws IOException {
 		String filePath = getFilePath().toLowerCase();
 		File file = new File(filePath);
-		ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
 		ZipEntry zipEntry = zis.getNextEntry();
 		while (zipEntry != null) {
 			String entryName = zipEntry.getName();

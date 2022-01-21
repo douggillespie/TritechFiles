@@ -107,6 +107,10 @@ public class LittleEndianDataInputStream extends InputStream implements DataInpu
 		 public final int skipBytes(int n) throws IOException {
 			 return d.skipBytes(n);
 		 }
+		 
+		 public final long skip(long n) throws IOException {
+			 return d.skipBytes((int) n);
+		 }
 	 
 		 public final boolean readBoolean() throws IOException {
 			 return d.readBoolean();

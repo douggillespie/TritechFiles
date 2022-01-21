@@ -103,6 +103,7 @@ public class CountingInputStream extends InputStream {
 		pos += skipped;
 		return skipped;
 	}
+	
 
 	/**
 	 * @return the pos

@@ -7,6 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class GLFFastInputStream extends InputStream implements Serializable {
 
@@ -25,13 +28,23 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	private File glfFile;
 	
 	/**
-	 * total length of each complete block
+	 * Start position of every block in the data file. Note that this
+	 * is the data position, i.e. the position in the unpacked dat file. The 
+	 * actual position in the file will always be (5*(blockNo+1)) further into 
+	 * the actual input file plus the file start offset datFilePos. 
 	 */
-	private static final int BLOCKLENGTH = 65536;
-	/**
-	 * length of the actual data in each complete block. 
-	 */
-	private static final int BLOCKDATALENGTH = 65531;
+	private ArrayList<GLFFastBlockData> datBlockStarts = new ArrayList<GLFFastBlockData>();
+	
+	private int currentLoadedBlock = 0;
+	
+//	/**
+//	 * total length of each complete block
+//	 */
+//	private static final int BLOCKLENGTH = 65536;
+//	/**
+//	 * length of the actual data in each complete block. 
+//	 */
+//	private static final int BLOCKDATALENGTH = 65531;
 	/**
 	 * length of header on each block.
 	 */
@@ -45,7 +58,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	/**
 	 * Data for the current uncompressed block. 
 	 */
-	private byte[] currentBlockData = new byte[BLOCKDATALENGTH];
+	private byte[] currentBlockData = null; //new byte[BLOCKDATALENGTH];
 	/**
 	 * Byte number for the first byte in currentblockData relative
 	 * to the true position of the virtual file. 
@@ -129,22 +142,38 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 				else {
 					return false;
 				}
-				glfInputStream.skip(cSize);
+//				glfInputStream.skipBytes(cSize);
 				// now need to go through all the blocks ...
-//				boolean lastBlock = false;
-//				boolean isRaw;
-//				while (!lastBlock) {
-//					int bMap = glfInputStream.readUnsignedByte();
-//					lastBlock = ((bMap & 0x1) == 0x1);
-//					isRaw = ((bMap & 0x6) == 0);
-//					if (!isRaw) {
-//						return false;
+				boolean lastBlock = false;
+				boolean isRaw;
+				long totalBlockBytes = 0;
+				while (!lastBlock) {
+					int bMap = glfInputStream.readUnsignedByte();
+					lastBlock = ((bMap & 0x1) == 0x1);
+					isRaw = ((bMap & 0x6) == 0);
+					if (!isRaw) {
+						return false;
+					}
+					long bCount = countingInputStream.getPos();
+//					if (bCount > 430070990 && bCount < 430070990 + 65536*2) {
+//						System.out.println("Block data start at byte " + bCount);
 //					}
-//					int blockSize = glfInputStream.readUnsignedShort();
-//					int spares = glfInputStream.readUnsignedShort();
-//					glfInputStream.skip(blockSize);
-//				}
+					int blockSize = glfInputStream.readUnsignedShort();
+//					if (lastBlock == false && blockSize != BLOCKDATALENGTH) {
+//						System.out.printf("irregular block length %d at byte %d\n", blockSize, bCount);
+//					}
+					if (foundFiles == 1) {
+						datBlockStarts.add(new GLFFastBlockData(totalBlockBytes, blockSize, bCount));
+					}
+					int spares = glfInputStream.readUnsignedShort();
+					totalBlockBytes += blockSize;
+					glfInputStream.skipBytes(blockSize);
+				}
 				
+				if (totalBlockBytes != uSize) {
+					System.out.println("Total data size not as expected");
+					return false;
+				}
 				
 				if (++foundFiles == 3) {
 					return true;
@@ -164,7 +193,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	@Override
 	public int read() throws IOException {
 		if (currentlyAvailable() <= 0) {
-			loadNextBlock();
+			loadNextBlock(currentLoadedBlock+1);
 		}
 		int data = currentBlockData[(int) (currentAbsPos-blockStartByte)];
 		currentAbsPos++;
@@ -198,7 +227,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 			currentAbsPos += toRead;
 			bytesRead += toRead;
 			if (currentAbsPos >= blockEndByte) {
-				loadNextBlock();
+				loadNextBlock(currentLoadedBlock+1);
 			}
 		}
 		readMonitor.stop();
@@ -225,6 +254,9 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	@Override
 	public long skip(long n) throws IOException {
 		skipMonitor.start();
+//		if (skipMonitor.getProcessCalls() == 1295) {
+//			System.out.println("All about to go horribly wrong");
+//		}
 		long endByte = currentAbsPos + n;
 		long remaining = blockEndByte-currentAbsPos; // bytes remaining in memory 	
 		currentAbsPos += n;	
@@ -232,10 +264,33 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 			skipMonitor.stop();
 			return n;
 		}
+		/*
+		 * Otherwise we need to go through the blocks until currentAbsPos >= a block start
+		 * in the great array list. Then we need to skip the appropriate number of bytes in 
+		 * the underlying input stream and also then load the next block in the actual data
+		 * the underlying input stream will currently be at the end of currentLoadedBlock 
+		 */
+		int whichBlock = currentLoadedBlock+1;
+		long skipInUnderlying = 0;
+		while (whichBlock < datBlockStarts.size()-1) {
+			if (datBlockStarts.get(whichBlock).getVirtualEndByte() >= currentAbsPos) {
+				// where we want to be will be within that block, so 
+				// no skipping in the underlying data.
+				break;
+			}
+			else {
+				skipInUnderlying += datBlockStarts.get(whichBlock).getThisBlockBytes()+BLOCKHEADLENGTH;
+				whichBlock++;
+			}
+		}
+		if (skipInUnderlying > 0) {
+			glfInputStream.skip(skipInUnderlying);
+		}
+		loadNextBlock(whichBlock);
 		// otherwise, go to the end of this block, then see how many are left
-//		n -= remaining;
-		int toSkip = (int) ((n-remaining)/BLOCKDATALENGTH)+1;
-		skipNBlocks(toSkip);
+////		n -= remaining;
+//		int toSkip = (int) ((n-remaining)/BLOCKDATALENGTH)+1;
+//		skipNBlocks(toSkip);
 		skipMonitor.stop();
 				
 		return n;
@@ -271,7 +326,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		blockStartByte = blockEndByte = 0;
 		currentBlockLength = 0;
 		currentAbsPos = 0;
-		loadNextBlock();
+		loadNextBlock(0);
 	}
 	
 	/**
@@ -279,17 +334,27 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	 * @return true if successful. 
 	 * @throws IOException
 	 */
-	private boolean loadNextBlock() throws IOException {
+	private boolean loadNextBlock(int blockNumber) throws IOException {
 		loadMonitor.start();
-		blockStartByte += currentBlockLength;
+		currentLoadedBlock = blockNumber;
+		blockStartByte = datBlockStarts.get(blockNumber).getVirtualStartByte();
 		int bMap = glfInputStream.readUnsignedByte();
 //		boolean lastBlock = ((bMap & 0x1) == 0x1);
 		boolean isRaw = ((bMap & 0x6) == 0);
 		if (!isRaw) {
-			throw new IOException("Data in GLF block are not raw data");
+			throw new IOException("Data in GLF block are not raw data at bytes " + countingInputStream.getPos());
+			/*
+			 * Probably if bytes 2 and 3 as 10, it's Huffman coding, so will need a decoder for that. 
+			 * Also note that the skipblocks won't work any more since this block size will be a lot smaller. 
+			 * So basically need to write something a whole lot more complicated, making it V hard to skip to 
+			 * where we want to in a file. 
+			 */
 		}
 		currentBlockLength = glfInputStream.readUnsignedShort();
 		int spares = glfInputStream.readShort();
+		if (currentBlockData == null || currentBlockData.length < currentBlockLength) {
+			currentBlockData = new byte[currentBlockLength];
+		}
 		int read = glfInputStream.read(currentBlockData, 0, currentBlockLength);
 		blockEndByte = blockStartByte + read;
 		loadMonitor.stop();
@@ -297,23 +362,23 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	}
 	
 	
-	/**
-	 * Skip a number of what are assumed to be full blocks. We actually skip
-	 * n-1 blocks and read the last one into currentData. <p>
-	 * Calling this with n = 1 is equivalent to calling loadNextBlock()
-	 * @param n number to skip. 
-	 * @return ok
-	 * @throws IOException 
-	 */
-	private boolean skipNBlocks(int n) throws IOException {
-		if (n == 0) {
-			return true;
-		}
-		int toSkip = n-1;
-		countingInputStream.skip(toSkip*BLOCKLENGTH);
-		blockStartByte += toSkip*BLOCKDATALENGTH;
-		blockEndByte += toSkip*BLOCKDATALENGTH;
-		return loadNextBlock();
-	}
+//	/**
+//	 * Skip a number of what are assumed to be full blocks. We actually skip
+//	 * n-1 blocks and read the last one into currentData. <p>
+//	 * Calling this with n = 1 is equivalent to calling loadNextBlock()
+//	 * @param n number to skip. 
+//	 * @return ok
+//	 * @throws IOException 
+//	 */
+//	private boolean skipNBlocks(int n) throws IOException {
+//		if (n == 0) {
+//			return true;
+//		}
+//		int toSkip = n-1;
+//		countingInputStream.skip(toSkip*BLOCKLENGTH);
+//		blockStartByte += toSkip*BLOCKDATALENGTH;
+//		blockEndByte += toSkip*BLOCKDATALENGTH;
+//		return loadNextBlock();
+//	}
 
 }

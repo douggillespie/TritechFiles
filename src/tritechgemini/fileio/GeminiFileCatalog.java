@@ -45,7 +45,6 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	}
 	
 	/**
-	 * 
 	 * Preferred way of getting a file catalogue, since it will automatically 
 	 * handle ECD, GLF and DAT files. 
 	 * @param filePath 
