@@ -18,7 +18,7 @@ import tritechgemini.imagedata.GLFImageRecord;
 public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	private static final int DE = 0xDE;
 
