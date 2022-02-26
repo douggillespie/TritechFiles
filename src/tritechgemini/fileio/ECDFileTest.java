@@ -17,7 +17,6 @@ public class ECDFileTest {
 	//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\glfexamples\\log_2021-04-10-085615.glf";
 //			private static final String ecdFile = "C:\\Meygen\\DavyPierTest\\Gemini\\20201110\\100016_IMG.ecd";
 	//	private static final String ecdFile = "E:\\RobSonar2021\\20210410";//
-	//	private static final String ecdFile = "C:\\Meygen\\DavyPierTest\\Gemini\\20201110";
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227\\log_2021-12-27-162222.glf";
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227\\log_2021-12-27-143452.glf";
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\log_2021-12-09-190821.glf";
