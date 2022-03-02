@@ -85,10 +85,12 @@ public class LittleEndianDataInputStream extends InputStream implements DataInpu
 		 }
 	 
 		 public final float readFloat() throws IOException {
+			 // still need to byteswap
 			 return Float.intBitsToFloat(readInt());
 		 }
 	 
 		 public final double readDouble() throws IOException {
+			 // still need to byteswap
 			 return Double.longBitsToDouble(readLong());
 		 }
 	 

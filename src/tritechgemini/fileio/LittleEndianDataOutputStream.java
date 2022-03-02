@@ -48,12 +48,14 @@ public class LittleEndianDataOutputStream extends OutputStream implements DataOu
 
 	@Override
 	public void writeFloat(float v) throws IOException {
-		o.writeFloat(v);
+		int intVal = Float.floatToIntBits(v);
+		writeInt(intVal);
 	}
 
 	@Override
 	public void writeDouble(double v) throws IOException {
-		o.writeDouble(v);
+		long longVal = Double.doubleToLongBits(v);
+		writeLong(longVal);
 	}
 
 	@Override

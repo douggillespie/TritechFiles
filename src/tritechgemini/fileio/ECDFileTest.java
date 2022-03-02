@@ -20,7 +20,8 @@ public class ECDFileTest {
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227\\log_2021-12-27-162222.glf";
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227\\log_2021-12-27-143452.glf";
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\log_2021-12-09-190821.glf";
-		private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227";
+//		private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227";
+		private static final String ecdFile = "C:\\PAMGuardTest\\glftest\\20220301\\data_2022-03-01-141949.dat";
 	//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\glfexamples\\data_2021-04-10-085615.dat";
 	//	private static String ecdFile = "C:\\ProjectData\\RobRiver\\ecdexamples\\data_2021-04-12-124025.ecd";
 	// Office desktop

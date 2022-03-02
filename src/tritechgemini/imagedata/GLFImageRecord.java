@@ -76,8 +76,7 @@ public class GLFImageRecord extends GeminiImageRecord {
 
 	@Override
 	public int getDeviceId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return tm_deviceId;
 	}
 
 	@Override

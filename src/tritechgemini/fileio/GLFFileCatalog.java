@@ -34,6 +34,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 	private GLFFastInputStream fastInput;
 
+	
 	public GLFFileCatalog(String filePath) {
 		super(filePath);
 	}
@@ -103,7 +104,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	 * @return
 	 * @throws CatalogException
 	 */
-	boolean readGlfRecord(GLFImageRecord glfImage, DataInput dis, boolean readFully) throws CatalogException {
+	public boolean readGlfRecord(GLFImageRecord glfImage, DataInput dis, boolean readFully) throws CatalogException {
 
 //		if (glfImage.getRecordNumber() >= 341) {
 //			System.out.println("Record " + glfImage.getRecordNumber());
@@ -113,9 +114,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		try {
 			glfImage.m_idChar = dis.readByte();
 			glfImage.m_version = dis.readUnsignedByte();
-			if (glfImage.m_version == DE || glfImage.m_idChar != 42) {
-				return false;
-			}
+//			if (glfImage.m_version == DE || glfImage.m_idChar != 42) {
+//				return false;
+//			}
 			glfImage.m_length = dis.readInt();
 			glfImage.m_timestamp = dis.readDouble();
 			glfImage.m_dataType = dis.readUnsignedByte();
@@ -144,14 +145,22 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			
 			zippedDataSize += glfImage.dataSize;
 			if (readFully) {
-				// read the image
-				byte[] zippedData = new byte[glfImage.dataSize];
-				dis.readFully(zippedData);
-				try {
-					glfImage.imageData = inflateData(zippedData, glfImage.endRange-glfImage.startRange, nBearing);
+				int expSize = (glfImage.endBearing-glfImage.startBearing)*(glfImage.endRange-glfImage.startRange);
+				if (expSize == glfImage.dataSize) {
+					// it's not zipped
+					glfImage.imageData = new byte[expSize]; 
+					dis.readFully(glfImage.imageData);
 				}
-				catch (DataFormatException dataFormatException) {
-					throw new CatalogException("Error unzipping raw data: " + dataFormatException.getMessage());
+				else { // it is zipped
+					// read the image
+					byte[] zippedData = new byte[glfImage.dataSize];
+					dis.readFully(zippedData);
+					try {
+						glfImage.imageData = inflateData(zippedData, glfImage.endRange-glfImage.startRange, nBearing);
+					}
+					catch (DataFormatException dataFormatException) {
+						throw new CatalogException("Error unzipping raw data: " + dataFormatException.getMessage());
+					}
 				}
 
 				// read the bearing table
