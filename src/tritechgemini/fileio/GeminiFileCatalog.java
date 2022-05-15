@@ -55,6 +55,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	public static GeminiFileCatalog getFileCatalog(String filePath, boolean create)  throws CatalogException {
 		
 		GeminiFileCatalog exCatalog = readSerializedCatalog(filePath);
+		exCatalog = null;
 		if (exCatalog != null) {
 			return exCatalog;
 		}
@@ -318,7 +319,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	public RecordClass getFullRecord(int recordIndex) throws IOException {
 		RecordClass rec = imageRecords.get(recordIndex);
 		if (rec.isFullyLoaded() == false) {
-			loadFullRecord(rec);
+			timedLoadFullRecord(rec);
 		}
 		return rec;
 	}
@@ -381,7 +382,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @return closest record or null
 	 */
 	public GeminiImageRecordI findRecordForIDandTime(int sonarID, long timeMillis) {
-		long dT = Long.MIN_VALUE;
+		long dT = Long.MAX_VALUE;
 		RecordClass bestRec = null;
 		for (RecordClass aRec : imageRecords) {
 			if (aRec.getDeviceId() != sonarID) {
@@ -401,13 +402,23 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		}
 		if (bestRec.isFullyLoaded() == false) {
 			try {
-				loadFullRecord(bestRec);
+				timedLoadFullRecord(bestRec);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		return bestRec;
 	}
+	
+	public boolean timedLoadFullRecord(RecordClass aRecord) throws IOException {
+		long t1 = System.nanoTime();
+		boolean lOK = false;
+		lOK = loadFullRecord(aRecord);
+		long t2 = System.nanoTime();
+		aRecord.setLoadTime(t2-t1);
+		return lOK;		
+	}
+	
 	/**
 	 * find the closest record to the given time for the sonar Index
 	 * @param sonarIndex sonar Index (1, 2, 3 ...)
@@ -435,7 +446,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		}
 		if (bestRec.isFullyLoaded() == false) {
 			try {
-				loadFullRecord(bestRec);
+				timedLoadFullRecord(bestRec);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

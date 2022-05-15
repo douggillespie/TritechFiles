@@ -133,7 +133,7 @@ public class MultiFileCatalog implements Serializable {
 						return null;
 					}
 					if (record.isFullyLoaded() == false) {
-						catalog.loadFullRecord(record);
+						catalog.timedLoadFullRecord(record);
 					}
 					return record;
 				} catch (IOException e) {
@@ -156,11 +156,14 @@ public class MultiFileCatalog implements Serializable {
 
 		for (int i = 0; i < catalogList.size(); i++) {
 			GeminiFileCatalog catalog = catalogList.get(i);
-			if (timeMillis < catalog.getFirstRecordTime() ) {
+			long firstTime = catalog.getFirstRecordTime() ;
+			long lastTime = catalog.getLastRecordTime() ;
+			
+			if (timeMillis < firstTime ) {
 				continue;
 			}
-			if (timeMillis > catalog.getLastRecordTime()) {
-				break;
+			if (timeMillis > lastTime) {
+				continue;
 			}
 			return catalog.findRecordForIDandTime(sonarID, timeMillis);
 		}
@@ -181,6 +184,10 @@ public class MultiFileCatalog implements Serializable {
 		return ids;
 	}
 	
+	public ArrayList<GeminiFileCatalog> getCatalogList() {
+		return catalogList;
+	}
+
 	public void addObserver(CatalogObserver observer) {
 		this.catalogObservers.add(observer);
 	}

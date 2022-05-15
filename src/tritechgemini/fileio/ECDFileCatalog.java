@@ -31,6 +31,8 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 	private int end_inf;
 
 	private String head_msg;
+	
+	private double[] lastBearingTable = {0.};
 
 	public ECDFileCatalog(String filePath) {
 		super(filePath);
@@ -191,13 +193,23 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 			dis.skipBytes(49);
 		}
 		if (readFully) {
-			ecdRecord.bearingTable = new double[m_numBeams];
-			for (int i = 0; i < m_numBeams; i++) {
-				/*
-				 * Sweet - clearly OK at this point since I get to read an array of 512 angles 
-				 * in radians that goes from +60 deg to -60 deg.. 
-				 */
-				ecdRecord.bearingTable[i] = dis.readDouble();
+			/**
+			 * Bearing tables are (nearly) always the same, so don't bother reading them. 
+			 */
+			if (lastBearingTable != null && lastBearingTable.length == m_numBeams) {
+				ecdRecord.bearingTable = lastBearingTable;
+				dis.skipBytes(m_numBeams*Double.BYTES);
+			}
+			else {
+				ecdRecord.bearingTable = new double[m_numBeams];
+				lastBearingTable = ecdRecord.bearingTable;
+				for (int i = 0; i < m_numBeams; i++) {
+					/*
+					 * Sweet - clearly OK at this point since I get to read an array of 512 angles 
+					 * in radians that goes from +60 deg to -60 deg.. 
+					 */
+					ecdRecord.bearingTable[i] = dis.readDouble();
+				}
 			}
 		}
 		else {

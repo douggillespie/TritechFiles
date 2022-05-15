@@ -68,5 +68,17 @@ public interface GeminiImageRecordI extends GeminiRecordI {
 	 * Free the data to save memory. 
 	 */
 	public void freeImageData();
+
+	/**
+	 * Record how long it took to load the record in nanoseconds. 
+	 * @param load time in nanoseconds. 
+	 */
+	public void setLoadTime(long nanos);
+	
+	/**
+	 * Get the record load time in nanoseconds. 
+	 * @return
+	 */
+	public long getLoadTime();
 	
 }

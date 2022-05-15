@@ -40,6 +40,8 @@ abstract public class GeminiImageRecord implements GeminiImageRecordI {
 	 * Full file path for this record
 	 */
 	private String filePath;
+
+	private long recordLoadNanos;
 	
 
 	/**
@@ -69,6 +71,18 @@ abstract public class GeminiImageRecord implements GeminiImageRecordI {
 	@Override
 	public boolean isFullyLoaded() {
 		return isFullyRead;
+	}
+
+
+	@Override
+	public void setLoadTime(long nanos) {
+		recordLoadNanos = nanos;
+	}
+
+
+	@Override
+	public long getLoadTime() {
+		return recordLoadNanos;
 	}
 
 }
