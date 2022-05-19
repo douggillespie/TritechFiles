@@ -6,6 +6,8 @@ import tritechgemini.fileio.GeminiPingTail;
 
 public class ECDImageRecord extends GeminiImageRecord {
 
+	private static final long serialVersionUID = 1L;
+
 	public static final int TYPE_SENSOR_RECORD = 1;
 	public static final int TYPE_TARGET_RECORD = 2;
 	public static final int TYPE_TARGET_IMAGE_RECORD = 3;
@@ -70,10 +72,6 @@ public class ECDImageRecord extends GeminiImageRecord {
 	public byte[] cData; // compressed data
 	public int sCount; // length of compressed data
 	
-	/**
-	 * Uncompressed image data. 
-	 */
-	public byte[] imageData;
 	
 	public ECDImageRecord(String filePath, int filePos, int recordNumber) {
 		super(filePath, filePos, recordNumber);
@@ -207,7 +205,7 @@ I would try to avoid using the PingTail Extension record, unless you think there
 	public void freeImageData() {
 	  cData = null;
 	  imageData = null;
-	  bearingTable = null;
+//	  bearingTable = null;
 	}
 
 	@Override
@@ -228,5 +226,10 @@ I would try to avoid using the PingTail Extension record, unless you think there
 	@Override
 	public long getRecordTime() {
 		return GeminiFileCatalog.cDateToMillis(m_txTime);
+	}
+
+	@Override
+	public ECDImageRecord clone() {
+			return (ECDImageRecord) super.clone();
 	}
 }

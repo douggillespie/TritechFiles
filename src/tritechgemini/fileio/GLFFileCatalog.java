@@ -148,15 +148,17 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				int expSize = (glfImage.endBearing-glfImage.startBearing)*(glfImage.endRange-glfImage.startRange);
 				if (expSize == glfImage.dataSize) {
 					// it's not zipped
-					glfImage.imageData = new byte[expSize]; 
-					dis.readFully(glfImage.imageData);
+					byte[] data = new byte[expSize];
+					dis.readFully(data);
+					glfImage.setImageData(data);
 				}
 				else { // it is zipped
 					// read the image
 					byte[] zippedData = new byte[glfImage.dataSize];
 					dis.readFully(zippedData);
 					try {
-						glfImage.imageData = inflateData(zippedData, glfImage.endRange-glfImage.startRange, nBearing);
+						byte[] data = inflateData(zippedData, glfImage.endRange-glfImage.startRange, nBearing);
+						glfImage.setImageData(data);
 					}
 					catch (DataFormatException dataFormatException) {
 						throw new CatalogException("Error unzipping raw data: " + dataFormatException.getMessage());

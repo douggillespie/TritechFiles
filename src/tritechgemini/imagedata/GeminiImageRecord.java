@@ -1,6 +1,6 @@
 package tritechgemini.imagedata;
 
-abstract public class GeminiImageRecord implements GeminiImageRecordI {
+abstract public class GeminiImageRecord implements GeminiImageRecordI, Cloneable {
 
 	
 	public GeminiImageRecord(String filePath, int filePos, int recordIndex) {
@@ -35,14 +35,38 @@ abstract public class GeminiImageRecord implements GeminiImageRecordI {
 	 * Bearing table
 	 */
 	public double[] bearingTable;
+
+	/**
+	 * Uncompressed image data. 
+	 */
+	protected byte[] imageData;
 	
 	/**
 	 * Full file path for this record
 	 */
 	private String filePath;
 
+	/**
+	 * time taken to load the record from file in nanoseconds. 
+	 */
 	private long recordLoadNanos;
 	
+
+	/**
+	 * Get uncompressed imageData.
+	 */
+	public byte[] getImageData() {
+		return imageData;
+	}
+	
+	/**
+	 * Set the uncompressed image data. 
+	 * @param imageData
+	 */
+	public void setImageData(byte[] imageData) {
+		this.imageData = imageData;
+	}
+
 
 	/**
 	 * 
@@ -83,6 +107,16 @@ abstract public class GeminiImageRecord implements GeminiImageRecordI {
 	@Override
 	public long getLoadTime() {
 		return recordLoadNanos;
+	}
+
+	@Override
+	public GeminiImageRecord clone() {
+		try {
+			return (GeminiImageRecord) super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }

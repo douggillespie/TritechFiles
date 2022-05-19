@@ -1,5 +1,7 @@
 package tritechgemini.detect;
 
+import tritechgemini.imagedata.GeminiImageRecordI;
+
 /**
  * Really simple background subtraction class
  * @author dg50
@@ -14,12 +16,33 @@ public class BackgroundSub {
 	 * get to contribute to the background data. 
 	 */
 	private int backgroundScale = 128;
+	
 	/**
 	 * update constant. should be about 1/20.
 	 * but it's stored as pos integer, so will be about 20.  
 	 */
 	private short updateConst = 20; 
+
+	/**
+	 * Remove background from an image record. 
+	 * @param geminiRecord Image record
+	 * @param updateFirst  update the background measurement before subtraction
+	 * @return clone of the input record with updated background. 
+	 */
+	public GeminiImageRecordI removeBackground(GeminiImageRecordI geminiRecord, boolean updateFirst) {
+		byte[] data = geminiRecord.getImageData();
+		byte[] newData = removeBackground(data, updateFirst);
+		GeminiImageRecordI newRecord = geminiRecord.clone();
+		newRecord.setImageData(newData);
+		return newRecord;
+	}
 	
+	/**
+	 * Remove background from raw image data
+	 * @param data raw image data 
+	 * @param updateFirst update the background measurement before subtraction
+	 * @return new array of data with background subtracted. 
+	 */
 	public byte[] removeBackground(byte[] data, boolean updateFirst) {
 		if (updateFirst) {
 			calcBackground(data);
@@ -60,5 +83,23 @@ public class BackgroundSub {
 		}
 		return data;
 		
+	}
+
+	/**
+	 * Background scale is 1/the update fraction, i.e. a big 
+	 * number updates slowly. 
+	 * @return the backgroundScale
+	 */
+	public int getBackgroundScale() {
+		return backgroundScale;
+	}
+
+	/**
+	 * Background scale is 1/the update fraction, i.e. a big 
+	 * number updates slowly. 
+	 * @param backgroundScale the backgroundScale to set
+	 */
+	public void setBackgroundScale(int backgroundScale) {
+		this.backgroundScale = Math.max(1, backgroundScale);
 	}
 }

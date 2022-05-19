@@ -4,6 +4,8 @@ import tritechgemini.fileio.GeminiFileCatalog;
 
 public class GLFImageRecord extends GeminiImageRecord {
 
+	private static final long serialVersionUID = 1L;
+
 	public GLFImageRecord(String filePath, int filePos, int recordIndex) {
 		super(filePath, filePos, recordIndex);
 	}
@@ -24,7 +26,6 @@ public class GLFImageRecord extends GeminiImageRecord {
 	public int startBearing;
 	public int endBearing;
 	public int dataSize;
-	public byte[] imageData;
 //	public double[] bearingTable;
 	
 	public int m_uiStateFlags;
@@ -40,10 +41,10 @@ public class GLFImageRecord extends GeminiImageRecord {
 	public byte oneSpare;
 	public int dede;
 
-	@Override
-	public byte[] getImageData() {
-		return imageData;
-	}
+//	@Override
+//	public byte[] getImageData() {
+//		return imageData;
+//	}
 
 	@Override
 	public long getRecordTime() {
@@ -99,6 +100,16 @@ public class GLFImageRecord extends GeminiImageRecord {
 	@Override
 	public double getSoS() {
 		return m_sosAtXd;
+	}
+
+	@Override
+	public GLFImageRecord clone() {
+//		try {
+			return (GLFImageRecord) super.clone();
+//		} catch (CloneNotSupportedException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
 	}
 
 }

@@ -1,12 +1,18 @@
 package tritechgemini.imagedata;
 
-public interface GeminiImageRecordI extends GeminiRecordI {
+public interface GeminiImageRecordI extends GeminiRecordI, Cloneable {
 
 	/**
 	 * Get decompressed image data. 
 	 * @return decompressed image data in a single array
 	 */
 	public byte[] getImageData();
+	
+	/**
+	 * Set the image data.
+	 * @param imageDataMust be an array of getnBeam() x getnRange()
+	 */
+	public void setImageData(byte[] imageData);
 	
 	/**
 	 * 
@@ -80,5 +86,11 @@ public interface GeminiImageRecordI extends GeminiRecordI {
 	 * @return
 	 */
 	public long getLoadTime();
+
+	/**
+	 * Clone in interface which is properly overridden in inherited classes
+	 * @return cloned record. 
+	 */
+	public GeminiImageRecordI clone();
 	
 }
