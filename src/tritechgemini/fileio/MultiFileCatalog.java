@@ -95,16 +95,46 @@ public class MultiFileCatalog implements Serializable {
 	 * @return ith record or null if it doesn't exit. 
 	 */
 	public GeminiImageRecordI getRecord(int iRecord) {
+//		int n = 0;
+//		int counted1 = 0, counted2;
+//		for (int i = 0; i < catalogList.size(); i++) {
+//			counted2 = counted1 + catalogList.get(i).getNumRecords();
+//			if (iRecord >= counted1 && iRecord < counted2) {
+//				try {
+//					return catalogList.get(i).getFullRecord(iRecord-counted1);
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//					return null;
+//				}
+//			}
+//			counted1 = counted2;
+//		}
+//		return null;
+		return getRecord(iRecord, true);
+	}
+
+	/**
+	 * Get the ith record from the total catalog.. 
+	 * @param iRecord record index. 
+	 * @param loadFully load the full record data (don't do this for too many units at once)
+	 * @return ith record or null if it doesn't exit. 
+	 */
+	public GeminiImageRecordI getRecord(int iRecord, boolean loadFully) {
 		int n = 0;
 		int counted1 = 0, counted2;
 		for (int i = 0; i < catalogList.size(); i++) {
 			counted2 = counted1 + catalogList.get(i).getNumRecords();
 			if (iRecord >= counted1 && iRecord < counted2) {
+				if (loadFully) {
 				try {
 					return catalogList.get(i).getFullRecord(iRecord-counted1);
 				} catch (IOException e) {
 					e.printStackTrace();
 					return null;
+				}
+				}
+				else {
+					return catalogList.get(i).getRecord(iRecord-counted1);
 				}
 			}
 			counted1 = counted2;

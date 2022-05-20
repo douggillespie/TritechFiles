@@ -9,19 +9,27 @@ import tritechgemini.imagedata.GeminiImageRecordI;
  */
 public class BackgroundSub {
 
-	private short[] background;
+	private int[] background;
 	
 	/**
-	 * Need to scale up the data, might even be best to use float, or small values never
-	 * get to contribute to the background data. 
+	 * Trying to do everything with fixed point maths, so we  
+	 * need to scale up the data, might even be best to use float, or small values never
+	 * get to contribute to the background data. So long as this is >> the updateConst, then 
+	 * even a value of 1 will contribute. 
 	 */
-	private int backgroundScale = 128;
+	private final int internalScale = 128;
 	
 	/**
-	 * update constant. should be about 1/20.
+	 * We may want to remove some factor times the background, in which case
+	 * removalScale is slightly < than 1*internalScale. 
+	 */
+	private int removalFactor = internalScale;
+	
+	/**
+	 * update time constant in frames. should be about 1/20.
 	 * but it's stored as pos integer, so will be about 20.  
 	 */
-	private short updateConst = 20; 
+	private int updateConst = 20; 
 
 	/**
 	 * Remove background from an image record. 
@@ -53,23 +61,23 @@ public class BackgroundSub {
 		byte[] cleanData = new byte[data.length];
 		int val;
 		for (int i = 0; i < data.length; i++) {
-			val =  Math.max(Byte.toUnsignedInt(data[i])-background[i]/backgroundScale,0);
+			val =  Math.max(Byte.toUnsignedInt(data[i])-background[i]/removalFactor,0);
 			cleanData[i] = (byte) (val & 0xFF);
 		}
 		return cleanData;
 	}
 	
-	public short[] calcBackground(byte[] data) {
+	public int[] calcBackground(byte[] data) {
 		checkArray(data.length);
 		for (int i = 0; i < data.length; i++) {
-			background[i] += ((Byte.toUnsignedInt(data[i])*backgroundScale-background[i]) / updateConst);
+			background[i] += ((Byte.toUnsignedInt(data[i])*internalScale-background[i]) / updateConst);
 		}
 		return background;
 	}
 	
 	private void checkArray(int len) {
 		if (background == null || background.length != len) {
-			background = new short[len];
+			background = new int[len];
 		}
 	}
 	
@@ -79,7 +87,7 @@ public class BackgroundSub {
 		}
 		byte[] data = new byte[background.length];
 		for (int i = 0; i < data.length; i++) {
-			data[i] = (byte) (Math.max(background[i]/backgroundScale,0) & 0xFF);
+			data[i] = (byte) (Math.max(background[i]/internalScale,0) & 0xFF);
 		}
 		return data;
 		
@@ -90,8 +98,8 @@ public class BackgroundSub {
 	 * number updates slowly. 
 	 * @return the backgroundScale
 	 */
-	public int getBackgroundScale() {
-		return backgroundScale;
+	public int getTimeConstant() {
+		return updateConst;
 	}
 
 	/**
@@ -99,7 +107,26 @@ public class BackgroundSub {
 	 * number updates slowly. 
 	 * @param backgroundScale the backgroundScale to set
 	 */
-	public void setBackgroundScale(int backgroundScale) {
-		this.backgroundScale = Math.max(1, backgroundScale);
+	public void setTimeConstant(int timeConstant) {
+		this.updateConst = Math.max(1, timeConstant);
+	}
+	
+	/**
+	 * Set a scaling factor for background removal. 1. is remove the background as is, 1.1 would remove a
+	 * bit more than the background, etc. 
+	 * @param removalScale
+	 */
+	public void setRemovalScale(double removalScale) {
+		this.removalFactor = (int) Math.round(internalScale / removalScale);
+	}
+	
+	/**
+	 * 
+	 * Get the scaling factor for background removal. 1. is remove the background as is, 1.1 would remove a
+	 * bit more than the background, etc. 
+	 * @return removal scale
+	 */
+	public double getRemovalScale() {
+		return (double) internalScale / (double) removalFactor;
 	}
 }

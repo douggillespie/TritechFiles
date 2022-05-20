@@ -159,4 +159,11 @@ public class DetectedRegion extends RegionDetector {
 	public int getRegionSize() {
 		return pointIndexes.size();
 	}
+
+	/**
+	 * @return the maxValue
+	 */
+	public int getMaxValue() {
+		return maxValue;
+	}
 }

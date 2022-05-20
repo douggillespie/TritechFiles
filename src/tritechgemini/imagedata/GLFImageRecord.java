@@ -83,7 +83,7 @@ public class GLFImageRecord extends GeminiImageRecord {
 	@Override
 	public void freeImageData() {
 		imageData = null;
-		bearingTable = null;
+//		bearingTable = null;
 		isFullyRead = false;
 	}
 

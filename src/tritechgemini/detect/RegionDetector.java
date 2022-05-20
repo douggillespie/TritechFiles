@@ -14,6 +14,7 @@ import tritechgemini.imagedata.GeminiImageRecordI;
 public class RegionDetector {
 
 	private int MAXSIZE = 200;
+	
 	/**
 	 * Search for regions using the raw data within the record
 	 * @param geminiRecord
