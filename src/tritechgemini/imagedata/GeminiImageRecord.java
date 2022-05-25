@@ -1,9 +1,13 @@
 package tritechgemini.imagedata;
 
-abstract public class GeminiImageRecord implements GeminiImageRecordI, Cloneable {
+import tritechgemini.fileio.GLFGenericHeader;
+import tritechgemini.fileio.PublicMessageHeader;
+
+abstract public class GeminiImageRecord extends PublicMessageHeader implements GeminiImageRecordI, Cloneable {
 
 	
-	public GeminiImageRecord(String filePath, int filePos, int recordIndex) {
+	public GeminiImageRecord(GLFGenericHeader glfGenericHeader, String filePath, int filePos, int recordIndex) {
+		super(glfGenericHeader);
 		this.filePath = filePath;
 		this.filePos = filePos;
 		this.recordIndex = recordIndex;

@@ -74,7 +74,7 @@ public class ECDImageRecord extends GeminiImageRecord {
 	
 	
 	public ECDImageRecord(String filePath, int filePos, int recordNumber) {
-		super(filePath, filePos, recordNumber);
+		super(null, filePath, filePos, recordNumber);
 	}
 	
 	/**
@@ -130,7 +130,7 @@ I would try to avoid using the PingTail Extension record, unless you think there
 
 	@Override
 	public int getDeviceId() {
-		return m_tx1;
+		return m_rx1;
 	}
 
 	public void setPingTail(GeminiPingTail pingTail) {

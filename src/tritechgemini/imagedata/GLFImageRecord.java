@@ -1,23 +1,16 @@
 package tritechgemini.imagedata;
 
+import tritechgemini.fileio.GLFGenericHeader;
 import tritechgemini.fileio.GeminiFileCatalog;
 
 public class GLFImageRecord extends GeminiImageRecord {
 
 	private static final long serialVersionUID = 1L;
 
-	public GLFImageRecord(String filePath, int filePos, int recordIndex) {
-		super(filePath, filePos, recordIndex);
+	public GLFImageRecord(GLFGenericHeader genericHeader, String filePath, int filePos, int recordIndex) {
+		super(genericHeader, filePath, filePos, recordIndex);
 	}
 	
-	public byte m_idChar;
-	public int m_version;
-	public int m_length;
-	public double m_timestamp;
-	public int m_dataType;
-	public int tm_deviceId;
-	public int m_utility;
-	public int m_spare;
 	
 	public int imageVersion;
 	public int startRange;
@@ -77,7 +70,7 @@ public class GLFImageRecord extends GeminiImageRecord {
 
 	@Override
 	public int getDeviceId() {
-		return tm_deviceId;
+		return genericHeader.tm_deviceId;
 	}
 
 	@Override

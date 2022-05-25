@@ -19,9 +19,11 @@ public class ECDFileTest {
 	//	private static final String ecdFile = "E:\\RobSonar2021\\20210410";//
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227\\log_2021-12-27-162222.glf";
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227\\log_2021-12-27-143452.glf";
+//	private static final String ecdFile = "C:\\GeminiData\\LD2\\20220520\\log_2022-05-20-143509.glf";
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\log_2021-12-09-190821.glf";
 //		private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227";
-		private static final String ecdFile = "C:\\PAMGuardTest\\glftest\\20220301\\data_2022-03-01-141949.dat";
+//		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\20220521\\glf\\data_2022-05-21-161648.dat";
+		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220524\\log_2022-05-24-114346.glf";
 	//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\glfexamples\\data_2021-04-10-085615.dat";
 	//	private static String ecdFile = "C:\\ProjectData\\RobRiver\\ecdexamples\\data_2021-04-12-124025.ecd";
 	// Office desktop
@@ -91,31 +93,31 @@ public class ECDFileTest {
 
 		t1 = System.currentTimeMillis();
 		//		% now load those records in turn and see how long that takes.
-		ImageFanMaker fanMaker = new FanPicksFromData(4);
-		int nDone = 0;
-		GeminiImageRecordI imRec = null;
-		if (ecdCatalog != null) {
-			try {
-				for (int i = nRec-1; i >= 0; i--) {
-					imRec = ecdCatalog.getFullRecord(i);
-					byte[] imData = imRec.getImageData();
-					nDone++;
-					t2 = System.currentTimeMillis();
-					//				System.out.printf("Fully read %d records size %dx%d then took %d milliseconds = %3.1fms/rec\n", nDone, 
-					//						imRec.getnBeam(), imRec.getnRange(), t2-t1, (double) (t2-t1)/nDone);
-					fanMaker.createFanData(imRec);
-					imRec.freeImageData();
-					//				break;
-					//			break;
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			t2 = System.currentTimeMillis();
-			System.out.printf("Full read of all records then took %d milliseconds = %3.1fms/rec\n", t2-t1, (double) (t2-t1)/nRec);
-
-		}
+//		ImageFanMaker fanMaker = new FanPicksFromData(4);
+//		int nDone = 0;
+//		GeminiImageRecordI imRec = null;
+//		if (ecdCatalog != null) {
+//			try {
+//				for (int i = nRec-1; i >= 0; i--) {
+//					imRec = ecdCatalog.getFullRecord(i);
+//					byte[] imData = imRec.getImageData();
+//					nDone++;
+//					t2 = System.currentTimeMillis();
+//					//				System.out.printf("Fully read %d records size %dx%d then took %d milliseconds = %3.1fms/rec\n", nDone, 
+//					//						imRec.getnBeam(), imRec.getnRange(), t2-t1, (double) (t2-t1)/nDone);
+//					fanMaker.createFanData(imRec);
+//					imRec.freeImageData();
+//					//				break;
+//					//			break;
+//				}
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			t2 = System.currentTimeMillis();
+//			System.out.printf("Full read of all records then took %d milliseconds = %3.1fms/rec\n", t2-t1, (double) (t2-t1)/nRec);
+//
+//		}
 		System.out.println(GLFFastInputStream.readMonitor.getSummary("Reading"));
 		System.out.println(GLFFastInputStream.skipMonitor.getSummary("Skipping"));
 		System.out.println(GLFFastInputStream.loadMonitor.getSummary("Loading"));

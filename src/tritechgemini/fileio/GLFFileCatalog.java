@@ -14,6 +14,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import tritechgemini.imagedata.GLFImageRecord;
+import tritechgemini.imagedata.GLFStatusData;
 
 public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
@@ -54,28 +55,84 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 		int nRec = 0;
 		long t1 = System.currentTimeMillis();
+		int badRec = 0;
 		try {
 			while (true) {
-
-				GLFImageRecord glfImage = new GLFImageRecord(getFilePath(), (int) cis.getPos(), nRec);
-
-				boolean ok = readGlfRecord(glfImage, dis, false);
 				
-				if (!ok) {
+				GLFGenericHeader header = readNextHeader(dis);
+				if (header == null) {
+					break; // should be EOF. 
+				}
+				if (header.m_idChar != 42) {
+					System.out.printf("Bad header id character in GLF: %d\n", header.m_idChar);
+				}
+				
+//				long p1 = cis.getPos();
+				switch (header.m_dataType) {
+				case 0: // image record
+					GLFImageRecord glfImage = new GLFImageRecord(header, getFilePath(), (int) cis.getPos(), nRec);
+					int ok = readGlfRecord(glfImage, dis, false);
+					if (ok == 0) {
+					imageRecords.add(glfImage);
+					nRec++;
+					}
 					break;
+				case 3: // status
+					GLFStatusData statusData = new GLFStatusData(header);
+					statusData.read(dis, false);
 				}
 
-				imageRecords.add(glfImage);
+//				long p2 = cis.getPos();
+//				System.out.printf("Type %d read %d bytes for header saying %d (diff %d)\n", 
+//						header.m_dataType, p2-p1, header.m_length, p2-p1-header.m_length);
 				
-				nRec++;
+//				if (ok == 1) {
+//					break;
+//				}
+//				else if (ok == 0) {
+//				}
+//				else if (ok == 2) {
+//					badRec++;
+//				}
 
 			}
 		}
 		catch (CatalogException e) {
 			e.printStackTrace();
 		}
+		System.out.println("Incomprehensible records records in file are " + badRec);
 
 		return true;
+	}
+
+	/**
+	 * Read the next generic header object from the file. 
+	 * @param dis 
+	 * @return Generic header or thrown an exception. 
+	 * @throws CatalogException 
+	 */
+	private GLFGenericHeader readNextHeader(DataInput dis) throws CatalogException {
+		GLFGenericHeader header = new GLFGenericHeader();
+		try {
+			header.m_idChar = dis.readByte();
+			header.m_version = dis.readUnsignedByte();
+			//		if (glfImage.m_version == DE || glfImage.m_idChar != 42) {
+			//			return false;
+			//		}
+			header.m_length = dis.readInt();
+			header.m_timestamp = dis.readDouble();
+			header.m_dataType = dis.readUnsignedByte(); // getting a datatype 3, which is not image data. FFS. 
+			header.tm_deviceId = dis.readUnsignedShort();
+			header.m_node_ID = dis.readUnsignedShort();
+			header.m_spare = dis.readShort();
+		}
+		catch (EOFException eof) {
+			return null;
+		}
+		catch (IOException ioEx) {
+			throw (new CatalogException(ioEx.getMessage()));
+		}
+		return header;
 	}
 
 	@Override
@@ -91,7 +148,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 //		BufferedInputStream bis = new BufferedInputStream(inputStream);
 		LittleEndianDataInputStream dis = new LittleEndianDataInputStream(inputStream);
 		dis.skip(geminiRecord.filePos);
-		boolean ok = readGlfRecord(geminiRecord, dis, true);
+		boolean ok = readGlfRecord(geminiRecord, dis, true) == 0;
 		inputStream.close();
 		return ok;
 	}
@@ -101,10 +158,10 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	 * @param glfImage
 	 * @param dis
 	 * @param readFully
-	 * @return
+	 * @return 0 for a normal GLF record, 1 for file end, 2 for something else we didn't understand
 	 * @throws CatalogException
 	 */
-	public boolean readGlfRecord(GLFImageRecord glfImage, DataInput dis, boolean readFully) throws CatalogException {
+	public int readGlfRecord(GLFImageRecord glfImage, DataInput dis, boolean readFully) throws CatalogException {
 
 //		if (glfImage.getRecordNumber() >= 341) {
 //			System.out.println("Record " + glfImage.getRecordNumber());
@@ -112,23 +169,41 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 //		}
 		
 		try {
-			glfImage.m_idChar = dis.readByte();
-			glfImage.m_version = dis.readUnsignedByte();
-//			if (glfImage.m_version == DE || glfImage.m_idChar != 42) {
-//				return false;
-//			}
-			glfImage.m_length = dis.readInt();
-			glfImage.m_timestamp = dis.readDouble();
-			glfImage.m_dataType = dis.readUnsignedByte();
-			glfImage.tm_deviceId = dis.readUnsignedShort();
-			glfImage.m_utility = dis.readUnsignedShort();
-			glfImage.m_spare = dis.readShort();
+			// end of standard header section. 
 
 			int imageRec = dis.readUnsignedShort();
 			int efef = dis.readUnsignedShort();
 			if (efef != 0xEFEF) {
-				String err = String.format("Unrecognised byte pattern ox%X  in file\n", efef);
-				throw new CatalogException(err);
+				String err = String.format("Unrecognised (a) byte pattern ox%X  in file\n", efef);
+				if (true) {
+//					System.out.printf("Problem at record %d type %d with %d bytes\n", glfImage.recordIndex, glfImage.m_dataType, glfImage.m_length);
+					dis.skipBytes(214);
+					return 2;
+				}
+//				throw new CatalogException(err);
+				// find DEDE and bomb. 
+				int nBytesJunk = 0;
+				int prev = 0;
+				while (true) {
+					int nxt = dis.readUnsignedByte();
+//					System.out.printf("%d 0X%X\n", nBytesJunk, nxt);
+					nBytesJunk++;
+					if (nxt != 0 && nxt == prev) {
+						System.out.printf("fByte match for dataType %d after %d more bytes: 0x%X\n", glfImage.genericHeader.m_dataType, nBytesJunk, nxt);
+					}
+					if (nxt == 42) {
+						System.out.printf("Found %c after %d bytes\n", nxt, nBytesJunk);
+					}
+					if (nxt == 0xDE && prev == 0xDE) {
+						/*
+						 *  this might be a record end, but might not be ! I think it's actually the end of the record after and
+						 *  that whatever this thing is, it's 
+						 */
+//						System.out.printf("found length of record for dataType %d after %d more bytes\n", glfImage.m_dataType, nBytesJunk);
+						return 2;
+					}
+					prev = nxt;
+				}
 			}
 
 			glfImage.imageVersion = dis.readUnsignedShort();
@@ -137,7 +212,14 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			glfImage.rangeCompression = dis.readUnsignedShort();
 			glfImage.startBearing = dis.readInt();
 			glfImage.endBearing = dis.readInt();
-			glfImage.dataSize = dis.readInt();
+
+			if (glfImage.imageVersion == 3) {
+				// two extra bytes in imageVersion 3.
+				int fKnows = dis.readShort();
+			}
+			
+			glfImage.dataSize = dis.readInt();	
+			
 
 			int nBearing = glfImage.endBearing-glfImage.startBearing;
 			int nRange = glfImage.endRange-glfImage.startRange;
@@ -189,17 +271,17 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			glfImage.oneSpare = dis.readByte();
 			glfImage.dede = dis.readUnsignedShort();
 			if (glfImage.dede != 0xDEDE) {
-				String err = String.format("Unrecognised byte pattern ox%X  in file\n", efef);
+				String err = String.format("Unrecognised (c) byte pattern ox%X  in file\n", glfImage.dede);
 				throw new CatalogException(err);
 			}
 		}
 		catch (EOFException eof) {
-			return false;
+			return 1;
 		}
 		catch (IOException ioEx) {
 			throw (new CatalogException(ioEx.getMessage()));
 		}
-		return true;
+		return 0;
 	}
 	
 	/**
