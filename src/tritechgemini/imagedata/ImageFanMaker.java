@@ -38,7 +38,7 @@ abstract public class ImageFanMaker {
 	 * @param nXbins number of x pixels
 	 * @return Fan image data
 	 */
-	private FanImageData createFanData(GeminiImageRecordI geminiRecord, int nXbins) {
+	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nXbins) {
 		return createFanData(geminiRecord, nXbins, geminiRecord.getImageData());
 	}
 

@@ -17,20 +17,60 @@ public class DetectedRegion extends RegionDetector {
 	
 	private ArrayList<Integer> pointIndexes;
 	
+	/*
+	 * Bins are only used when detecting. Only the abs values are stored in database. 
+	 */
 	private int minBearingBin, maxBearingBin;
 	
 	private int minRangeBin, maxRangeBin;
+	
+	private double minBearing, maxBearing;
+	
+	private double minRange, maxRange;
 
 	private int totalValue;
 	
 	private int maxValue;
+	
+	private int nPoints;
+	
+	private int sonarId;
 
+	/**
+	 * During detection
+	 * @param geminiRecord
+	 * @param pointIndex
+	 */
 	public DetectedRegion(GeminiImageRecordI geminiRecord, int pointIndex) {
 		this.geminiRecord = geminiRecord;
 		pointIndexes = new ArrayList<Integer>();
 		pointIndexes.add(pointIndex);
+		sonarId = geminiRecord.getDeviceId();
 	}
 	
+	/**
+	 * With viewer
+	 * @param sonarId
+	 * @param minB
+	 * @param maxB
+	 * @param minR
+	 * @param maxR
+	 * @param meanV
+	 * @param totV
+	 * @param maxV
+	 */
+	public DetectedRegion(int sonarId, double minB, double maxB, double minR, double maxR, int meanV, int totV,
+			int maxV) {
+		this.sonarId = sonarId;
+		this.minBearing = minB;
+		this.maxBearing = maxB;
+		this.minRange = minR;
+		this.maxRange = maxR;
+		this.totalValue = totV;
+		this.maxValue = maxV;
+		this.nPoints = Math.round(totalValue/meanV);
+	}
+
 	/**
 	 * Add a point to the growing region 
 	 * @param pointIndex
@@ -50,7 +90,8 @@ public class DetectedRegion extends RegionDetector {
 		int nRange = geminiRecord.getnRange();
 		minBearingBin = nBearing-1;
 		minRangeBin = nRange;
-		maxBearingBin = maxRangeBin = 0;
+		maxBearingBin = 0;
+		maxRangeBin = 0;
 		totalValue = maxValue = 0;
 		for (int i = 0; i < pointIndexes.size(); i++) {
 			int point = pointIndexes.get(i); 
@@ -64,6 +105,12 @@ public class DetectedRegion extends RegionDetector {
 			minRangeBin = Math.min(minRangeBin, rangeBin);
 			maxRangeBin = Math.max(maxRangeBin, rangeBin);
 		}
+		nPoints = pointIndexes.size();
+		double[] bearingTable = geminiRecord.getBearingTable();
+		minBearing = bearingTable[minBearingBin];
+		maxBearing = bearingTable[maxBearingBin];
+		minRange = geminiRecord.getMaxRange() * (double) minRangeBin / (double) geminiRecord.getnRange();
+		maxRange = geminiRecord.getMaxRange() * (double) maxRangeBin / (double) geminiRecord.getnRange();
 	}
 
 	/**
@@ -81,59 +128,31 @@ public class DetectedRegion extends RegionDetector {
 	}
 
 	/**
-	 * @return the minBearingBin
-	 */
-	public int getMinBearingBin() {
-		return minBearingBin;
-	}
-
-	/**
-	 * @return the maxBearingBin
-	 */
-	public int getMaxBearingBin() {
-		return maxBearingBin;
-	}
-
-	/**
 	 * @return the minimum bearing in radians
 	 */
 	public double getMinBearing() {
-		return geminiRecord.getBearingTable()[minBearingBin];
+		return minBearing;
 	}
 
 	/**
 	 * @return the maximum bearing in radians
 	 */
 	public double getMaxBearing() {
-		return geminiRecord.getBearingTable()[maxBearingBin];
-	}
-
-	/**
-	 * @return the minRangeBin
-	 */
-	public int getMinRangeBin() {
-		return minRangeBin;
-	}
-
-	/**
-	 * @return the maxRangeBin
-	 */
-	public int getMaxRangeBin() {
-		return maxRangeBin;
+		return maxBearing;
 	}
 
 	/**
 	 * @return the minimum range in metres
 	 */
 	public double getMinRange() {
-		return geminiRecord.getMaxRange() * (double) minRangeBin / (double) geminiRecord.getnRange();
+		return minRange;
 	}
 
 	/**
 	 * @return the maximum range in metres
 	 */
 	public double getMaxRange() {
-		return geminiRecord.getMaxRange() * (double) maxRangeBin / (double) geminiRecord.getnRange();
+		return maxRange;
 	}
 
 	/**

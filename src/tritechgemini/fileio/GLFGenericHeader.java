@@ -3,13 +3,14 @@ package tritechgemini.fileio;
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Generic header structure for .dat file records. 
  * @author dg50
  *
  */
-public class GLFGenericHeader {
+public class GLFGenericHeader implements Serializable {
 
 	public byte m_idChar;
 	public int m_version;

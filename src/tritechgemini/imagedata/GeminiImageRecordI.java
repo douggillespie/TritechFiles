@@ -1,6 +1,8 @@
 package tritechgemini.imagedata;
 
-public interface GeminiImageRecordI extends GeminiRecordI, Cloneable {
+import java.io.Serializable;
+
+public interface GeminiImageRecordI extends GeminiRecordI, Cloneable, Serializable {
 
 	/**
 	 * Get decompressed image data. 
@@ -63,6 +65,18 @@ public interface GeminiImageRecordI extends GeminiRecordI, Cloneable {
 	 * @return speed of sound
 	 */
 	public double getSoS();
+	
+	/**
+	 * Get if chirp was on 0 off, 1 on, -1 unknown
+	 * @return true if chirp mode
+	 */
+	public int getChirp();
+	
+	/**
+	 * 
+	 * @return the gain for that frame
+	 */
+	public int getGain();
 	
 	/**
 	 * Is record fully loaded ?

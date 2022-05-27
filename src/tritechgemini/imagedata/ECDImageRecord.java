@@ -1,10 +1,12 @@
 package tritechgemini.imagedata;
 
+import java.io.Serializable;
+
 import tritechgemini.fileio.GeminiAcousticZoom;
 import tritechgemini.fileio.GeminiFileCatalog;
 import tritechgemini.fileio.GeminiPingTail;
 
-public class ECDImageRecord extends GeminiImageRecord {
+public class ECDImageRecord extends GeminiImageRecord implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -71,8 +73,9 @@ public class ECDImageRecord extends GeminiImageRecord {
 	public int m_Brgs_2;
 	public byte[] cData; // compressed data
 	public int sCount; // length of compressed data
-	
-	
+
+	private GeminiAcousticZoom acousticZoom;
+		
 	public ECDImageRecord(String filePath, int filePos, int recordNumber) {
 		super(null, filePath, filePos, recordNumber);
 	}
@@ -138,10 +141,14 @@ I would try to avoid using the PingTail Extension record, unless you think there
 		
 	}
 
+	/**
+	 * Set the acoustic zoom data which always follows the main image record in an ECD file. 
+	 * @param acousticZoom
+	 */
 	public void setAcousticZoom(GeminiAcousticZoom acousticZoom) {
-		// TODO Auto-generated method stub
-		
+		this.acousticZoom = acousticZoom;
 	}
+	
 	public byte[] uncompressData() {
 		int m_dataSize = m_nBrgs*m_nRngs*m_bpp;
 		byte[] pData = new byte[m_nBrgs*m_nRngs*m_bpp]; // have to use short ?
@@ -231,5 +238,20 @@ I would try to avoid using the PingTail Extension record, unless you think there
 	@Override
 	public ECDImageRecord clone() {
 			return (ECDImageRecord) super.clone();
+	}
+
+	@Override
+	public int getChirp() {
+		if (acousticZoom == null) {
+			return -1;
+		}
+		else {
+			return acousticZoom.m_chirp;
+		}
+	}
+
+	@Override
+	public int getGain() {
+		return m_mainGain;
 	}
 }

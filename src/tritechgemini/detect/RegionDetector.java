@@ -68,9 +68,15 @@ public class RegionDetector {
 			int[] mask = {-1, 1, nBearing, -nBearing, nBearing-1, nBearing+1, -nBearing-1, -nBearing+1};
 			searchMask = mask;
 		}
+		if (geminiRecord.getRecordNumber() == 99) {
+			System.out.println("Proc Record 99");
+		}
 		// can now look for data above threshold
 		for (int i = nBearing+1; i < nData-nBearing; i++) {
 			if (Byte.toUnsignedInt(data[i]) >= thHigh) {
+				if (geminiRecord.getRecordNumber() == 99) {
+					System.out.println("Record 99");
+				}
 				//	we have a detection
 				DetectedRegion newRegion = new DetectedRegion(geminiRecord, i);
 				data[i] = 0; // set point to zero so it's not used again
@@ -118,6 +124,15 @@ public class RegionDetector {
 	 * @return true if it's worth keeping. 
 	 */
 	private boolean wantRegion(DetectedRegion newRegion) {
-		return newRegion.getRegionSize() > 10;
+		return newRegion.getRegionSize() > -1;
+	}
+	
+	/**
+	 * Get types of available connection
+	 * @return 4 and 8
+	 */
+	public static int[] getConnectionTypes() {
+		int[] conTypes = {4, 8};
+		return conTypes;
 	}
 }

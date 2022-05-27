@@ -38,8 +38,6 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		super(filePath);
 	}
 
-
-
 	@Override
 	public boolean buildCatalogue(ArrayList<ECDImageRecord> imageRecords) throws Exception {
 		try {
@@ -73,9 +71,10 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 //					readSensorRecord(ecdFile, type, ver, dis);
 					gotoNextEndTag(dis);
 					break;
-//				case TYPE_TARGET_RECORD:
+				case ECDImageRecord.TYPE_TARGET_RECORD:
 //					readSensorRecord(ecdFile, type, ver, dis);
-//					break;
+					gotoNextEndTag(dis);
+					break;
 				case ECDImageRecord.TYPE_TARGET_IMAGE_RECORD:
 					ecdRecord = new ECDImageRecord(getFilePath(), (int) cis.getPos(), frameNumber++);
 					boolean recOK = readTargetImageRecord(ecdRecord, type, ver, dis, false);
@@ -112,6 +111,30 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		return true;
 	}
 	
+	private void readSensorRecord(File ecdFile, int type, int ver, DataInput dis) {
+		try {
+			short dfdf = dis.readShort();
+			short ping_version = dis.readShort();
+			short ping_pid = dis.readByte();
+			int ping_halfArr = dis.readInt();
+			byte ping_txLength = dis.readByte();
+			byte ping_scanRate = dis.readByte();
+			float ping_sos = dis.readFloat();
+			
+			short m_tid = dis.readShort();
+			short m_pid = dis.readShort();
+			double m_txTime = dis.readDouble();
+			double m_txAngle = dis.readDouble();
+			double m_sosAvg = dis.readDouble();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
+
 	@Override
 	boolean loadFullRecord(ECDImageRecord geminiRecord) throws IOException {
 		File ecdFile = new File(getFilePath());
@@ -239,7 +262,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 	}
 
 	private static GeminiAcousticZoom readAcousticZoomRecord(File ecdFile, int type, int ver, DataInput dis)  throws IOException {
-		GeminiAcousticZoom acousticZoom = new GeminiAcousticZoom(ecdFile, type, ver);
+		GeminiAcousticZoom acousticZoom = new GeminiAcousticZoom();
 		boolean ok = acousticZoom.readDataFile(dis);
 		return ok ? acousticZoom : null;
 	}

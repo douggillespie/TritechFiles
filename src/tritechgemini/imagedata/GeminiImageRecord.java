@@ -1,10 +1,12 @@
 package tritechgemini.imagedata;
 
+import java.io.Serializable;
+
 import tritechgemini.fileio.GLFGenericHeader;
-import tritechgemini.fileio.PublicMessageHeader;
 
-abstract public class GeminiImageRecord extends PublicMessageHeader implements GeminiImageRecordI, Cloneable {
+abstract public class GeminiImageRecord extends PublicMessageHeader implements GeminiImageRecordI, Cloneable, Serializable {
 
+	private static final long serialVersionUID = 1L;
 	
 	public GeminiImageRecord(GLFGenericHeader glfGenericHeader, String filePath, int filePos, int recordIndex) {
 		super(glfGenericHeader);

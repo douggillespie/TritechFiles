@@ -1,9 +1,11 @@
 package tritechgemini.imagedata;
 
+import java.io.Serializable;
+
 import tritechgemini.fileio.GLFGenericHeader;
 import tritechgemini.fileio.GeminiFileCatalog;
 
-public class GLFImageRecord extends GeminiImageRecord {
+public class GLFImageRecord extends GeminiImageRecord implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -103,6 +105,16 @@ public class GLFImageRecord extends GeminiImageRecord {
 //			e.printStackTrace();
 //			return null;
 //		}
+	}
+
+	@Override
+	public int getChirp() {
+		return m_fChirp;
+	}
+
+	@Override
+	public int getGain() {
+		return m_sPercentGain;
 	}
 
 }

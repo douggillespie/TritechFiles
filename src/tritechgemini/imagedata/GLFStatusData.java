@@ -2,18 +2,20 @@ package tritechgemini.imagedata;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.Serializable;
 
 import tritechgemini.fileio.CatalogException;
 import tritechgemini.fileio.GLFGenericHeader;
 import tritechgemini.fileio.LittleEndianDataInputStream;
-import tritechgemini.fileio.PublicMessageHeader;
 
 /**
  * This works reading from the latest GLF files and seems to get reasonable values. 
  * @author dg50
  *
  */
-public class GLFStatusData extends PublicMessageHeader {
+public class GLFStatusData extends PublicMessageHeader implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	
 	public short m_bfVersion;
 	public short m_daVer;
