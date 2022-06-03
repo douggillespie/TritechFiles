@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 
 import tritechgemini.imagedata.GeminiImageRecordI;
 
@@ -32,6 +33,12 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	private transient Exception catalogException;
 	
 	/**
+	 * Gemini times seem to be local so will need to set a time zone to convert them. 
+	 * Therefore will probably also need options to enable setting of these. 
+	 */
+	private static TimeZone timeZone = TimeZone.getDefault(); 
+	
+	/**
 	 * Hash map of sonars, identified by the sonar Id (not it's index)
 	 */
 	private HashMap<Integer, CatalogSonarInfo> sonarMap = new HashMap<>();
@@ -43,6 +50,8 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	public GeminiFileCatalog(String filePath) {
 		this.filePath = filePath;
 	}
+	
+	
 	
 	/**
 	 * Preferred way of getting a file catalogue, since it will automatically 
@@ -216,6 +225,22 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	abstract boolean loadFullRecord(RecordClass geminiRecord) throws IOException;
 	
 	/**
+	 * Start a full forwards only read of the catalog from start to end, sending all 
+	 * records through to the streamObserver. <p>
+	 * Whatever calls this will almost definitely want to do so in a separate worker thread
+	 * because the call will block until the read has finished. 
+	 * @param streamObserver observer to get catalog data. 
+	 * @return number of records read. 
+	 * @throws CatalogException 
+	 */
+	abstract public int streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException;
+	
+	/**
+	 * Stop streaming the catalog.
+	 */
+	abstract public void stopCatalogStream();
+	
+	/**
 	 * Get the time of the first record
 	 * @return the time of the first record
 	 */
@@ -325,10 +350,24 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	}
 
 	public static long cDateToMillis(double cDate) {
-//		cDate is ref's to 1980 in secs, Java in millis from 1970. 
+		/*
+		 * cDate is ref's to 1980 in secs, Java in millis from 1970.
+		 * Also note that the dates are returned in local time, so it's going to be necessary
+		 * to correct for time zone at some point.  
+		 */
 		int days = 3652;
 		int secsPerDay = 3600*24;
-		return (long) ((cDate+days*secsPerDay)*1000.);
+		long ms = (long) ((cDate+days*secsPerDay)*1000.);
+		/**
+		 * This can only go horribly wrong when the clocks go back. Will have to wait until the
+		 * autumn and see what happens. I don't see though how we're not going to have overlapping
+		 * files. 
+		 */
+		if (timeZone != null) {
+			long offset = timeZone.getOffset(ms);
+			ms -= offset;
+		}
+		return ms;
 	}
 	
 	/**
@@ -459,6 +498,20 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 			aRec.freeImageData();
 		}
 		
+	}
+
+	/**
+	 * @return the timeZone
+	 */
+	public static TimeZone getTimeZone() {
+		return timeZone;
+	}
+
+	/**
+	 * @param timeZone the timeZone to set
+	 */
+	public static void setTimeZone(TimeZone timeZone) {
+		GeminiFileCatalog.timeZone = timeZone;
 	}
 	
 	

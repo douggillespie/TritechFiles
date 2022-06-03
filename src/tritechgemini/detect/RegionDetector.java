@@ -13,7 +13,48 @@ import tritechgemini.imagedata.GeminiImageRecordI;
  */
 public class RegionDetector {
 
+	/**
+	 * Max size in pixels for any region. 
+	 */
 	private int MAXSIZE = 200;
+	
+	/**
+	 * Min and max object sizes in metres. 
+	 */
+	private double minObjectSize = 0;
+	
+	/**
+	 * @return the minObjectSize
+	 */
+	public double getMinObjectSize() {
+		return minObjectSize;
+	}
+
+
+	/**
+	 * @param minObjectSize the minObjectSize to set
+	 */
+	public void setMinObjectSize(double minObjectSize) {
+		this.minObjectSize = minObjectSize;
+	}
+
+
+	/**
+	 * @return the maxObjectSize
+	 */
+	public double getMaxObjectSize() {
+		return maxObjectSize;
+	}
+
+
+	/**
+	 * @param maxObjectSize the maxObjectSize to set
+	 */
+	public void setMaxObjectSize(double maxObjectSize) {
+		this.maxObjectSize = maxObjectSize;
+	}
+
+	private double maxObjectSize = 20;
 	
 	/**
 	 * Search for regions using the raw data within the record
@@ -124,7 +165,10 @@ public class RegionDetector {
 	 * @return true if it's worth keeping. 
 	 */
 	private boolean wantRegion(DetectedRegion newRegion) {
-		return newRegion.getRegionSize() > -1;
+		if (newRegion.getRegionSize() < 2) {
+			return false;
+		}
+		return (newRegion.getObjectSize() >= minObjectSize && newRegion.getObjectSize() <= maxObjectSize);
 	}
 	
 	/**

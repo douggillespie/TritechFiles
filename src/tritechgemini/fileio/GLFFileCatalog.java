@@ -26,6 +26,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	private transient Inflater inflater;
 	
 	private int zippedDataSize = 0;
+	
+	private double[] lastBearingTable = {0.};
 
 	@Override
 	protected void finalize() throws Throwable {
@@ -34,6 +36,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	private GLFFastInputStream fastInput;
+
+	private volatile boolean continueStream;
 
 	
 	public GLFFileCatalog(String filePath) {
@@ -82,25 +86,14 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 					statusData.read(dis, false);
 				}
 
-//				long p2 = cis.getPos();
-//				System.out.printf("Type %d read %d bytes for header saying %d (diff %d)\n", 
-//						header.m_dataType, p2-p1, header.m_length, p2-p1-header.m_length);
-				
-//				if (ok == 1) {
-//					break;
-//				}
-//				else if (ok == 0) {
-//				}
-//				else if (ok == 2) {
-//					badRec++;
-//				}
-
 			}
 		}
 		catch (CatalogException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Incomprehensible records records in file are " + badRec);
+		if (badRec > 0) {
+			System.out.println("Incomprehensible records records in file are " + badRec);
+		}
 
 		return true;
 	}
@@ -248,9 +241,16 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				}
 
 				// read the bearing table
-				glfImage.bearingTable = new double[nBearing];
-				for (int i = 0; i < nBearing; i++) {
-					glfImage.bearingTable[i] = dis.readDouble();
+				if (nBearing == lastBearingTable.length) {
+					glfImage.bearingTable = lastBearingTable;
+					dis.skipBytes(nBearing*Double.BYTES);
+				}
+				else {
+					glfImage.bearingTable = new double[nBearing];
+					for (int i = 0; i < nBearing; i++) {
+						glfImage.bearingTable[i] = dis.readDouble();
+					}
+					lastBearingTable = glfImage.bearingTable;
 				}
 			}
 			else {
@@ -362,6 +362,67 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		}
 		
 		throw new IOException("Input stream unavailable in archive file " + file);
+	}
+
+	@Override
+	public int streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
+		
+		continueStream = true;
+		
+		InputStream inputStream;
+		try {
+			inputStream = findDataInputStream();
+		} catch (IOException e1) {
+			throw new CatalogException(e1.getMessage());
+		}
+
+		/*
+		 * Using a buffered input stream brings down the file read time from 18s to 322 millis (x56 speed up)
+		 * i've also tried various combinations of random access files and they are not ideal since they go even 
+		 * slower than a basic unbuffered file input stream. 
+		 */
+//		BufferedInputStream bis = new BufferedInputStream(inputStream);
+		CountingInputStream cis = new CountingInputStream(inputStream);
+		DataInput dis = new LittleEndianDataInputStream(cis);
+
+		int nRec = 0;
+		long t1 = System.currentTimeMillis();
+		int badRec = 0;
+			while (continueStream) {
+				
+				GLFGenericHeader header = readNextHeader(dis);
+				if (header == null) {
+					break; // should be EOF. 
+				}
+				if (header.m_idChar != 42) {
+					System.out.printf("Bad header id character in GLF: %d\n", header.m_idChar);
+				}
+				
+//				long p1 = cis.getPos();
+				switch (header.m_dataType) {
+				case 0: // image record
+					GLFImageRecord glfImage = new GLFImageRecord(header, getFilePath(), (int) cis.getPos(), nRec);
+					int ok = readGlfRecord(glfImage, dis, true);
+					if (ok == 0) {
+//					imageRecords.add(glfImage);
+						streamObserver.newImageRecord(glfImage);
+					nRec++;
+					}
+					break;
+				case 3: // status
+					GLFStatusData statusData = new GLFStatusData(header);
+					statusData.read(dis, false);
+					streamObserver.newStatusData(statusData);
+				}
+
+			}
+
+		return nRec;
+	}
+
+	@Override
+	public void stopCatalogStream() {
+		continueStream = false;
 	}
 
 }

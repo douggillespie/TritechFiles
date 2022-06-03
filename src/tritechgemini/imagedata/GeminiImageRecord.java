@@ -29,8 +29,13 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 	
 	/**
 	 * Millisecond time
+	 * Don't store this since I only want to store the raw time. ms
+	 * will need to take into account a time zone, so best apply this 
+	 * at point of need, not when generating data that will be catalogued or
+	 * we'll end up with values where we don't know whether or not a correction
+	 * can been applied. 
 	 */
-	public long recordTimeMillis;
+//	public long recordTimeMillis;
 	
 	/**
 	 * Index in file
@@ -64,6 +69,7 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 	public byte[] getImageData() {
 		return imageData;
 	}
+	
 	
 	/**
 	 * Set the uncompressed image data. 

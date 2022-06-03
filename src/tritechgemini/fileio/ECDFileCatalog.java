@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import tritechgemini.imagedata.ECDImageRecord;
 
 public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
-	
+
 	public static final int HEAD_VERSION = 0x0F0F;
 
 	public static final String HEAD_MSG = "Main Data";
@@ -31,8 +31,10 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 	private int end_inf;
 
 	private String head_msg;
-	
+
 	private double[] lastBearingTable = {0.};
+
+	private volatile boolean continueStream;
 
 	public ECDFileCatalog(String filePath) {
 		super(filePath);
@@ -50,7 +52,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 			this.head_ver = dis.readInt();
 			this.end_inf = dis.readInt();
 			this.head_msg = readUnicodeString(dis, 9);
-			
+
 			ECDImageRecord ecdRecord = null;
 
 			int frameNumber = 0;
@@ -61,18 +63,18 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 					break;
 				}
 				int ver = dis.readUnsignedShort();
-//				System.out.printf("Reading type %d version %d\n", type, ver);
+				//				System.out.printf("Reading type %d version %d\n", type, ver);
 				boolean ok = ECDImageRecord.checkTypeVersion(type, ver);
 				if (ok == false) {
 					break;
 				}
 				switch (type) {
 				case ECDImageRecord.TYPE_SENSOR_RECORD:
-//					readSensorRecord(ecdFile, type, ver, dis);
+					//					readSensorRecord(ecdFile, type, ver, dis);
 					gotoNextEndTag(dis);
 					break;
 				case ECDImageRecord.TYPE_TARGET_RECORD:
-//					readSensorRecord(ecdFile, type, ver, dis);
+					//					readSensorRecord(ecdFile, type, ver, dis);
 					gotoNextEndTag(dis);
 					break;
 				case ECDImageRecord.TYPE_TARGET_IMAGE_RECORD:
@@ -100,17 +102,17 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 
 
 			fis.close();
-			
-			
+
+
 		}
 		catch (IOException e) {
 			throw e;
 		}
-		
-		
+
+
 		return true;
 	}
-	
+
 	private void readSensorRecord(File ecdFile, int type, int ver, DataInput dis) {
 		try {
 			short dfdf = dis.readShort();
@@ -120,7 +122,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 			byte ping_txLength = dis.readByte();
 			byte ping_scanRate = dis.readByte();
 			float ping_sos = dis.readFloat();
-			
+
 			short m_tid = dis.readShort();
 			short m_pid = dis.readShort();
 			double m_txTime = dis.readDouble();
@@ -145,7 +147,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		dis.skipBytes(geminiRecord.filePos);
 		boolean ok = readTargetImageRecord(geminiRecord, 0, 0, dis, true);
 		fis.close();
-		
+
 		return ok;
 	}
 
@@ -197,8 +199,8 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		ecdRecord.m_pid2 = dis.readUnsignedShort(); // oscillates between 2 and 1. Is this the sonar number ? 
 		ecdRecord.m_txTime = dis.readDouble(); // typical 1.2894707737033613E9
 		ecdRecord.m_endTime = dis.readDouble(); 
-		ecdRecord.recordTimeMillis = cDateToMillis(ecdRecord.m_txTime);
-//		double dt = m_endTime-m_txTime; // comes out at 0 every time. 
+		//		ecdRecord.recordTimeMillis = cDateToMillis(ecdRecord.m_txTime);
+		//		double dt = m_endTime-m_txTime; // comes out at 0 every time. 
 		if (notSuperQuick) {
 			ecdRecord.m_txAngle = dis.readDouble(); 
 			ecdRecord.m_sosAvg = dis.readDouble();  //End of data from CTgtRec - looks like a reasonable value for speed of sound
@@ -266,8 +268,8 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		boolean ok = acousticZoom.readDataFile(dis);
 		return ok ? acousticZoom : null;
 	}
-	
-	
+
+
 	private static String readUnicodeString(DataInput dis, int nChar) throws IOException {
 		byte[] bytes = new byte[nChar*2];
 		dis.readFully(bytes);
@@ -296,5 +298,84 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		}
 		return nRead;
 	}
-	
+
+	@Override
+	public int streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
+		int frameNumber = 0;
+		
+		try {
+			File ecdFile = new File(getFilePath());
+			FileInputStream fis = new FileInputStream(ecdFile);
+			BufferedInputStream bis = new BufferedInputStream(fis);
+			CountingInputStream cis = new CountingInputStream(bis);
+			DataInput dis = new LittleEndianDataInputStream(cis);
+
+			this.head_ver = dis.readInt();
+			this.end_inf = dis.readInt();
+			this.head_msg = readUnicodeString(dis, 9);
+
+			ECDImageRecord ecdRecord = null;
+
+			while (continueStream) {
+				long filePos = cis.getPos();
+				int type = dis.readUnsignedShort(); // first record is TARGET_IMAGE_RECORD
+				if (type == ECDImageRecord.END_TAG) {
+					break;
+				}
+				int ver = dis.readUnsignedShort();
+				//			System.out.printf("Reading type %d version %d\n", type, ver);
+				boolean ok = ECDImageRecord.checkTypeVersion(type, ver);
+				if (ok == false) {
+					break;
+				}
+				switch (type) {
+				case ECDImageRecord.TYPE_SENSOR_RECORD:
+					//				readSensorRecord(ecdFile, type, ver, dis);
+					gotoNextEndTag(dis);
+					break;
+				case ECDImageRecord.TYPE_TARGET_RECORD:
+					//				readSensorRecord(ecdFile, type, ver, dis);
+					gotoNextEndTag(dis);
+					break;
+				case ECDImageRecord.TYPE_TARGET_IMAGE_RECORD:
+					ecdRecord = new ECDImageRecord(getFilePath(), (int) cis.getPos(), frameNumber++);
+					boolean recOK = readTargetImageRecord(ecdRecord, type, ver, dis, true);
+					//				imageRecords.add(ecdRecord);
+					streamObserver.newImageRecord(ecdRecord);
+
+					//					System.out.println("Read target image record " + nImage);
+					//				}
+					break;
+				case ECDImageRecord.TYPE_PING_TAIL_RECORD:
+					GeminiPingTail pingTail = readPingTailRecord(ecdFile, type, ver, dis);
+					ecdRecord.setPingTail(pingTail);
+					gotoNextEndTag(dis);
+					break;
+				case ECDImageRecord.TYPE_ACOUSTIC_ZOOM_RECORD:
+					GeminiAcousticZoom acousticZoom = readAcousticZoomRecord(ecdFile, type, ver, dis);
+					ecdRecord.setAcousticZoom(acousticZoom);
+					gotoNextEndTag(dis);
+					break;
+				default:
+					System.err.printf("Unknown gemini record type %d version %d in file %s\n", type, ver, ecdFile.getAbsolutePath());
+				}
+			}
+
+
+			fis.close();
+
+
+		}
+		catch (IOException e) {
+			throw new CatalogException(e.getMessage());
+		}
+
+		return frameNumber;
+	}
+
+	@Override
+	public void stopCatalogStream() {
+		continueStream = false;
+	}
+
 }

@@ -34,7 +34,24 @@ public class DetectedRegion extends RegionDetector {
 	
 	private int nPoints;
 	
+	/**
+	 * @return the nPoints
+	 */
+	public int getnPoints() {
+		return nPoints;
+	}
+
 	private int sonarId;
+
+	// object diagonal size in metres. 
+	private double objectSize;
+
+	/**
+	 * @return the objectSize
+	 */
+	public double getObjectSize() {
+		return objectSize;
+	}
 
 	/**
 	 * During detection
@@ -59,13 +76,14 @@ public class DetectedRegion extends RegionDetector {
 	 * @param totV
 	 * @param maxV
 	 */
-	public DetectedRegion(int sonarId, double minB, double maxB, double minR, double maxR, int meanV, int totV,
+	public DetectedRegion(int sonarId, double minB, double maxB, double minR, double maxR, double objectSize, int meanV, int totV,
 			int maxV) {
 		this.sonarId = sonarId;
 		this.minBearing = minB;
 		this.maxBearing = maxB;
 		this.minRange = minR;
 		this.maxRange = maxR;
+		this.objectSize = objectSize;
 		this.totalValue = totV;
 		this.maxValue = maxV;
 		this.nPoints = Math.round(totalValue/meanV);
@@ -111,6 +129,22 @@ public class DetectedRegion extends RegionDetector {
 		maxBearing = bearingTable[maxBearingBin];
 		minRange = geminiRecord.getMaxRange() * (double) minRangeBin / (double) geminiRecord.getnRange();
 		maxRange = geminiRecord.getMaxRange() * (double) maxRangeBin / (double) geminiRecord.getnRange();
+		/*
+		 * now work out a single size value for the object in metres. This is basically
+		 * the diagonal measurment across the shape.   
+		 */
+		double x1 = minRange*Math.sin(minBearing);
+		double y1 = minRange*Math.cos(minBearing);
+		double x2 = maxRange*Math.sin(maxBearing);
+		double y2 = maxRange*Math.cos(maxBearing);
+		objectSize = Math.sqrt(Math.pow(x2-x1, 2)+Math.pow(y2-y1, 2));
+//		double sz2 = (maxBearing-minBearing)*maxRange;
+//		if (objectSize > 3 && minRange > 56) {
+//			sz2 = (maxBearing-minBearing)*maxRange;
+//			
+//		}
+		
+		geminiRecord = null; // get rid of this or we run out of memory. 
 	}
 
 	/**
@@ -168,15 +202,18 @@ public class DetectedRegion extends RegionDetector {
 	 * @return
 	 */
 	public int getAverageValue() {
-		return totalValue / pointIndexes.size();
+		return (int) (totalValue / nPoints);
 	}
 	
 	/**
 	 * Get the total number of pixels making up the region. 
-	 * @return
+	 * @return number of pixels in region
 	 */
 	public int getRegionSize() {
-		return pointIndexes.size();
+		if (pointIndexes != null) {
+			return pointIndexes.size();
+		}
+		return nPoints;
 	}
 
 	/**
