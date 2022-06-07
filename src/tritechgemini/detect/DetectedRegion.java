@@ -27,31 +27,56 @@ public class DetectedRegion extends RegionDetector {
 	private double minBearing, maxBearing;
 	
 	private double minRange, maxRange;
+	
+	private double peakRange, peakBearing;
 
 	private int totalValue;
 	
 	private int maxValue;
 	
-	private int nPoints;
+	private int maxIndex;
 	
+	private int nPoints;
+
+	private int sonarId;
+	
+	// object diagonal size in metres. 
+	private double objectSize;
+
+	private long timeMilliseconds;
+	
+	private double peakX = -999, peakY = -999;
+
 	/**
+	 * @return the sonarId
+	 */
+	public int getSonarId() {
+		return sonarId;
+	}
+
+	/**
+	 * @return the timeMilliseconds
+	 */
+	public long getTimeMilliseconds() {
+		return timeMilliseconds;
+	}
+
+	/**
+	 * The biggest diagonal measurement of length and breadth. 
+	 * @return the objectSize in metres. 
+	 */
+	public double getObjectSize() {
+		return objectSize;
+	}
+
+	/**
+	 * the number of pixels which went into the region  
 	 * @return the nPoints
 	 */
 	public int getnPoints() {
 		return nPoints;
 	}
 
-	private int sonarId;
-
-	// object diagonal size in metres. 
-	private double objectSize;
-
-	/**
-	 * @return the objectSize
-	 */
-	public double getObjectSize() {
-		return objectSize;
-	}
 
 	/**
 	 * During detection
@@ -60,6 +85,7 @@ public class DetectedRegion extends RegionDetector {
 	 */
 	public DetectedRegion(GeminiImageRecordI geminiRecord, int pointIndex) {
 		this.geminiRecord = geminiRecord;
+		this.timeMilliseconds = geminiRecord.getRecordTime();
 		pointIndexes = new ArrayList<Integer>();
 		pointIndexes.add(pointIndex);
 		sonarId = geminiRecord.getDeviceId();
@@ -67,6 +93,7 @@ public class DetectedRegion extends RegionDetector {
 	
 	/**
 	 * With viewer
+	 * @param timeMilliseconds
 	 * @param sonarId
 	 * @param minB
 	 * @param maxB
@@ -76,8 +103,9 @@ public class DetectedRegion extends RegionDetector {
 	 * @param totV
 	 * @param maxV
 	 */
-	public DetectedRegion(int sonarId, double minB, double maxB, double minR, double maxR, double objectSize, int meanV, int totV,
+	public DetectedRegion(long timeMilliseconds, int sonarId, double minB, double maxB, double minR, double maxR, double objectSize, int meanV, int totV,
 			int maxV) {
+		this.timeMilliseconds = timeMilliseconds;
 		this.sonarId = sonarId;
 		this.minBearing = minB;
 		this.maxBearing = maxB;
@@ -111,13 +139,18 @@ public class DetectedRegion extends RegionDetector {
 		maxBearingBin = 0;
 		maxRangeBin = 0;
 		totalValue = maxValue = 0;
+		int peakRangeBin = 0, peakBearingBin = 0;
 		for (int i = 0; i < pointIndexes.size(); i++) {
 			int point = pointIndexes.get(i); 
 			int val = Byte.toUnsignedInt(data[point]);
-			totalValue += val;
-			maxValue = Math.max(maxValue, val);
 			int bearingBin = point % nBearing;
 			int rangeBin = point / nBearing;
+			totalValue += val;
+			if (val > maxValue) {
+				maxValue = val;
+				peakRangeBin = rangeBin;
+				peakBearingBin = bearingBin;
+			}
 			minBearingBin = Math.min(minBearingBin, bearingBin);
 			maxBearingBin = Math.max(maxBearingBin, bearingBin);
 			minRangeBin = Math.min(minRangeBin, rangeBin);
@@ -129,6 +162,8 @@ public class DetectedRegion extends RegionDetector {
 		maxBearing = bearingTable[maxBearingBin];
 		minRange = geminiRecord.getMaxRange() * (double) minRangeBin / (double) geminiRecord.getnRange();
 		maxRange = geminiRecord.getMaxRange() * (double) maxRangeBin / (double) geminiRecord.getnRange();
+		peakRange = geminiRecord.getMaxRange() * (double) peakRangeBin / (double) geminiRecord.getnRange();
+		peakBearing = bearingTable[peakBearingBin];
 		/*
 		 * now work out a single size value for the object in metres. This is basically
 		 * the diagonal measurment across the shape.   
@@ -221,5 +256,46 @@ public class DetectedRegion extends RegionDetector {
 	 */
 	public int getMaxValue() {
 		return maxValue;
+	}
+
+	/**
+	 * @return the peakRange
+	 */
+	public double getPeakRange() {
+		return peakRange;
+	}
+
+	/**
+	 * @return the peakBearing
+	 */
+	public double getPeakBearing() {
+		return peakBearing;
+	}
+	
+	/**
+	 * Get X coordinate of peak
+	 * @return
+	 */
+	public double getPeakX() {
+		if (peakX == -999) {
+			calcPeakXY();
+		}
+		return peakX;
+	}
+
+	/**
+	 * Get Y coordinate of peak
+	 * @return
+	 */
+	public double getPeakY() {
+		if (peakY == -999) {
+			calcPeakXY();
+		}
+		return peakY;
+	}
+
+	private void calcPeakXY() {
+		peakX = peakRange * Math.sin(peakBearing);
+		peakY = peakRange * Math.cos(peakBearing);		
 	}
 }
