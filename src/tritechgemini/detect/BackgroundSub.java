@@ -1,5 +1,7 @@
 package tritechgemini.detect;
 
+import java.util.Arrays;
+
 import tritechgemini.imagedata.GeminiImageRecordI;
 
 /**
@@ -10,6 +12,11 @@ import tritechgemini.imagedata.GeminiImageRecordI;
 public class BackgroundSub {
 
 	private int[] background;
+	
+	/**
+	 * Store number of bins in background so we can handle resizing sensibly. 
+	 */
+	private int backgroundNRange, backgroundNBearing;
 	
 	/**
 	 * Trying to do everything with fixed point maths, so we  
@@ -39,7 +46,7 @@ public class BackgroundSub {
 	 */
 	public GeminiImageRecordI removeBackground(GeminiImageRecordI geminiRecord, boolean updateFirst) {
 		byte[] data = geminiRecord.getImageData();
-		byte[] newData = removeBackground(data, updateFirst);
+		byte[] newData = removeBackground(data, geminiRecord.getnBeam(), geminiRecord.getnRange(), updateFirst);
 		GeminiImageRecordI newRecord = geminiRecord.clone();
 		newRecord.setImageData(newData);
 		return newRecord;
@@ -51,12 +58,12 @@ public class BackgroundSub {
 	 * @param updateFirst update the background measurement before subtraction
 	 * @return new array of data with background subtracted. 
 	 */
-	public byte[] removeBackground(byte[] data, boolean updateFirst) {
+	public byte[] removeBackground(byte[] data, int nBearing, int nRange, boolean updateFirst) {
 		if (updateFirst) {
-			calcBackground(data);
+			calcBackground(data, nBearing, nRange);
 		}
 		else {
-			checkArray(data.length);
+			checkArray(nBearing, nRange);
 		}
 		byte[] cleanData = new byte[data.length];
 		int val;
@@ -67,17 +74,43 @@ public class BackgroundSub {
 		return cleanData;
 	}
 	
-	public int[] calcBackground(byte[] data) {
-		checkArray(data.length);
+	public int[] calcBackground(byte[] data, int nBearing, int nRange) {
+		checkArray(nBearing, nRange);
 		for (int i = 0; i < data.length; i++) {
 			background[i] += ((Byte.toUnsignedInt(data[i])*internalScale-background[i]) / updateConst);
 		}
 		return background;
 	}
 	
-	private void checkArray(int len) {
-		if (background == null || background.length != len) {
-			background = new int[len];
+	private void checkArray(int nBearing, int nRange) {
+		/**
+		 * If there was no background, or if the number of bearing bins has changed at all
+		 * or if the number of range bins has changed by > 2, then total rebuild. 
+		 */
+		if (background == null || backgroundNBearing != nBearing || Math.abs(nRange-backgroundNRange) > 2) {
+			background = new int[nBearing*nRange];
+			backgroundNBearing = nBearing;
+			backgroundNRange = nRange;
+		}
+		// here we at least know we have the same number of bearings
+		if (nRange < backgroundNRange) {
+			// leave it ! The background is a bit big, but the data will 
+			// probably grow back to that size in a frame or two. 
+			return;
+		}
+		if (nRange > backgroundNRange) {
+			// assume high correlation within a bin and copy 
+			// data from the last range into the new ranges. 
+			int extraRanges = nRange - backgroundNRange;
+			background = Arrays.copyOf(background, nRange*nBearing);
+			int oldEnd = backgroundNBearing*backgroundNRange;
+			for (int i = 0; i < extraRanges; i++) {
+				for (int b = 0; b < nBearing; b++) {
+					background[oldEnd + i* nBearing + b] = background[oldEnd - nBearing + b];
+				}
+			}
+			backgroundNBearing = nBearing;
+			backgroundNRange = nRange;
 		}
 	}
 	
