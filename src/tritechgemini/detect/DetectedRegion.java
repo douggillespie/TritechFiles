@@ -46,6 +46,18 @@ public class DetectedRegion extends RegionDetector {
 	private long timeMilliseconds;
 	
 	private double peakX = -999, peakY = -999;
+	
+	/**
+	 * Percentage of pixels within the wedge which were over threshold
+	 */
+	private double occupancy;
+
+	/**
+	 * @return the occupancy
+	 */
+	public double getOccupancy() {
+		return occupancy;
+	}
 
 	/**
 	 * @return the sonarId
@@ -104,7 +116,7 @@ public class DetectedRegion extends RegionDetector {
 	 * @param maxV
 	 */
 	public DetectedRegion(long timeMilliseconds, int sonarId, double minB, double maxB, double minR, double maxR, double objectSize, int meanV, int totV,
-			int maxV) {
+			int maxV, double occupancy) {
 		this.timeMilliseconds = timeMilliseconds;
 		this.sonarId = sonarId;
 		this.minBearing = minB;
@@ -114,6 +126,7 @@ public class DetectedRegion extends RegionDetector {
 		this.objectSize = objectSize;
 		this.totalValue = totV;
 		this.maxValue = maxV;
+		this.occupancy = occupancy;
 		this.nPoints = Math.round(totalValue/meanV);
 	}
 
@@ -173,6 +186,9 @@ public class DetectedRegion extends RegionDetector {
 		double x2 = maxRange*Math.sin(maxBearing);
 		double y2 = maxRange*Math.cos(maxBearing);
 		objectSize = Math.sqrt(Math.pow(x2-x1, 2)+Math.pow(y2-y1, 2));
+		
+		double area = (maxBearingBin-minBearingBin+1)*(maxRangeBin-minRangeBin+1);
+		occupancy = 100.*nPoints/area;
 //		double sz2 = (maxBearing-minBearing)*maxRange;
 //		if (objectSize > 3 && minRange > 56) {
 //			sz2 = (maxBearing-minBearing)*maxRange;
