@@ -318,7 +318,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	 * Find the input stream. normally it's a GLF file, which is a zipped archive 
 	 * containing the dat file. The dat file contains the actual data and is the thing
 	 * we want to read. Java ZipInputStream provides direct access to this without unpacking
-	 * physical files. 
+	 * physical files. The GLFFastInputStream is a hack of the glf file which indexes it and
+	 * can then quickly access any record using something close to random file access which is 
+	 * useful when processing offline. 
 	 * @return Input stream. 
 	 * @throws IOException if the input stream cannot be found / opened. 
 	 */
@@ -371,7 +373,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		
 		InputStream inputStream;
 		try {
-			inputStream = findDataInputStream();
+//			inputStream = findDataInputStream();
+			// no point with dealing with the random access methods here so just use normal zipped reader
+			inputStream = openZippedinputStream(); 
 		} catch (IOException e1) {
 			throw new CatalogException(e1.getMessage());
 		}
