@@ -18,16 +18,15 @@ import tritechgemini.imagedata.GLFStatusData;
 
 public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
-
 	private static final long serialVersionUID = 2L;
 
 	private static final int DE = 0xDE;
 
 	private transient Inflater inflater;
-	
+
 	private int zippedDataSize = 0;
-	
-	private double[] lastBearingTable = {0.};
+
+	private double[] lastBearingTable = { 0. };
 
 	@Override
 	protected void finalize() throws Throwable {
@@ -39,7 +38,6 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 	private volatile boolean continueStream;
 
-	
 	public GLFFileCatalog(String filePath) {
 		super(filePath);
 	}
@@ -49,9 +47,10 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		InputStream inputStream = findDataInputStream();
 
 		/*
-		 * Using a buffered input stream brings down the file read time from 18s to 322 millis (x56 speed up)
-		 * i've also tried various combinations of random access files and they are not ideal since they go even 
-		 * slower than a basic unbuffered file input stream. 
+		 * Using a buffered input stream brings down the file read time from 18s to 322
+		 * millis (x56 speed up) i've also tried various combinations of random access
+		 * files and they are not ideal since they go even slower than a basic
+		 * unbuffered file input stream.
 		 */
 //		BufferedInputStream bis = new BufferedInputStream(inputStream);
 		CountingInputStream cis = new CountingInputStream(inputStream);
@@ -62,23 +61,23 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		int badRec = 0;
 		try {
 			while (true) {
-				
+
 				GLFGenericHeader header = readNextHeader(dis);
 				if (header == null) {
-					break; // should be EOF. 
+					break; // should be EOF.
 				}
 				if (header.m_idChar != 42) {
 					System.out.printf("Bad header id character in GLF: %d\n", header.m_idChar);
 				}
-				
+
 //				long p1 = cis.getPos();
 				switch (header.m_dataType) {
 				case 0: // image record
 					GLFImageRecord glfImage = new GLFImageRecord(header, getFilePath(), (int) cis.getPos(), nRec);
 					int ok = readGlfRecord(glfImage, dis, false);
 					if (ok == 0) {
-					imageRecords.add(glfImage);
-					nRec++;
+						imageRecords.add(glfImage);
+						nRec++;
 					}
 					break;
 				case 3: // status
@@ -87,8 +86,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				}
 
 			}
-		}
-		catch (CatalogException e) {
+		} catch (CatalogException e) {
 			e.printStackTrace();
 		}
 		if (badRec > 0) {
@@ -99,30 +97,29 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	/**
-	 * Read the next generic header object from the file. 
-	 * @param dis 
-	 * @return Generic header or thrown an exception. 
-	 * @throws CatalogException 
+	 * Read the next generic header object from the file.
+	 * 
+	 * @param dis
+	 * @return Generic header or thrown an exception.
+	 * @throws CatalogException
 	 */
 	private GLFGenericHeader readNextHeader(DataInput dis) throws CatalogException {
 		GLFGenericHeader header = new GLFGenericHeader();
 		try {
 			header.m_idChar = dis.readByte();
 			header.m_version = dis.readUnsignedByte();
-			//		if (glfImage.m_version == DE || glfImage.m_idChar != 42) {
-			//			return false;
-			//		}
+			// if (glfImage.m_version == DE || glfImage.m_idChar != 42) {
+			// return false;
+			// }
 			header.m_length = dis.readInt();
 			header.m_timestamp = dis.readDouble();
-			header.m_dataType = dis.readUnsignedByte(); // getting a datatype 3, which is not image data. FFS. 
+			header.m_dataType = dis.readUnsignedByte(); // getting a datatype 3, which is not image data. FFS.
 			header.tm_deviceId = dis.readUnsignedShort();
 			header.m_node_ID = dis.readUnsignedShort();
 			header.m_spare = dis.readShort();
-		}
-		catch (EOFException eof) {
+		} catch (EOFException eof) {
 			return null;
-		}
-		catch (IOException ioEx) {
+		} catch (IOException ioEx) {
 			throw (new CatalogException(ioEx.getMessage()));
 		}
 		return header;
@@ -134,8 +131,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		if (fastInput != null) {
 			fastInput.resetDataStream();
 			inputStream = fastInput;
-		}
-		else {
+		} else {
 			inputStream = findDataInputStream();
 		}
 //		BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -147,11 +143,13 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	/**
-	 * Read a GLF record which may or may not have already been partially read. 
+	 * Read a GLF record which may or may not have already been partially read.
+	 * 
 	 * @param glfImage
 	 * @param dis
 	 * @param readFully
-	 * @return 0 for a normal GLF record, 1 for file end, 2 for something else we didn't understand
+	 * @return 0 for a normal GLF record, 1 for file end, 2 for something else we
+	 *         didn't understand
 	 * @throws CatalogException
 	 */
 	public int readGlfRecord(GLFImageRecord glfImage, DataInput dis, boolean readFully) throws CatalogException {
@@ -160,9 +158,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 //			System.out.println("Record " + glfImage.getRecordNumber());
 //			readFully = true;
 //		}
-		
+
 		try {
-			// end of standard header section. 
+			// end of standard header section.
 
 			int imageRec = dis.readUnsignedShort();
 			int efef = dis.readUnsignedShort();
@@ -174,7 +172,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 					return 2;
 				}
 //				throw new CatalogException(err);
-				// find DEDE and bomb. 
+				// find DEDE and bomb.
 				int nBytesJunk = 0;
 				int prev = 0;
 				while (true) {
@@ -182,15 +180,16 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 //					System.out.printf("%d 0X%X\n", nBytesJunk, nxt);
 					nBytesJunk++;
 					if (nxt != 0 && nxt == prev) {
-						System.out.printf("fByte match for dataType %d after %d more bytes: 0x%X\n", glfImage.genericHeader.m_dataType, nBytesJunk, nxt);
+						System.out.printf("fByte match for dataType %d after %d more bytes: 0x%X\n",
+								glfImage.genericHeader.m_dataType, nBytesJunk, nxt);
 					}
 					if (nxt == 42) {
 						System.out.printf("Found %c after %d bytes\n", nxt, nBytesJunk);
 					}
 					if (nxt == 0xDE && prev == 0xDE) {
 						/*
-						 *  this might be a record end, but might not be ! I think it's actually the end of the record after and
-						 *  that whatever this thing is, it's 
+						 * this might be a record end, but might not be ! I think it's actually the end
+						 * of the record after and that whatever this thing is, it's
 						 */
 //						System.out.printf("found length of record for dataType %d after %d more bytes\n", glfImage.m_dataType, nBytesJunk);
 						return 2;
@@ -210,32 +209,29 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				// two extra bytes in imageVersion 3.
 				int fKnows = dis.readShort();
 			}
-			
-			glfImage.dataSize = dis.readInt();	
-			
 
-			int nBearing = glfImage.endBearing-glfImage.startBearing;
-			int nRange = glfImage.endRange-glfImage.startRange;
+			glfImage.dataSize = dis.readInt();
+
+			int nBearing = glfImage.endBearing - glfImage.startBearing;
+			int nRange = glfImage.endRange - glfImage.startRange;
 			int iRec = glfImage.recordIndex;
-			
+
 			zippedDataSize += glfImage.dataSize;
 			if (readFully) {
-				int expSize = (glfImage.endBearing-glfImage.startBearing)*(glfImage.endRange-glfImage.startRange);
+				int expSize = (glfImage.endBearing - glfImage.startBearing) * (glfImage.endRange - glfImage.startRange);
 				if (expSize == glfImage.dataSize) {
 					// it's not zipped
 					byte[] data = new byte[expSize];
 					dis.readFully(data);
 					glfImage.setImageData(data);
-				}
-				else { // it is zipped
-					// read the image
+				} else { // it is zipped
+							// read the image
 					byte[] zippedData = new byte[glfImage.dataSize];
 					dis.readFully(zippedData);
 					try {
-						byte[] data = inflateData(zippedData, glfImage.endRange-glfImage.startRange, nBearing);
+						byte[] data = inflateData(zippedData, glfImage.endRange - glfImage.startRange, nBearing);
 						glfImage.setImageData(data);
-					}
-					catch (DataFormatException dataFormatException) {
+					} catch (DataFormatException dataFormatException) {
 						throw new CatalogException("Error unzipping raw data: " + dataFormatException.getMessage());
 					}
 				}
@@ -243,19 +239,17 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				// read the bearing table
 				if (nBearing == lastBearingTable.length) {
 					glfImage.bearingTable = lastBearingTable;
-					dis.skipBytes(nBearing*Double.BYTES);
-				}
-				else {
+					dis.skipBytes(nBearing * Double.BYTES);
+				} else {
 					glfImage.bearingTable = new double[nBearing];
 					for (int i = 0; i < nBearing; i++) {
 						glfImage.bearingTable[i] = dis.readDouble();
 					}
 					lastBearingTable = glfImage.bearingTable;
 				}
-			}
-			else {
+			} else {
 				// skip the image and bearing table
-				dis.skipBytes(glfImage.dataSize + nBearing*Double.BYTES);
+				dis.skipBytes(glfImage.dataSize + nBearing * Double.BYTES);
 //				dis.skipBytes(glfImage.dataSize);
 			}
 			glfImage.m_uiStateFlags = dis.readInt();
@@ -274,29 +268,28 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				String err = String.format("Unrecognised (c) byte pattern ox%X  in file\n", glfImage.dede);
 				throw new CatalogException(err);
 			}
-		}
-		catch (EOFException eof) {
+		} catch (EOFException eof) {
 			return 1;
-		}
-		catch (IOException ioEx) {
+		} catch (IOException ioEx) {
 			throw (new CatalogException(ioEx.getMessage()));
 		}
 		return 0;
 	}
-	
+
 	/**
-	 * Unzip the data which is in a standard zipped archive format. 
+	 * Unzip the data which is in a standard zipped archive format.
+	 * 
 	 * @param zippedData zipped data
-	 * @param nRange number of ranges
-	 * @param nBearing number of bearings
-	 * @return unzipped data. 
-	 * @throws DataFormatException Exception thrown by the unzipper. 
+	 * @param nRange     number of ranges
+	 * @param nBearing   number of bearings
+	 * @return unzipped data.
+	 * @throws DataFormatException Exception thrown by the unzipper.
 	 */
-	private byte[] inflateData(byte[] zippedData, int nRange, int nBearing) throws DataFormatException{
+	private byte[] inflateData(byte[] zippedData, int nRange, int nBearing) throws DataFormatException {
 		inflater = getInflater();
 		inflater.reset();
 		inflater.setInput(zippedData);
-		int outSize = nRange*nBearing;
+		int outSize = nRange * nBearing;
 		byte[] unzippedData = new byte[outSize];
 		int bytesRead = 0;
 		bytesRead = inflater.inflate(unzippedData);
@@ -305,7 +298,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 	/**
 	 * getter for inflater to call to make sure it's there since it's not
-	 * serialised. 
+	 * serialised.
+	 * 
 	 * @return inflater
 	 */
 	private Inflater getInflater() {
@@ -314,22 +308,24 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		}
 		return inflater;
 	}
+
 	/**
-	 * Find the input stream. normally it's a GLF file, which is a zipped archive 
-	 * containing the dat file. The dat file contains the actual data and is the thing
-	 * we want to read. Java ZipInputStream provides direct access to this without unpacking
-	 * physical files. The GLFFastInputStream is a hack of the glf file which indexes it and
-	 * can then quickly access any record using something close to random file access which is 
-	 * useful when processing offline. 
-	 * @return Input stream. 
-	 * @throws IOException if the input stream cannot be found / opened. 
+	 * Find the input stream. normally it's a GLF file, which is a zipped archive
+	 * containing the dat file. The dat file contains the actual data and is the
+	 * thing we want to read. Java ZipInputStream provides direct access to this
+	 * without unpacking physical files. The GLFFastInputStream is a hack of the glf
+	 * file which indexes it and can then quickly access any record using something
+	 * close to random file access which is useful when processing offline.
+	 * 
+	 * @return Input stream.
+	 * @throws IOException if the input stream cannot be found / opened.
 	 */
 	private InputStream findDataInputStream() throws IOException {
 //		if (fastInput != null) {
 //			fastInput.resetDataStream();
 //			return fastInput;
 //		}
-		
+
 		String filePath = getFilePath().toLowerCase();
 		File file = new File(filePath);
 		boolean glf = filePath.endsWith(".glf");
@@ -342,14 +338,13 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			if (fastInput.isOk) {
 				fastInput.resetDataStream();
 				return fastInput;
-			}
-			else {
+			} else {
 				return openZippedinputStream();
 			}
 		}
 		throw new IOException("Input stream unavailable in archive file " + file);
 	}
-	
+
 	private InputStream openZippedinputStream() throws IOException {
 		String filePath = getFilePath().toLowerCase();
 		File file = new File(filePath);
@@ -362,28 +357,30 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			}
 			zipEntry = zis.getNextEntry();
 		}
-		
+
 		throw new IOException("Input stream unavailable in archive file " + file);
 	}
 
 	@Override
 	public int streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
-		
+
 		continueStream = true;
-		
+
 		InputStream inputStream;
 		try {
 //			inputStream = findDataInputStream();
-			// no point with dealing with the random access methods here so just use normal zipped reader
-			inputStream = openZippedinputStream(); 
+			// no point with dealing with the random access methods here so just use normal
+			// zipped reader
+			inputStream = openZippedinputStream();
 		} catch (IOException e1) {
 			throw new CatalogException(e1.getMessage());
 		}
 
 		/*
-		 * Using a buffered input stream brings down the file read time from 18s to 322 millis (x56 speed up)
-		 * i've also tried various combinations of random access files and they are not ideal since they go even 
-		 * slower than a basic unbuffered file input stream. 
+		 * Using a buffered input stream brings down the file read time from 18s to 322
+		 * millis (x56 speed up) i've also tried various combinations of random access
+		 * files and they are not ideal since they go even slower than a basic
+		 * unbuffered file input stream.
 		 */
 //		BufferedInputStream bis = new BufferedInputStream(inputStream);
 		CountingInputStream cis = new CountingInputStream(inputStream);
@@ -392,34 +389,34 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		int nRec = 0;
 		long t1 = System.currentTimeMillis();
 		int badRec = 0;
-			while (continueStream) {
-				
-				GLFGenericHeader header = readNextHeader(dis);
-				if (header == null) {
-					break; // should be EOF. 
-				}
-				if (header.m_idChar != 42) {
-					System.out.printf("Bad header id character in GLF: %d\n", header.m_idChar);
-				}
-				
-//				long p1 = cis.getPos();
-				switch (header.m_dataType) {
-				case 0: // image record
-					GLFImageRecord glfImage = new GLFImageRecord(header, getFilePath(), (int) cis.getPos(), nRec);
-					int ok = readGlfRecord(glfImage, dis, true);
-					if (ok == 0) {
-//					imageRecords.add(glfImage);
-						streamObserver.newImageRecord(glfImage);
-					nRec++;
-					}
-					break;
-				case 3: // status
-					GLFStatusData statusData = new GLFStatusData(header);
-					statusData.read(dis, false);
-					streamObserver.newStatusData(statusData);
-				}
+		while (continueStream) {
 
+			GLFGenericHeader header = readNextHeader(dis);
+			if (header == null) {
+				break; // should be EOF.
 			}
+			if (header.m_idChar != 42) {
+				System.out.printf("Bad header id character in GLF: %d\n", header.m_idChar);
+			}
+
+//				long p1 = cis.getPos();
+			switch (header.m_dataType) {
+			case 0: // image record
+				GLFImageRecord glfImage = new GLFImageRecord(header, getFilePath(), (int) cis.getPos(), nRec);
+				int ok = readGlfRecord(glfImage, dis, true);
+				if (ok == 0) {
+//					imageRecords.add(glfImage);
+					streamObserver.newImageRecord(glfImage);
+					nRec++;
+				}
+				break;
+			case 3: // status
+				GLFStatusData statusData = new GLFStatusData(header);
+				statusData.read(dis, false);
+				streamObserver.newStatusData(statusData);
+			}
+
+		}
 
 		return nRec;
 	}

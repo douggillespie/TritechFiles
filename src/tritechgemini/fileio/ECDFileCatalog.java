@@ -302,7 +302,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 	@Override
 	public int streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
 		int frameNumber = 0;
-		
+		continueStream = true;
 		try {
 			File ecdFile = new File(getFilePath());
 			FileInputStream fis = new FileInputStream(ecdFile);
@@ -357,7 +357,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 					gotoNextEndTag(dis);
 					break;
 				default:
-					System.err.printf("Unknown gemini record type %d version %d in file %s\n", type, ver, ecdFile.getAbsolutePath());
+					System.err.printf("Unknown Gemini record type %d version %d in file %s\n", type, ver, ecdFile.getAbsolutePath());
 				}
 			}
 

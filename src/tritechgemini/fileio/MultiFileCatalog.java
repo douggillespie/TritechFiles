@@ -228,5 +228,18 @@ public class MultiFileCatalog implements Serializable {
 		}
 	}
 	
+	/**
+	 * Free image data from all records, but with a window around the
+	 * time of interest. 
+	 * @param currentTime current time (in Viewer ?)
+	 * @param timeWinMillis time window about current time. 
+	 */
+	public void freeImageData(long currentTime, long timeWinMillis) {
+		for (int i = 0; i < catalogList.size(); i++) {
+			GeminiFileCatalog catalog = catalogList.get(i);
+			catalog.freeImageData(currentTime, timeWinMillis);
+		}
+	}
+	
 	
 }

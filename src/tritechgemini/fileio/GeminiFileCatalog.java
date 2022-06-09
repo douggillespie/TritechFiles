@@ -513,6 +513,24 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	public static void setTimeZone(TimeZone timeZone) {
 		GeminiFileCatalog.timeZone = timeZone;
 	}
+
+	/**
+	 * Free image data from all records, but with a window around the
+	 * time of interest which gets kept. 
+	 * @param currentTime current time (in Viewer ?)
+	 * @param timeWinMillis time window about current time. 
+	 */
+	public void freeImageData(long currentTime, long timeWinMillis) {
+		long t1 = currentTime-timeWinMillis;
+		long t2 = currentTime+timeWinMillis;
+		for (RecordClass record : imageRecords) {
+			long rt = record.getRecordTime();
+			if (rt > t1 && rt < t2) {
+				continue;
+			}
+			record.freeImageData();
+		}
+	}
 	
 	
 }

@@ -52,6 +52,9 @@ public class FanPicksFromData extends ImageFanMaker {
 	
 	@Override
 	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, int nPixY, byte[] data) {
+		if (geminiRecord == null || geminiRecord.getImageData() == null) {
+			return null;
+		}
 		if (needNewLUT(geminiRecord, nPixX, nPixY)) {
 			createLUTs(geminiRecord, nPixX, nPixY);
 		}
