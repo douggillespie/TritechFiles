@@ -80,7 +80,9 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 				case ECDImageRecord.TYPE_TARGET_IMAGE_RECORD:
 					ecdRecord = new ECDImageRecord(getFilePath(), (int) cis.getPos(), frameNumber++);
 					boolean recOK = readTargetImageRecord(ecdRecord, type, ver, dis, false);
-					imageRecords.add(ecdRecord);
+					if (recOK) {
+						imageRecords.add(ecdRecord);
+					}
 
 					//					System.out.println("Read target image record " + nImage);
 					//				}
@@ -180,6 +182,9 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 			dis.skipBytes(48);
 		}
 		short m_numBeams = dis.readShort(); // need this !
+		if (m_numBeams == 0) {
+			
+		}
 		if (notSuperQuick) {
 			ecdRecord.m_sosAtXd_2 = dis.readFloat(); // speed of sound
 			ecdRecord.m_rx1 = dis.readShort(); 
@@ -252,9 +257,28 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		ecdRecord.sCount = dis.readInt();
 		int tag = dis.readUnsignedShort(); // correct tag for end of frame!
 
-		return false;
+		return checkBadRecord(ecdRecord);
 	}
 
+	/**
+	 * Some ECD files seem corrupt. Do a few checks of number of bearings
+	 * and ranges and check they are sensible. It may be quite hard to identify these
+	 * records though. 
+	 * @param ecdRecord
+	 * @return true if the record is OK, of false if it's suspect. 
+	 */
+	private boolean checkBadRecord(ECDImageRecord ecdRecord) {
+		if (ecdRecord.m_nBrgs <= 0) {
+			return false;
+		}
+		if (ecdRecord.m_nRngs <= 0) {
+			return false;
+		}
+		if (ecdRecord.m_sosAvg < 1000 || ecdRecord.m_sosAvg > 2000) {
+			return false;
+		}
+		return true;
+	}
 
 	private static  GeminiPingTail readPingTailRecord(File ecdFile, int type, int ver, DataInput dis) throws IOException {
 		GeminiPingTail pingTail = new GeminiPingTail(ecdFile, type, ver);
@@ -341,7 +365,9 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 					ecdRecord = new ECDImageRecord(getFilePath(), (int) cis.getPos(), frameNumber++);
 					boolean recOK = readTargetImageRecord(ecdRecord, type, ver, dis, true);
 					//				imageRecords.add(ecdRecord);
-					streamObserver.newImageRecord(ecdRecord);
+					if (recOK) {
+						streamObserver.newImageRecord(ecdRecord);
+					}
 
 					//					System.out.println("Read target image record " + nImage);
 					//				}

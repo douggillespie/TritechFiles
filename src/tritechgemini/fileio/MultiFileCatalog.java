@@ -23,12 +23,20 @@ public class MultiFileCatalog implements Serializable {
 	
 	private HashMap<Integer, CatalogSonarInfo> allSonarInfo = new HashMap<Integer, CatalogSonarInfo>();
 
+	/**
+	 * constructor doesn't actually do any cataloging. 
+	 * Call catalogFiles(...) to build it. 
+	 */
 	public MultiFileCatalog() {
 		super();
 		catalogList = new ArrayList<>();
 		catalogObservers = new ArrayList<>();
 	}
 	
+	/**
+	 * Build a catalog from a list of files. 
+	 * @param fileList
+	 */
 	public void catalogFiles(String[] fileList) {
 		catalogList.clear();
 		for (int i = 0; i < fileList.length; i++) {
@@ -36,6 +44,7 @@ public class MultiFileCatalog implements Serializable {
 			try {
 //				System.out.println("Catalog " + fileList[i]);
 				cat = GeminiFileCatalog.getFileCatalog(fileList[i], true);
+				notifyObservers(CatalogObserver.BUILDING, i+1, fileList[i]);
 			} catch (CatalogException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -61,7 +70,7 @@ public class MultiFileCatalog implements Serializable {
 			}
 		}
 		
-		notifyObservers();
+		notifyObservers(CatalogObserver.COMPLETE, catalogList.size(), null);
 	}
 	
 	/**
@@ -222,9 +231,13 @@ public class MultiFileCatalog implements Serializable {
 		this.catalogObservers.add(observer);
 	}
 	
-	private void notifyObservers() {
+	public void removeObserver(CatalogObserver observer) {
+		this.catalogObservers.remove(observer);
+	}
+	
+	private void notifyObservers(int state, int nFiles, String lastFile) {
 		for (int i = 0; i < catalogObservers.size(); i++) {
-			catalogObservers.get(i).catalogChanged();
+			catalogObservers.get(i).catalogChanged(state, nFiles, lastFile);
 		}
 	}
 	

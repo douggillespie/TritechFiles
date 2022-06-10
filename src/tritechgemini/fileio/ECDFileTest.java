@@ -22,7 +22,11 @@ public class ECDFileTest {
 //	private static final String ecdFile = "C:\\GeminiData\\LD2\\20220520\\log_2022-05-20-143509.glf";
 //	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\log_2021-12-09-190821.glf";
 //		private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227";
-		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220521\\glf\\log_2022-05-21-161648.glf";
+//		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220521\\glf\\log_2022-05-21-161648.glf";
+	// corrupt	
+	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\Corruptfile\\data_2022-05-22-031938.ecd";
+//	not corrupt
+//	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220521\\ecd\\data_2022-05-21-185110.ecd";
 //		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220524\\log_2022-05-24-114346.glf";
 //		private static final String ecdFile = "C:\\ProjectData\\GordonGeminiTrainingFiles\\pv_hg\\LD20150610_205441_IMG_pv_para_KR_3D.ecd";
 	//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\glfexamples\\data_2021-04-10-085615.dat";

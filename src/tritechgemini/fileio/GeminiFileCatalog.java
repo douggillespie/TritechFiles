@@ -64,7 +64,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	public static GeminiFileCatalog getFileCatalog(String filePath, boolean create)  throws CatalogException {
 		
 		GeminiFileCatalog exCatalog = readSerializedCatalog(filePath);
-		exCatalog = null;
+//		exCatalog = null;
 		if (exCatalog != null) {
 			return exCatalog;
 		}
