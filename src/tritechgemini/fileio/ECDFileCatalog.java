@@ -32,7 +32,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 
 	private String head_msg;
 
-	private double[] lastBearingTable = {0.};
+	private double[] lastBearingTable = { 0. };
 
 	private volatile boolean continueStream;
 
@@ -63,18 +63,18 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 					break;
 				}
 				int ver = dis.readUnsignedShort();
-				//				System.out.printf("Reading type %d version %d\n", type, ver);
+				// System.out.printf("Reading type %d version %d\n", type, ver);
 				boolean ok = ECDImageRecord.checkTypeVersion(type, ver);
 				if (ok == false) {
 					break;
 				}
 				switch (type) {
 				case ECDImageRecord.TYPE_SENSOR_RECORD:
-					//					readSensorRecord(ecdFile, type, ver, dis);
+					// readSensorRecord(ecdFile, type, ver, dis);
 					gotoNextEndTag(dis);
 					break;
 				case ECDImageRecord.TYPE_TARGET_RECORD:
-					//					readSensorRecord(ecdFile, type, ver, dis);
+					// readSensorRecord(ecdFile, type, ver, dis);
 					gotoNextEndTag(dis);
 					break;
 				case ECDImageRecord.TYPE_TARGET_IMAGE_RECORD:
@@ -84,8 +84,8 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 						imageRecords.add(ecdRecord);
 					}
 
-					//					System.out.println("Read target image record " + nImage);
-					//				}
+					// System.out.println("Read target image record " + nImage);
+					// }
 					break;
 				case ECDImageRecord.TYPE_PING_TAIL_RECORD:
 					GeminiPingTail pingTail = readPingTailRecord(ecdFile, type, ver, dis);
@@ -98,19 +98,16 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 					gotoNextEndTag(dis);
 					break;
 				default:
-					System.err.printf("Unknown gemini record type %d version %d in file %s\n", type, ver, ecdFile.getAbsolutePath());
+					System.err.printf("Unknown gemini record type %d version %d in file %s\n", type, ver,
+							ecdFile.getAbsolutePath());
 				}
 			}
 
-
 			fis.close();
 
-
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw e;
 		}
-
 
 		return true;
 	}
@@ -137,11 +134,12 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		}
 	}
 
-
-
 	@Override
 	boolean loadFullRecord(ECDImageRecord geminiRecord) throws IOException {
 		File ecdFile = new File(getFilePath());
+		if (ecdFile.exists() == false) {
+			return false;
+		}
 		FileInputStream fis = new FileInputStream(ecdFile);
 		BufferedInputStream bis = new BufferedInputStream(fis);
 		CountingInputStream cis = new CountingInputStream(bis);
@@ -153,105 +151,102 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		return ok;
 	}
 
-	private boolean readTargetImageRecord(ECDImageRecord ecdRecord, int type, int ver, DataInput dis, boolean readFully) throws IOException {
+	private boolean readTargetImageRecord(ECDImageRecord ecdRecord, int type, int ver, DataInput dis, boolean readFully)
+			throws IOException {
 		// start of record CPing
 		ecdRecord.m_version = dis.readShort(); // def 0
 		ecdRecord.m_pid = dis.readUnsignedByte(); // unique id for ping
 		boolean notSuperQuick = true;
 		if (notSuperQuick) {
 			ecdRecord.m_halfArr = dis.readInt(); // 4
-			ecdRecord.m_txLength = dis.readUnsignedByte(); 
-			ecdRecord.m_scanRate = dis.readUnsignedByte(); //6
+			ecdRecord.m_txLength = dis.readUnsignedByte();
+			ecdRecord.m_scanRate = dis.readUnsignedByte(); // 6
 			ecdRecord.m_sosAtXd = dis.readFloat(); // 10
-			ecdRecord.m_shading = dis.readShort(); //12
-			ecdRecord.m_mainGain = dis.readShort(); 
-			ecdRecord.m_gainBlank = dis.readShort(); 
-			ecdRecord.m_adcInput = dis.readShort(); 
-			ecdRecord.m_spreadGain = dis.readShort(); 
-			ecdRecord.m_absorbGain = dis.readShort(); //22
-			ecdRecord.m_bfFocus = dis.readInt(); 
-			ecdRecord.m_bfGain = dis.readShort(); //28
-			ecdRecord.m_bfAperture = dis.readFloat(); //32
-			ecdRecord.m_txStart = dis.readShort(); 
+			ecdRecord.m_shading = dis.readShort(); // 12
+			ecdRecord.m_mainGain = dis.readShort();
+			ecdRecord.m_gainBlank = dis.readShort();
+			ecdRecord.m_adcInput = dis.readShort();
+			ecdRecord.m_spreadGain = dis.readShort();
+			ecdRecord.m_absorbGain = dis.readShort(); // 22
+			ecdRecord.m_bfFocus = dis.readInt();
+			ecdRecord.m_bfGain = dis.readShort(); // 28
+			ecdRecord.m_bfAperture = dis.readFloat(); // 32
+			ecdRecord.m_txStart = dis.readShort();
 			ecdRecord.m_txLen = dis.readShort(); // correct to here. // 36
-			ecdRecord.m_txRadius = dis.readFloat(); //40
-			ecdRecord.m_txRng = dis.readFloat();  
-			ecdRecord.m_modFreq = dis.readInt(); //48
-		}
-		else {
+			ecdRecord.m_txRadius = dis.readFloat(); // 40
+			ecdRecord.m_txRng = dis.readFloat();
+			ecdRecord.m_modFreq = dis.readInt(); // 48
+		} else {
 			dis.skipBytes(48);
 		}
 		short m_numBeams = dis.readShort(); // need this !
 		if (m_numBeams == 0) {
-			
+
 		}
 		if (notSuperQuick) {
 			ecdRecord.m_sosAtXd_2 = dis.readFloat(); // speed of sound
-			ecdRecord.m_rx1 = dis.readShort(); 
-			ecdRecord.m_rx2 = dis.readShort(); //58
-			ecdRecord.m_tx1 = dis.readShort(); 
-			ecdRecord.m_pingFlags = dis.readShort(); 
-			ecdRecord.m_rx1Arr = dis.readUnsignedByte(); 
-			ecdRecord.m_rx2Arr = dis.readUnsignedByte(); 
-			ecdRecord.m_tx1Arr = dis.readUnsignedByte(); 
-			ecdRecord.m_tx2Arr = dis.readUnsignedByte();  
-			//End of data from CPing
-			ecdRecord.m_tid = dis.readUnsignedShort();  //From CTgtRec
-		}
-		else {
+			ecdRecord.m_rx1 = dis.readShort();
+			ecdRecord.m_rx2 = dis.readShort(); // 58
+			ecdRecord.m_tx1 = dis.readShort();
+			ecdRecord.m_pingFlags = dis.readShort();
+			ecdRecord.m_rx1Arr = dis.readUnsignedByte();
+			ecdRecord.m_rx2Arr = dis.readUnsignedByte();
+			ecdRecord.m_tx1Arr = dis.readUnsignedByte();
+			ecdRecord.m_tx2Arr = dis.readUnsignedByte();
+			// End of data from CPing
+			ecdRecord.m_tid = dis.readUnsignedShort(); // From CTgtRec
+		} else {
 			dis.skipBytes(18);
 		}
-		ecdRecord.m_pid2 = dis.readUnsignedShort(); // oscillates between 2 and 1. Is this the sonar number ? 
+		ecdRecord.m_pid2 = dis.readUnsignedShort(); // oscillates between 2 and 1. Is this the sonar number ?
 		ecdRecord.m_txTime = dis.readDouble(); // typical 1.2894707737033613E9
-		ecdRecord.m_endTime = dis.readDouble(); 
-		//		ecdRecord.recordTimeMillis = cDateToMillis(ecdRecord.m_txTime);
-		//		double dt = m_endTime-m_txTime; // comes out at 0 every time. 
+		ecdRecord.m_endTime = dis.readDouble();
+		// ecdRecord.recordTimeMillis = cDateToMillis(ecdRecord.m_txTime);
+		// double dt = m_endTime-m_txTime; // comes out at 0 every time.
 		if (notSuperQuick) {
-			ecdRecord.m_txAngle = dis.readDouble(); 
-			ecdRecord.m_sosAvg = dis.readDouble();  //End of data from CTgtRec - looks like a reasonable value for speed of sound
-			ecdRecord.mask = dis.readInt();  //From CTgtImg
-			ecdRecord.m_bpp = dis.readUnsignedByte(); 
-			ecdRecord.m_nRngs = dis.readInt();  // 25 this changes with set range. On old Gemini's 1m=122, 5.1m=677 101m=1545 , New gemini 50.1m 763 ranges. 
-			ecdRecord.m_b0 = dis.readInt(); 
-			ecdRecord.m_b1 = dis.readInt(); 
-			ecdRecord.m_r0 = dis.readInt(); 
-			ecdRecord.m_r1 = dis.readInt(); 
-			ecdRecord.dual = dis.readInt(); 
+			ecdRecord.m_txAngle = dis.readDouble();
+			ecdRecord.m_sosAvg = dis.readDouble(); // End of data from CTgtRec - looks like a reasonable value for speed
+													// of sound
+			ecdRecord.mask = dis.readInt(); // From CTgtImg
+			ecdRecord.m_bpp = dis.readUnsignedByte();
+			ecdRecord.m_nRngs = dis.readInt(); // 25 this changes with set range. On old Gemini's 1m=122, 5.1m=677
+												// 101m=1545 , New gemini 50.1m 763 ranges.
+			ecdRecord.m_b0 = dis.readInt();
+			ecdRecord.m_b1 = dis.readInt();
+			ecdRecord.m_r0 = dis.readInt();
+			ecdRecord.m_r1 = dis.readInt();
+			ecdRecord.dual = dis.readInt();
 			ecdRecord.m_nBrgs = dis.readInt();
-		}
-		else {
+		} else {
 			dis.skipBytes(49);
 		}
 		if (readFully) {
 			/**
-			 * Bearing tables are (nearly) always the same, so don't bother reading them. 
+			 * Bearing tables are (nearly) always the same, so don't bother reading them.
 			 */
 			if (lastBearingTable != null && lastBearingTable.length == m_numBeams) {
 				ecdRecord.bearingTable = lastBearingTable;
-				dis.skipBytes(m_numBeams*Double.BYTES);
-			}
-			else {
+				dis.skipBytes(m_numBeams * Double.BYTES);
+			} else {
 				ecdRecord.bearingTable = new double[m_numBeams];
 				lastBearingTable = ecdRecord.bearingTable;
 				for (int i = 0; i < m_numBeams; i++) {
 					/*
-					 * Sweet - clearly OK at this point since I get to read an array of 512 angles 
-					 * in radians that goes from +60 deg to -60 deg.. 
+					 * Sweet - clearly OK at this point since I get to read an array of 512 angles
+					 * in radians that goes from +60 deg to -60 deg..
 					 */
 					ecdRecord.bearingTable[i] = dis.readDouble();
 				}
 			}
-		}
-		else {
-			dis.skipBytes(m_numBeams*Double.BYTES);
+		} else {
+			dis.skipBytes(m_numBeams * Double.BYTES);
 		}
 		ecdRecord.m_Brgs_2 = dis.readInt();
 		int cSize = dis.readInt();
 		if (readFully) {
 			ecdRecord.cData = new byte[cSize];
 			dis.readFully(ecdRecord.cData);
-		}
-		else {
+		} else {
 			dis.skipBytes(cSize);
 		}
 		ecdRecord.sCount = dis.readInt();
@@ -261,11 +256,12 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 	}
 
 	/**
-	 * Some ECD files seem corrupt. Do a few checks of number of bearings
-	 * and ranges and check they are sensible. It may be quite hard to identify these
-	 * records though. 
+	 * Some ECD files seem corrupt. Do a few checks of number of bearings and ranges
+	 * and check they are sensible. It may be quite hard to identify these records
+	 * though.
+	 * 
 	 * @param ecdRecord
-	 * @return true if the record is OK, of false if it's suspect. 
+	 * @return true if the record is OK, of false if it's suspect.
 	 */
 	private boolean checkBadRecord(ECDImageRecord ecdRecord) {
 		if (ecdRecord.m_nBrgs <= 0) {
@@ -280,33 +276,36 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		return true;
 	}
 
-	private static  GeminiPingTail readPingTailRecord(File ecdFile, int type, int ver, DataInput dis) throws IOException {
+	private static GeminiPingTail readPingTailRecord(File ecdFile, int type, int ver, DataInput dis)
+			throws IOException {
 		GeminiPingTail pingTail = new GeminiPingTail(ecdFile, type, ver);
 		boolean ok = pingTail.readDataFile(dis);
 		return ok ? pingTail : null;
 
 	}
 
-	private static GeminiAcousticZoom readAcousticZoomRecord(File ecdFile, int type, int ver, DataInput dis)  throws IOException {
+	private static GeminiAcousticZoom readAcousticZoomRecord(File ecdFile, int type, int ver, DataInput dis)
+			throws IOException {
 		GeminiAcousticZoom acousticZoom = new GeminiAcousticZoom();
 		boolean ok = acousticZoom.readDataFile(dis);
 		return ok ? acousticZoom : null;
 	}
 
-
 	private static String readUnicodeString(DataInput dis, int nChar) throws IOException {
-		byte[] bytes = new byte[nChar*2];
+		byte[] bytes = new byte[nChar * 2];
 		dis.readFully(bytes);
 		return new String(bytes, Charset.forName("UTF_16LE"));
 	}
 
 	/**
 	 * work through file byte at a time until next endflag is found. These occurr at
-	 * end of every record. 
+	 * end of every record.
+	 * 
 	 * @param dis
 	 */
 	private int gotoNextEndTag(DataInput dis) {
-		int prevByte = 0;int nRead = 0;
+		int prevByte = 0;
+		int nRead = 0;
 		try {
 			while (true) {
 				int aByte = dis.readUnsignedByte();
@@ -347,30 +346,30 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 					break;
 				}
 				int ver = dis.readUnsignedShort();
-				//			System.out.printf("Reading type %d version %d\n", type, ver);
+				// System.out.printf("Reading type %d version %d\n", type, ver);
 				boolean ok = ECDImageRecord.checkTypeVersion(type, ver);
 				if (ok == false) {
 					break;
 				}
 				switch (type) {
 				case ECDImageRecord.TYPE_SENSOR_RECORD:
-					//				readSensorRecord(ecdFile, type, ver, dis);
+					// readSensorRecord(ecdFile, type, ver, dis);
 					gotoNextEndTag(dis);
 					break;
 				case ECDImageRecord.TYPE_TARGET_RECORD:
-					//				readSensorRecord(ecdFile, type, ver, dis);
+					// readSensorRecord(ecdFile, type, ver, dis);
 					gotoNextEndTag(dis);
 					break;
 				case ECDImageRecord.TYPE_TARGET_IMAGE_RECORD:
 					ecdRecord = new ECDImageRecord(getFilePath(), (int) cis.getPos(), frameNumber++);
 					boolean recOK = readTargetImageRecord(ecdRecord, type, ver, dis, true);
-					//				imageRecords.add(ecdRecord);
+					// imageRecords.add(ecdRecord);
 					if (recOK) {
 						streamObserver.newImageRecord(ecdRecord);
 					}
 
-					//					System.out.println("Read target image record " + nImage);
-					//				}
+					// System.out.println("Read target image record " + nImage);
+					// }
 					break;
 				case ECDImageRecord.TYPE_PING_TAIL_RECORD:
 					GeminiPingTail pingTail = readPingTailRecord(ecdFile, type, ver, dis);
@@ -383,16 +382,14 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 					gotoNextEndTag(dis);
 					break;
 				default:
-					System.err.printf("Unknown Gemini record type %d version %d in file %s\n", type, ver, ecdFile.getAbsolutePath());
+					System.err.printf("Unknown Gemini record type %d version %d in file %s\n", type, ver,
+							ecdFile.getAbsolutePath());
 				}
 			}
 
-
 			fis.close();
 
-
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new CatalogException(e.getMessage());
 		}
 

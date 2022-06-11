@@ -8,10 +8,8 @@ public interface CatalogObserver {
 	
 	/**
 	 * Notification sent as a catalog is being built. 
-	 * @param state will be one of BUILDING, COMPLETE or CLEARED
-	 * @param nFiles numbe of files currently in catalog. 
-	 * @param lastFile name of last file added. 
+	 * @param offlineCatalogProgress info on last single file catalog added to multifilecatalog. 
 	 */
-	public void catalogChanged(int state, int nFiles, String lastFile);
+	public void catalogChanged(OfflineCatalogProgress offlineCatalogProgress);
 	
 }

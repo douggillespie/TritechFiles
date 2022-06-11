@@ -66,6 +66,8 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		GeminiFileCatalog exCatalog = readSerializedCatalog(filePath);
 //		exCatalog = null;
 		if (exCatalog != null) {
+			// may be on a different drive, so update this critical information.
+			exCatalog.filePath = filePath;
 			return exCatalog;
 		}
 		

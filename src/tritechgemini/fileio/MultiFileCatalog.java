@@ -23,6 +23,8 @@ public class MultiFileCatalog implements Serializable {
 	
 	private HashMap<Integer, CatalogSonarInfo> allSonarInfo = new HashMap<Integer, CatalogSonarInfo>();
 
+	private volatile boolean stopCataloging;
+
 	/**
 	 * constructor doesn't actually do any cataloging. 
 	 * Call catalogFiles(...) to build it. 
@@ -39,38 +41,60 @@ public class MultiFileCatalog implements Serializable {
 	 */
 	public void catalogFiles(String[] fileList) {
 		catalogList.clear();
+		allSonarInfo.clear();
+//		if (fileList.length> 0) {
+//			notifyObservers(CatalogObserver.BUILDING, catalogList.size(), 1, fileList[0]);
+//		}
 		for (int i = 0; i < fileList.length; i++) {
 			GeminiFileCatalog cat = null;
 			try {
 //				System.out.println("Catalog " + fileList[i]);
 				cat = GeminiFileCatalog.getFileCatalog(fileList[i], true);
-				notifyObservers(CatalogObserver.BUILDING, i+1, fileList[i]);
+				// send notification after building so can send the cat 
+				// information for a gradual increase in the data map. 
+				notifyObservers(new OfflineCatalogProgress(CatalogObserver.BUILDING, fileList.length, i+1, fileList[i], cat));
 			} catch (CatalogException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			if (cat != null) {
 				catalogList.add(cat);
+				int[] sonars = cat.getSonarIDs();
+				for (int is = 0; is < sonars.length; is++) {
+					CatalogSonarInfo sonarInf = cat.getSonarInfo(sonars[is]);
+					CatalogSonarInfo exInfo = allSonarInfo.get(sonarInf.getSonarId());
+					if (exInfo == null) {
+						exInfo = sonarInf.clone();
+						allSonarInfo.put(sonars[is], exInfo);
+					}
+					else {
+						exInfo.addFrameCount(sonarInf.getnFrames());
+					}
+				}
+				
+			}
+			if (stopCataloging) {
+				break;
 			}
 		}
 		
 		// sort out summary info of all sonars present. 
-		for (GeminiFileCatalog aCat : catalogList) {
-			int[] sonars = aCat.getSonarIDs();
-			for (int i = 0; i < sonars.length; i++) {
-				CatalogSonarInfo sonarInf = aCat.getSonarInfo(sonars[i]);
-				CatalogSonarInfo exInfo = allSonarInfo.get(sonarInf.getSonarId());
-				if (exInfo == null) {
-					exInfo = sonarInf.clone();
-					allSonarInfo.put(sonars[i], exInfo);
-				}
-				else {
-					exInfo.addFrameCount(sonarInf.getnFrames());
-				}
-			}
-		}
+//		for (GeminiFileCatalog aCat : catalogList) {
+//			int[] sonars = aCat.getSonarIDs();
+//			for (int i = 0; i < sonars.length; i++) {
+//				CatalogSonarInfo sonarInf = aCat.getSonarInfo(sonars[i]);
+//				CatalogSonarInfo exInfo = allSonarInfo.get(sonarInf.getSonarId());
+//				if (exInfo == null) {
+//					exInfo = sonarInf.clone();
+//					allSonarInfo.put(sonars[i], exInfo);
+//				}
+//				else {
+//					exInfo.addFrameCount(sonarInf.getnFrames());
+//				}
+//			}
+//		}
 		
-		notifyObservers(CatalogObserver.COMPLETE, catalogList.size(), null);
+		notifyObservers(new OfflineCatalogProgress(CatalogObserver.COMPLETE, catalogList.size(), catalogList.size(), null, null));
 	}
 	
 	/**
@@ -235,9 +259,9 @@ public class MultiFileCatalog implements Serializable {
 		this.catalogObservers.remove(observer);
 	}
 	
-	private void notifyObservers(int state, int nFiles, String lastFile) {
+	private void notifyObservers(OfflineCatalogProgress offlineCatalogProgress) {
 		for (int i = 0; i < catalogObservers.size(); i++) {
-			catalogObservers.get(i).catalogChanged(state, nFiles, lastFile);
+			catalogObservers.get(i).catalogChanged(offlineCatalogProgress);
 		}
 	}
 	
@@ -252,6 +276,10 @@ public class MultiFileCatalog implements Serializable {
 			GeminiFileCatalog catalog = catalogList.get(i);
 			catalog.freeImageData(currentTime, timeWinMillis);
 		}
+	}
+
+	public void stopCataloging() {
+		stopCataloging = true;
 	}
 	
 	

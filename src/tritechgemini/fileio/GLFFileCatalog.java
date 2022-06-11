@@ -134,6 +134,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		} else {
 			inputStream = findDataInputStream();
 		}
+		if (inputStream == null) {
+			return false;
+		}
 //		BufferedInputStream bis = new BufferedInputStream(inputStream);
 		LittleEndianDataInputStream dis = new LittleEndianDataInputStream(inputStream);
 		dis.skip(geminiRecord.filePos);
@@ -328,6 +331,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 		String filePath = getFilePath().toLowerCase();
 		File file = new File(filePath);
+		if (file.exists() == false) {
+			return null;
+		}
 		boolean glf = filePath.endsWith(".glf");
 		boolean dat = filePath.endsWith(".dat");
 		if (dat) {

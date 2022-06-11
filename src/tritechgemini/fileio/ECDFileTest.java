@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import tritechgemini.imagedata.FanPicksFromData;
+import tritechgemini.imagedata.GLFStatusData;
 import tritechgemini.imagedata.GeminiImageRecordI;
 import tritechgemini.imagedata.ImageFanMaker;
 
 
-public class ECDFileTest {
+public class ECDFileTest implements CatalogStreamObserver {
 
 
 	// laptop
@@ -24,7 +25,8 @@ public class ECDFileTest {
 //		private static final String ecdFile = "C:\\ProjectData\\RobRiver\\20211227";
 //		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220521\\glf\\log_2022-05-21-161648.glf";
 	// corrupt	
-	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\Corruptfile\\data_2022-05-22-031938.ecd";
+//	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\Corruptfile\\data_2022-05-22-031938.ecd";
+	private static final String ecdFile = "E:\\GeminiData\\20220523\\data_2022-05-23-062933.ecd";
 //	not corrupt
 //	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220521\\ecd\\data_2022-05-21-185110.ecd";
 //		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220524\\log_2022-05-24-114346.glf";
@@ -82,7 +84,10 @@ public class ECDFileTest {
 		else {
 			nFile = 1;
 			try {
-				ecdCatalog = catalogFile(ecdFile);
+				// stream it
+				ecdCatalog = GeminiFileCatalog.getFileCatalog(ecdFile, false);
+				ecdCatalog.streamCatalog(this);
+//				ecdCatalog = catalogFile(ecdFile);
 			} catch (CatalogException e) {
 				e.printStackTrace();
 			}
@@ -139,6 +144,17 @@ public class ECDFileTest {
 
 	private GeminiFileCatalog catalogFile(String filePath) throws CatalogException {
 		return GeminiFileCatalog.getFileCatalog(filePath, true);
+	}
+
+	@Override
+	public void newImageRecord(GeminiImageRecordI glfImage) {
+		System.out.println("Image record " + glfImage.getRecordNumber());
+	}
+
+	@Override
+	public void newStatusData(GLFStatusData statusData) {
+		// TODO Auto-generated method stub
+		
 	}
 
 
