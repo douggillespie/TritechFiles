@@ -52,7 +52,7 @@ abstract public class ImageFanMaker {
 	 */
 	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, byte[] imageData) {
 		double[] bearingTable = geminiRecord.getBearingTable();
-		if (bearingTable == null) {
+		if (bearingTable == null || bearingTable.length == 0) {
 			return null;
 		}
 		double b1 = Math.abs(bearingTable[0]);
