@@ -115,14 +115,17 @@ public class DetectedRegion extends RegionDetector {
 	 * @param totV
 	 * @param maxV
 	 */
-	public DetectedRegion(long timeMilliseconds, int sonarId, double minB, double maxB, double minR, double maxR, double objectSize, int meanV, int totV,
+	public DetectedRegion(long timeMilliseconds, int sonarId, double minB, double maxB, double peakB, 
+			double minR, double maxR, double peakR, double objectSize, int meanV, int totV,
 			int maxV, double occupancy) {
 		this.timeMilliseconds = timeMilliseconds;
 		this.sonarId = sonarId;
 		this.minBearing = minB;
 		this.maxBearing = maxB;
+		this.peakBearing = peakB;
 		this.minRange = minR;
 		this.maxRange = maxR;
+		this.peakRange = peakR;
 		this.objectSize = objectSize;
 		this.totalValue = totV;
 		this.maxValue = maxV;

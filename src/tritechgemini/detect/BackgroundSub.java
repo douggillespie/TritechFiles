@@ -76,6 +76,9 @@ public class BackgroundSub {
 	
 	public int[] calcBackground(byte[] data, int nBearing, int nRange) {
 		checkArray(nBearing, nRange);
+		if (data == null) {
+			return background;
+		}
 		for (int i = 0; i < data.length; i++) {
 			background[i] += ((Byte.toUnsignedInt(data[i])*internalScale-background[i]) / updateConst);
 		}
