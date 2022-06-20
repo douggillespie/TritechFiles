@@ -370,13 +370,29 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	@Override
 	public int streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
 
+		/**
+		 * Stream the catalogue to the stream observer, but at the same time, build and store a 
+		 * serialized catalogue. This is because our work flow will generally involve first
+		 * streaming everything through a detector, then wanting random access to the files as
+		 * we go through to confirm detections, so may as well do the painful step of making 
+		 * the index files while we're streaming ...
+		 * Note that the stored catalogue will use clones of the original records so we can 
+		 * delete the raw data without messing data going for processing which may be 
+		 * waiting in a thread queue. 
+		 */
+		ArrayList<GLFImageRecord> catalogRecords = getImageRecords();
+		if (catalogRecords == null) {
+			catalogRecords = new ArrayList<>();
+			setImageRecords(catalogRecords);
+		}
+		
 		continueStream = true;
 
 		InputStream inputStream;
 		try {
 //			inputStream = findDataInputStream();
 			// no point with dealing with the random access methods here so just use normal
-			// zipped reader
+			// zipped reader. Should have same byte count for stored catalogue in either case. 
 			inputStream = openZippedinputStream();
 		} catch (IOException e1) {
 			throw new CatalogException(e1.getMessage());
@@ -413,6 +429,15 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				if (ok == 0) {
 //					imageRecords.add(glfImage);
 					streamObserver.newImageRecord(glfImage);
+					/**
+					 * And make a copy for the stored catalogue, because we're about to delete the raw data and 
+					 * don't want it to dissapear from glfImage while it's waiting in a queue for a processing
+					 * running in a separate thread. 
+					 */
+					GLFImageRecord clonedRecord = glfImage.clone();
+					clonedRecord.freeImageData();
+					catalogRecords.add(clonedRecord);
+					
 					nRec++;
 				}
 				break;
@@ -424,6 +449,10 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 		}
 
+		// and save the catalogue of clones ...
+		analyseCatalog();
+		writeSerializedCatalog(getFilePath(), this);
+		
 		return nRec;
 	}
 

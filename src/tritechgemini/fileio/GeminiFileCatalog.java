@@ -182,7 +182,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	/**
 	 * Get the number of sonars, their id's and types, etc. 
 	 */
-	private void analyseCatalog() {
+	protected void analyseCatalog() {
 		if (imageRecords == null) {
 			return;
 		}
@@ -532,6 +532,22 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 			}
 			record.freeImageData();
 		}
+	}
+
+
+
+	/**
+	 * @return the imageRecords
+	 */
+	public ArrayList<RecordClass> getImageRecords() {
+		return imageRecords;
+	}
+
+	/**
+	 * @param imageRecords the imageRecords to set
+	 */
+	protected void setImageRecords(ArrayList<RecordClass> imageRecords) {
+		this.imageRecords = imageRecords;
 	}
 	
 	
