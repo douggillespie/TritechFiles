@@ -361,15 +361,17 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		return rec;
 	}
 
+	private static int days = 3652;
+	private static int secsPerDay = 3600*24;
+	private static double cDateOffset = days*secsPerDay;
 	public static long cDateToMillis(double cDate) {
 		/*
 		 * cDate is ref's to 1980 in secs, Java in millis from 1970.
 		 * Also note that the dates are returned in local time, so it's going to be necessary
 		 * to correct for time zone at some point.  
 		 */
-		int days = 3652;
-		int secsPerDay = 3600*24;
-		long ms = (long) ((cDate+days*secsPerDay)*1000.);
+//		long ms = (long) ((cDate+days*secsPerDay)*1000.);
+		long ms = (long) ((cDate+cDateOffset)*1000.);
 		/**
 		 * This can only go horribly wrong when the clocks go back. Will have to wait until the
 		 * autumn and see what happens. I don't see though how we're not going to have overlapping
@@ -440,11 +442,15 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 				continue;
 			}
 			long t = aRec.getRecordTime()-timeMillis;
-			if (Math.abs(t) < Math.abs(dT)) {
+			if (Math.abs(t) < dT) {
 				bestRec = aRec;
-				dT = t;
+				dT = Math.abs(t);
 			}
 			if (t > 0) {
+				/*
+				 *  this means we've looked at at least one record after the
+				 *  time we want, so no need to look any further. 
+				 */				
 				break;
 			}
 		}
