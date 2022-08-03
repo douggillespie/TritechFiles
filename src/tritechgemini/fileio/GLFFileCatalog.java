@@ -380,11 +380,17 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		 * delete the raw data without messing data going for processing which may be 
 		 * waiting in a thread queue. 
 		 */
+		boolean newCatalog = false;
 		ArrayList<GLFImageRecord> catalogRecords = getImageRecords();
-		if (catalogRecords == null) {
+//		if (catalogRecords == null) {
+		/*
+		 *  mess up whereby it was adding records to the catalog multiple times if files
+		 *  were reprocessed, so always make a new catalog now ! 
+		 */
 			catalogRecords = new ArrayList<>();
 			setImageRecords(catalogRecords);
-		}
+			newCatalog = true;
+//		}
 		
 		continueStream = true;
 
@@ -436,7 +442,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 					 */
 					GLFImageRecord clonedRecord = glfImage.clone();
 					clonedRecord.freeImageData();
-					catalogRecords.add(clonedRecord);
+					if (newCatalog) {
+						catalogRecords.add(clonedRecord);
+					}
 					
 					nRec++;
 				}
@@ -450,8 +458,10 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		}
 
 		// and save the catalogue of clones ...
-		analyseCatalog();
-		writeSerializedCatalog(getFilePath(), this);
+		if (newCatalog) {
+			analyseCatalog();
+			writeSerializedCatalog(getFilePath(), this);
+		}
 		
 		return nRec;
 	}

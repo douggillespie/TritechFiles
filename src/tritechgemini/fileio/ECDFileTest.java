@@ -26,7 +26,8 @@ public class ECDFileTest implements CatalogStreamObserver {
 //		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220521\\glf\\log_2022-05-21-161648.glf";
 	// corrupt	
 //	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\Corruptfile\\data_2022-05-22-031938.ecd";
-	private static final String ecdFile = "E:\\GeminiData\\20220523\\data_2022-05-23-062933.ecd";
+//	private static final String ecdFile = "E:\\GeminiData\\20220523\\data_2022-05-23-062933.ecd";
+	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\BadGLFFiles\\log_2022-07-21-094511.glf";
 //	not corrupt
 //	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220521\\ecd\\data_2022-05-21-185110.ecd";
 //		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220524\\log_2022-05-24-114346.glf";

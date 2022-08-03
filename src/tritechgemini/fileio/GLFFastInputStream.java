@@ -4,8 +4,11 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
@@ -19,32 +22,14 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	private transient LittleEndianDataInputStream glfInputStream;
 	private transient CountingInputStream countingInputStream;
 
-	boolean isOk;
+	private GLFFastData glfFastData;
 
-	private String cfgFileName, datFileName, xmlFileName;
-	private long cfgFilePos, datFilePos, xmlFilePos;
-	private long cfgFileLen, datFileLen, xmlFileLen;
+	protected boolean isOk;
 	
 	private File glfFile;
-	
-	/**
-	 * Start position of every block in the data file. Note that this
-	 * is the data position, i.e. the position in the unpacked dat file. The 
-	 * actual position in the file will always be (5*(blockNo+1)) further into 
-	 * the actual input file plus the file start offset datFilePos. 
-	 */
-	private ArrayList<GLFFastBlockData> datBlockStarts = new ArrayList<GLFFastBlockData>();
-	
+		
 	private int currentLoadedBlock = 0;
 	
-//	/**
-//	 * total length of each complete block
-//	 */
-//	private static final int BLOCKLENGTH = 65536;
-//	/**
-//	 * length of the actual data in each complete block. 
-//	 */
-//	private static final int BLOCKDATALENGTH = 65531;
 	/**
 	 * length of header on each block.
 	 */
@@ -84,8 +69,75 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	public GLFFastInputStream(File glfFile) throws FileNotFoundException {
 		super();
 		this.glfFile = glfFile;
+		
 		openInputStream();
-		isOk = checkGlfInput();
+		
+		/**
+		 * New system 2022-08-03. Keep all the important index
+		 * information in a separate serializable object and write / load
+		 * from file after it's first generates to speed this up. With SSD
+		 * laptop this speeds the indexing of the glf file from 3s to about 100ms
+		 * so makes scrolling a lot smoother when jumping to next file. 
+		 */
+//		long t1 = System.nanoTime();
+//		boolean makeNew = false;
+		glfFastData = loadGlfFastData();
+		isOk = (glfFastData != null);
+		if (glfFastData == null) {
+			isOk = createGlfFastInput();
+			saveGlfFastData(glfFastData);
+//			makeNew = true;
+		}
+//		long t2 = System.nanoTime();
+//		if (makeNew) {
+//			System.out.printf("GLF zip file structure analysed in %3.3fms\n", (t2-t1)/1000000.);
+//		}
+//		else {
+//			System.out.printf("GLF structure reloaded in %3.3fms\n", (t2-t1)/1000000.);
+//		}
+	}
+
+	private GLFFastData loadGlfFastData() {
+		File fastFile = getGlfFastFile(glfFile);
+		GLFFastData fastData = null;
+		if (fastFile.exists() == false) {
+			return null;
+		}
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fastFile));
+			fastData = (GLFFastData) ois.readObject();
+			ois.close();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println("Error reading fast glf index file " + fastFile.toString());
+		}
+		return fastData;
+	}
+
+	private void saveGlfFastData(GLFFastData glfFastData) {
+		File fastFile = getGlfFastFile(glfFile);
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fastFile));
+			oos.writeObject(glfFastData);
+			oos.close();
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+	}
+	
+	/**
+	 * Get a name for a fast glf data file. Basicaly the glf file with .ind on the end
+	 * @param glfFile
+	 * @return
+	 */
+	private File getGlfFastFile(File glfFile) {
+		if (glfFile == null) {
+			return null;
+		}
+		String name = glfFile.getAbsolutePath() + ".ind";
+		return new File(name);
 	}
 
 	private void openInputStream() throws FileNotFoundException {
@@ -102,8 +154,9 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	 * @param inputStream
 	 * @return true if all OK.
 	 */
-	private boolean checkGlfInput() {
+	private boolean createGlfFastInput() {
 		int foundFiles = 0;
+		glfFastData = new GLFFastData();
 		try {
 			while (true) {
 				int sig = glfInputStream.readInt();
@@ -125,19 +178,19 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 				glfInputStream.read(nameData);
 				String fileName = new String(nameData);
 				if (fileName.endsWith(".cfg")) {
-					cfgFileName = fileName;
-					cfgFilePos = countingInputStream.getPos();
-					cfgFileLen = uSize;
+					glfFastData.cfgFileName = fileName;
+					glfFastData.cfgFilePos = countingInputStream.getPos();
+					glfFastData.cfgFileLen = uSize;
 				}
 				else if (fileName.endsWith(".dat")) {
-					datFileName = fileName;
-					datFilePos = countingInputStream.getPos();
-					datFileLen = uSize;
+					glfFastData.datFileName = fileName;
+					glfFastData.datFilePos = countingInputStream.getPos();
+					glfFastData.datFileLen = uSize;
 				}
 				else if (fileName.endsWith(".xml")) {
-					xmlFileName = fileName;
-					xmlFilePos = countingInputStream.getPos();
-					xmlFileLen = uSize;
+					glfFastData.xmlFileName = fileName;
+					glfFastData.xmlFilePos = countingInputStream.getPos();
+					glfFastData.xmlFileLen = uSize;
 				}
 				else {
 					return false;
@@ -163,7 +216,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 //						System.out.printf("irregular block length %d at byte %d\n", blockSize, bCount);
 //					}
 					if (foundFiles == 1) {
-						datBlockStarts.add(new GLFFastBlockData(totalBlockBytes, blockSize, bCount));
+						glfFastData.datBlockStarts.add(new GLFFastBlockData(totalBlockBytes, blockSize, bCount));
 					}
 					int spares = glfInputStream.readUnsignedShort();
 					totalBlockBytes += blockSize;
@@ -272,14 +325,14 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		 */
 		int whichBlock = currentLoadedBlock+1;
 		long skipInUnderlying = 0;
-		while (whichBlock < datBlockStarts.size()-1) {
-			if (datBlockStarts.get(whichBlock).getVirtualEndByte() >= currentAbsPos) {
+		while (whichBlock < glfFastData.datBlockStarts.size()-1) {
+			if (glfFastData.datBlockStarts.get(whichBlock).getVirtualEndByte() >= currentAbsPos) {
 				// where we want to be will be within that block, so 
 				// no skipping in the underlying data.
 				break;
 			}
 			else {
-				skipInUnderlying += datBlockStarts.get(whichBlock).getThisBlockBytes()+BLOCKHEADLENGTH;
+				skipInUnderlying += glfFastData.datBlockStarts.get(whichBlock).getThisBlockBytes()+BLOCKHEADLENGTH;
 				whichBlock++;
 			}
 		}
@@ -303,7 +356,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 
 	@Override
 	public int available() throws IOException {
-		return (int) (datFileLen-currentAbsPos);
+		return (int) (glfFastData.datFileLen-currentAbsPos);
 	}
 
 	@Override
@@ -322,7 +375,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 			glfInputStream.close();
 		}
 		openInputStream();
-		glfInputStream.skip(datFilePos);
+		glfInputStream.skip(glfFastData.datFilePos);
 		blockStartByte = blockEndByte = 0;
 		currentBlockLength = 0;
 		currentAbsPos = 0;
@@ -337,7 +390,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	private boolean loadNextBlock(int blockNumber) throws IOException {
 		loadMonitor.start();
 		currentLoadedBlock = blockNumber;
-		blockStartByte = datBlockStarts.get(blockNumber).getVirtualStartByte();
+		blockStartByte = glfFastData.datBlockStarts.get(blockNumber).getVirtualStartByte();
 		int bMap = glfInputStream.readUnsignedByte();
 //		boolean lastBlock = ((bMap & 0x1) == 0x1);
 		boolean isRaw = ((bMap & 0x6) == 0);
