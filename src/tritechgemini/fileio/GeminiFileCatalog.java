@@ -1,5 +1,6 @@
 package tritechgemini.fileio;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -105,7 +106,10 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		}
 		Object obj = null;
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(catFile));
+//			long t1 = System.nanoTime();
+			ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(catFile)));
+//			long t2 = System.nanoTime();
+//			System.out.printf("Catalog load time %3.1us\n", (t2-t1)/1000.);
 			obj = ois.readObject();
 			ois.close();
 		} catch (IOException e) {

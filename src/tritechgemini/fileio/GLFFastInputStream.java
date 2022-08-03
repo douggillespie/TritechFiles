@@ -76,7 +76,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		 * New system 2022-08-03. Keep all the important index
 		 * information in a separate serializable object and write / load
 		 * from file after it's first generates to speed this up. With SSD
-		 * laptop this speeds the indexing of the glf file from 3s to about 100ms
+		 * laptop this speeds the indexing of the glf file from 3s to about 15ms
 		 * so makes scrolling a lot smoother when jumping to next file. 
 		 */
 //		long t1 = System.nanoTime();
@@ -104,7 +104,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 			return null;
 		}
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fastFile));
+			ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fastFile)));
 			fastData = (GLFFastData) ois.readObject();
 			ois.close();
 		} catch (Exception e) {
