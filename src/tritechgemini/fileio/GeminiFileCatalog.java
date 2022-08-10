@@ -1,6 +1,7 @@
 package tritechgemini.fileio;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -134,7 +135,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	public static boolean writeSerializedCatalog(String filePath, GeminiFileCatalog fileCatalog) {
 		File catFile = new File(getCatalogName(filePath));
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(catFile));
+			ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(catFile)));
 			oos.writeObject(fileCatalog);
 			oos.close();
 		} catch (IOException e) {
@@ -146,7 +147,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	
 	/**
 	 * Get a name for a serialized catalog file. this is just the normal file 
-	 * name with .cat on the end. 
+	 * name with .x on the end. 
 	 * @param dataFileName Data file name. 
 	 * @return name of catalog file.
 	 */

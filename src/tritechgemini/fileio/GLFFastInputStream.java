@@ -1,6 +1,7 @@
 package tritechgemini.fileio;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -117,7 +118,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	private void saveGlfFastData(GLFFastData glfFastData) {
 		File fastFile = getGlfFastFile(glfFile);
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fastFile));
+			ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(fastFile)));
 			oos.writeObject(glfFastData);
 			oos.close();
 		}
@@ -132,7 +133,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	 * @param glfFile
 	 * @return
 	 */
-	private File getGlfFastFile(File glfFile) {
+	public static File getGlfFastFile(File glfFile) {
 		if (glfFile == null) {
 			return null;
 		}
