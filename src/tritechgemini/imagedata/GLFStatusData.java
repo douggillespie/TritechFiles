@@ -251,6 +251,32 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 		
 		return true;
 	}
+	
+	/**
+	 * Get the link type. 
+	 * @return 0 = Ethernet, 1 = VDSL
+	 */
+	public int getLinkType() {
+		return m_linkType & 0x1;
+	}
+	
+	/**
+	 * Get the link speed which should be 10,100 or 1000Mbps 
+	 * @return link speed in Mbps
+	 */
+	public int getLinkSpeed() {
+		int spd = (m_linkType >> 8) & 0x3;
+		return (int) Math.pow(10, spd+1);
+	}
+	
+	/**
+	 * Get the 720im/Micron linkType
+	 * @return 0 = no link (broadcast, 1 = Ethernet, 2 = Serial RS232, 3 = RS485  
+	 */
+	public int getMicronLinkType() {
+		int typ = (m_linkType >> 10) & 0x3;
+		return typ;
+	}
 
 	public GLFStatusData(GLFGenericHeader genericHeader) {
 		super(genericHeader);

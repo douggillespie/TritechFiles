@@ -116,5 +116,33 @@ public class GLFImageRecord extends GeminiImageRecord implements Serializable {
 	public int getGain() {
 		return m_sPercentGain;
 	}
+	
+	/**
+	 * Is HF - 1200 only I think. 
+	 * @return true if HF - means 1.2MHz.
+	 */
+	public boolean isHF() {
+		return ((m_usPingFlags & 256) != 0);
+	}
+	
+	/**
+	 * Get the device type as a string. 
+	 * @return
+	 */
+	public String getDeviceType() {
+		switch (m_ucPlatform) {
+		case 0:
+			return "none";
+		case 1:
+			return "720is";
+		case 2:
+			return "720ik";
+		case 3:
+			return "720im";
+		case 4:
+			return "1200ik";
+		}
+		return null;
+	}
 
 }

@@ -83,6 +83,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				case 3: // status
 					GLFStatusData statusData = new GLFStatusData(header);
 					statusData.read(dis, false);
+					break;
+				default:
+					System.out.println("Unknown record type in file " + this.getFilePath());
 				}
 
 			}
@@ -264,6 +267,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			glfImage.m_sPercentGain = dis.readUnsignedShort();
 			glfImage.m_fChirp = dis.readUnsignedByte();
 			glfImage.m_ucSonartype = dis.readUnsignedByte();
+			/*
+			 * none=0, 720is=1, 720ik=2, 720im= Micron Gemini = 3, 1200ik=4
+			 */
 			glfImage.m_ucPlatform = dis.readUnsignedByte();
 			glfImage.oneSpare = dis.readByte();
 			glfImage.dede = dis.readUnsignedShort();
@@ -469,6 +475,14 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	@Override
 	public void stopCatalogStream() {
 		continueStream = false;
+	}
+
+	@Override
+	protected void checkDeserialisedCatalog(String filePath) {
+		if (fastInput != null) {
+//			fastInput.setGlfFile(new File(filePath));
+			fastInput = null;
+		}
 	}
 
 }

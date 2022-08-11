@@ -68,6 +68,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		GeminiFileCatalog exCatalog = readSerializedCatalog(filePath);
 //		exCatalog = null;
 		if (exCatalog != null) {
+			exCatalog.checkDeserialisedCatalog(filePath);
 			// may be on a different drive, so update this critical information.
 			exCatalog.filePath = filePath;
 			return exCatalog;
@@ -95,6 +96,10 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		return fileCatalog;
 	}
 	
+	protected abstract void checkDeserialisedCatalog(String filePath2);
+
+
+
 	/**
 	 * Read a Gemini file catalogue record for the given data file
 	 * @param filePath path of data (ecd or glf) file

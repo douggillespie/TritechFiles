@@ -401,4 +401,10 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		continueStream = false;
 	}
 
+	@Override
+	protected void checkDeserialisedCatalog(String filePath2) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

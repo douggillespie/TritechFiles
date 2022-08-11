@@ -66,6 +66,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	 * 
 	 */
 	private long currentAbsPos;
+	
 
 	public GLFFastInputStream(File glfFile) throws FileNotFoundException {
 		super();
@@ -155,7 +156,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	 * @param inputStream
 	 * @return true if all OK.
 	 */
-	private boolean createGlfFastInput() {
+	private synchronized boolean createGlfFastInput() {
 		int foundFiles = 0;
 		glfFastData = new GLFFastData();
 		try {
@@ -306,7 +307,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 //	}
 
 	@Override
-	public long skip(long n) throws IOException {
+	public synchronized long skip(long n) throws IOException {
 		skipMonitor.start();
 //		if (skipMonitor.getProcessCalls() == 1295) {
 //			System.out.println("All about to go horribly wrong");
@@ -317,6 +318,9 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		if (n < remaining) {
 			skipMonitor.stop();
 			return n;
+		}
+		if (glfFastData == null) {
+			return 0;
 		}
 		/*
 		 * Otherwise we need to go through the blocks until currentAbsPos >= a block start
@@ -356,7 +360,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 //	}
 
 	@Override
-	public int available() throws IOException {
+	public synchronized int available() throws IOException {
 		return (int) (glfFastData.datFileLen-currentAbsPos);
 	}
 
@@ -371,11 +375,15 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		return super.toString();
 	}
 
-	public void resetDataStream() throws IOException {
+	public synchronized void resetDataStream() throws IOException {
 		if (glfInputStream != null) {
 			glfInputStream.close();
 		}
 		openInputStream();
+		if (glfInputStream == null || glfFastData == null) {
+			// not sure how glfFastData can be null ? 
+			return;
+		}
 		glfInputStream.skip(glfFastData.datFilePos);
 		blockStartByte = blockEndByte = 0;
 		currentBlockLength = 0;
@@ -388,7 +396,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	 * @return true if successful. 
 	 * @throws IOException
 	 */
-	private boolean loadNextBlock(int blockNumber) throws IOException {
+	private synchronized boolean loadNextBlock(int blockNumber) throws IOException {
 		loadMonitor.start();
 		currentLoadedBlock = blockNumber;
 		blockStartByte = glfFastData.datBlockStarts.get(blockNumber).getVirtualStartByte();
@@ -413,6 +421,20 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		blockEndByte = blockStartByte + read;
 		loadMonitor.stop();
 		return read == currentBlockLength;
+	}
+
+	/**
+	 * @return the glfFile
+	 */
+	public File getGlfFile() {
+		return glfFile;
+	}
+
+	/**
+	 * @param glfFile the glfFile to set
+	 */
+	public void setGlfFile(File glfFile) {
+		this.glfFile = glfFile;
 	}
 	
 	
