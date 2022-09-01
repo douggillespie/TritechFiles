@@ -232,6 +232,62 @@ public class MultiFileCatalog implements Serializable {
 		}
 		return null;
 	}
+
+	/**
+	 * Used when scrolling by record number. Allows to take the current time, then move by a small number 
+	 * of records forwards or backwards. 
+	 * @param sonarID
+	 * @param timeMillis
+	 * @param recordOffest
+	 * @return relative image record in list. 
+	 */
+	public GeminiImageRecordI findRelativeRecord(GeminiImageRecordI baseRecord, int recordOffset) {
+		if (baseRecord == null) {
+			return null;
+		}
+		int currentCatalogIndex = -1;
+		long timeMillis = baseRecord.getRecordTime();
+		for (int i = 0; i < catalogList.size(); i++) {
+			GeminiFileCatalog catalog = catalogList.get(i);
+			long firstTime = catalog.getFirstRecordTime() ;
+			long lastTime = catalog.getLastRecordTime() ;
+			
+			if (timeMillis < firstTime ) {
+				continue;
+			}
+			if (timeMillis > lastTime) {
+				continue;
+			}
+			currentCatalogIndex = i;
+			break;
+		}
+		if (currentCatalogIndex < 0) {
+			return null;
+		}
+		GeminiFileCatalog currentCatalog = catalogList.get(currentCatalogIndex);
+		int currInd = currentCatalog.getRecordIndex(baseRecord);
+		if (currInd < 0) {
+			return null;
+		}
+		currInd += recordOffset;
+		while (currInd < 0) {
+			currentCatalogIndex--;
+			if (currentCatalogIndex < 0) {
+				return null;
+			}
+			currentCatalog = catalogList.get(currentCatalogIndex);
+			currInd += currentCatalog.getNumRecords();
+		}
+		while (currInd >= currentCatalog.getNumRecords()) {
+			currInd -= currentCatalog.getNumRecords();
+			currentCatalogIndex++;
+			if (currentCatalogIndex >= catalogList.size()) {
+				return null;
+			}
+			currentCatalog = catalogList.get(currentCatalogIndex);
+		}
+		return currentCatalog.getRecordByIndex(currInd);
+	}
 	
 	/**
 	 * Get the ID's of the sonars in this catalogue. 

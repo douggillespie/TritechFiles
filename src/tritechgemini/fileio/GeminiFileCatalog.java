@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.GeminiRecordI;
 
 /**
  * Catalog of information that's in a single Gemini ECD of GLF file. 
@@ -459,6 +460,49 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 			}
 		}
 		return bestRec;
+	}
+	
+	/**
+	 * Used when scrolling by record number. Allows to take the current time, then move by a small number 
+	 * of records forwards or backwards. 
+	 * @param sonarID
+	 * @param timeMillis
+	 * @param recordOffest
+	 * @return relative image record in list. 
+	 */
+	public GeminiImageRecordI findRelativeRecord(GeminiImageRecordI baseRecord, int recordOffset) {
+		long dT = Long.MAX_VALUE;
+		RecordClass bestRec = null;
+		if (baseRecord == null) {
+			return null;
+		}
+		int currInd = imageRecords.indexOf(baseRecord);
+		currInd += recordOffset;
+		currInd = Math.max(currInd, 0);
+		currInd = Math.min(currInd, imageRecords.size()-1);
+		return imageRecords.get(currInd);
+	}
+	
+	/*
+	 * Get the index of a record within the catalog. 
+	 */
+	public int getRecordIndex(GeminiRecordI currentRecord) {
+		if (currentRecord == null) {
+			return -1;
+		}
+		return imageRecords.indexOf(currentRecord);
+	}
+	
+	/**
+	 * Get record for given index. 
+	 * @param index
+	 * @return record index (or -1 if not found)
+	 */
+	public GeminiImageRecordI getRecordByIndex(int index) {
+		if (index < 0 || index >= imageRecords.size()) {
+			return null;
+		}
+		return imageRecords.get(index);
 	}
 	
 	public boolean timedLoadFullRecord(RecordClass aRecord) throws IOException {
