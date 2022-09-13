@@ -70,7 +70,6 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 		return imageData;
 	}
 	
-	
 	/**
 	 * Set the uncompressed image data. 
 	 * @param imageData
@@ -79,7 +78,26 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 		this.imageData = imageData;
 	}
 
-
+	/**
+	 * Get the decompressed image data in an array of shorts
+	 * this allows correction of problems caused by Java not understanding
+	 * unsigned values, so what should be large values (>=128) are negative. 
+	 * <br>This will return an array of values between 0 and 255
+	 * @return Decompressed raw data in short format. 
+	 */
+	public short[] getShortImageData() {
+		byte[] byteData = getImageData();
+		if (byteData == null) {
+			return null;
+		}
+		int n = byteData.length;
+		short[] shortData = new short[n];
+		for (int i = 0; i < n; i++) {
+			shortData[i] = (short) Byte.toUnsignedInt(byteData[i]);
+		}
+		return shortData;
+	}
+	
 	/**
 	 * 
 	 * @return the number of beams

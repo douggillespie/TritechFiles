@@ -17,6 +17,15 @@ public interface GeminiImageRecordI extends GeminiRecordI, Cloneable, Serializab
 	public void setImageData(byte[] imageData);
 	
 	/**
+	 * Get the decompressed image data in an array of shorts
+	 * this allows correction of problems caused by Java not understanding
+	 * unsigned values, so what should be large values (>=128) are negative. 
+	 * <br>This will return an array of values between 0 and 255
+	 * @return Decompressed raw data in short format. 
+	 */
+	public short[] getShortImageData();
+	
+	/**
 	 * 
 	 * @return List of beam angles in radians. 
 	 */
