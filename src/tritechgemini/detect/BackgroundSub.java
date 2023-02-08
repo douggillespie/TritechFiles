@@ -90,7 +90,7 @@ public class BackgroundSub {
 		 * If there was no background, or if the number of bearing bins has changed at all
 		 * or if the number of range bins has changed by > 2, then total rebuild. 
 		 */
-		if (background == null || backgroundNBearing != nBearing || Math.abs(nRange-backgroundNRange) > 2) {
+		if (background == null || backgroundNBearing != nBearing || Math.abs(nRange-backgroundNRange) > 20) {
 			background = new int[nBearing*nRange];
 			backgroundNBearing = nBearing;
 			backgroundNRange = nRange;
