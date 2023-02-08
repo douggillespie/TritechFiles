@@ -335,7 +335,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 //			return fastInput;
 //		}
 
-		String filePath = getFilePath().toLowerCase();
+		String filePath = getFilePath();//.toLowerCase();
 		File file = new File(filePath);
 		if (file.exists() == false) {
 			return null;
@@ -358,7 +358,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	private InputStream openZippedinputStream() throws IOException {
-		String filePath = getFilePath().toLowerCase();
+		String filePath = getFilePath();//.toLowerCase();
 		File file = new File(filePath);
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
 		ZipEntry zipEntry = zis.getNextEntry();

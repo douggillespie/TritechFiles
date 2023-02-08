@@ -48,7 +48,6 @@ public class GLFImageRecord extends GeminiImageRecord implements Serializable {
 
 	@Override
 	public double getMaxRange() {
-		// TODO Auto-generated method stub
 		return endRange * m_sosAtXd/2. / m_UiModulationFrequency;
 	}
 

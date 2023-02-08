@@ -9,7 +9,7 @@ package tritechgemini.imagedata;
  * @author dg50
  *
  */
-public class FanImageData {
+public class FanImageData implements Cloneable {
 
 	private short[][] imageValues;
 	
@@ -56,5 +56,25 @@ public class FanImageData {
 	 */
 	public GeminiImageRecordI getGeminiRecord() {
 		return geminiRecord;
+	}
+
+	/**
+	 * Deep hard clone of the image data
+	 */
+	@Override
+	public FanImageData clone() {
+		try {
+			FanImageData cloned = (FanImageData) super.clone();
+			// deep hard clone
+			cloned.imageValues = cloned.imageValues.clone();
+			int n = cloned.imageValues.length;
+			for (int i = 0; i < n; i++) {
+				cloned.imageValues[i] = cloned.imageValues[i].clone();
+			}
+			return cloned;
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return this;
+		}
 	}
 }

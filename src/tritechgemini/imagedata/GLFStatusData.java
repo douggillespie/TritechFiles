@@ -17,6 +17,11 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	/*
+	 * bit in m_shutdownStatus indicating out of water
+	 */
+	private static final int OUT_OF_WATER = 0x4;
+	
 	public short m_bfVersion;
 	public short m_daVer;
 	public short m_deviceID;
@@ -280,6 +285,22 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 
 	public GLFStatusData(GLFGenericHeader genericHeader) {
 		super(genericHeader);
+	}
+	
+	/**
+	 * Out of water flag (0x4) in m_shutdownStatus is set.
+	 * @return true if sonar is flagged as out of water. 
+	 */
+	public boolean isOutOfWater() {
+		return ((m_shutdownStatus & OUT_OF_WATER) != 0);
+	}
+
+	@Override
+	public String toString() {
+//		String str = String.format("Flags 0x%X 0x%X Temps 1:15: %3.1f, %3.1f, %3.1f, %3.1f, %3.1f, %3.1f, %3.1f, %3.1f, %3.1f", m_flags, m_shutdownStatus,
+//				m_vgaT1, m_vgaT2, m_vgaT3, m_vgaT4, m_psuT, m_dieT, m_afe0TopTemp, m_afe0BotTemp, m_afe1TopTemp);
+		String str = String.format("Flags flags: 0x%X shutdownsttauts: 0x%X, 0x%X, %d ", m_flags, m_shutdownStatus, m_xdSelected, (int) reserved);
+		return str;	
 	}
 
 
