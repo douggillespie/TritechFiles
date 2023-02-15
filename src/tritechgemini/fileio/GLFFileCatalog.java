@@ -2,6 +2,7 @@ package tritechgemini.fileio;
 
 import java.io.BufferedInputStream;
 import java.io.DataInput;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -168,7 +170,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		try {
 			// end of standard header section.
 
-			int imageRec = dis.readUnsignedShort();
+			int imageRec = dis.readUnsignedShort(); // reading a value of 1.
 			int efef = dis.readUnsignedShort();
 			if (efef != 0xEFEF) {
 				String err = String.format("Unrecognised (a) byte pattern ox%X  in file\n", efef);
@@ -286,6 +288,86 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	/**
+	 * Write a GLF record to the data output stream. This should be in the same
+	 * format as the data were read in. 
+	 * @param imageRecord GLF image record
+	 * @param dos Data output stream. Should be LittleEndien
+	 * @return number of bytes written. 
+	 */
+	public void writeGLFReecord(GLFImageRecord glfImage, LittleEndianDataOutputStream dos) throws IOException {
+
+		dos.writeShort(1);
+		dos.writeShort(0xEFEF);
+//		int efef = dis.readUnsignedShort();
+
+		dos.writeShort(glfImage.imageVersion);
+//		glfImage.imageVersion = dis.readUnsignedShort();
+		dos.writeInt(glfImage.startRange);
+//		glfImage.startRange = dis.readInt();
+		dos.writeInt(glfImage.endRange);
+//		glfImage.endRange = dis.readInt();
+		dos.writeShort(glfImage.rangeCompression);
+//		glfImage.rangeCompression = dis.readUnsignedShort();
+		dos.writeInt(glfImage.startBearing);
+//		glfImage.startBearing = dis.readInt();
+		dos.writeInt(glfImage.endBearing);
+//		glfImage.endBearing = dis.readInt();
+
+		if (glfImage.imageVersion == 3) {
+			// two extra bytes in imageVersion 3.
+			dos.writeShort(0);
+//			int fKnows = dis.readShort();
+		}
+		
+		/**
+		 * Zip the data and see how bit it us
+		 */
+		Deflater deflater = new Deflater();
+		byte[] imageRaw = glfImage.getImageData();
+		deflater.setInput(imageRaw);
+		byte[] zippedData = new byte[imageRaw.length];
+		int packedSize = deflater.deflate(zippedData);
+		
+		dos.writeInt(packedSize);
+//		glfImage.dataSize = dis.readInt();
+
+
+//		zippedDataSize += glfImage.dataSize;
+		dos.write(zippedData, 0, packedSize);
+//				dis.readFully(zippedData);
+		double[] bearings = glfImage.bearingTable;
+		for (int i = 0; i < bearings.length; i++) {
+			dos.writeDouble(bearings[i]);
+		}
+		dos.writeInt(glfImage.m_uiStateFlags);
+//		glfImage.m_uiStateFlags = dis.readInt();
+		dos.writeInt(glfImage.m_UiModulationFrequency);
+//		glfImage.m_UiModulationFrequency = dis.readInt();
+		dos.writeFloat(glfImage.m_fBeamFormAperture);
+//		glfImage.m_fBeamFormAperture = dis.readFloat();
+		dos.writeDouble(glfImage.m_dbTxtime);
+//		glfImage.m_dbTxtime = dis.readDouble();
+		dos.writeShort(glfImage.m_usPingFlags);
+//		glfImage.m_usPingFlags = dis.readUnsignedShort();
+		dos.writeFloat(glfImage.m_sosAtXd);
+//		glfImage.m_sosAtXd = dis.readFloat();
+		dos.writeShort(glfImage.m_sPercentGain);
+//		glfImage.m_sPercentGain = dis.readUnsignedShort();
+		dos.writeByte(glfImage.m_fChirp);
+//		glfImage.m_fChirp = dis.readUnsignedByte();
+		dos.writeByte(glfImage.m_ucSonartype);
+//		glfImage.m_ucSonartype = dis.readUnsignedByte();
+		/*
+		 * none=0, 720is=1, 720ik=2, 720im= Micron Gemini = 3, 1200ik=4
+		 */
+		dos.writeByte(glfImage.m_ucPlatform);
+//		glfImage.m_ucPlatform = dis.readUnsignedByte();
+		dos.writeByte(glfImage.oneSpare);
+//		glfImage.oneSpare = dis.readByte();
+		dos.writeShort(0xDEDE);
+//		glfImage.dede = dis.readUnsignedShort();
+	}
+	/**
 	 * Unzip the data which is in a standard zipped archive format.
 	 * 
 	 * @param zippedData zipped data
@@ -374,7 +456,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	@Override
-	public int streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
+	public boolean streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
 
 		/**
 		 * Stream the catalogue to the stream observer, but at the same time, build and store a 
@@ -427,7 +509,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 			GLFGenericHeader header = readNextHeader(dis);
 			if (header == null) {
-				break; // should be EOF.
+				break; // should be EOF. Exits loop at end of file. 
 			}
 			if (header.m_idChar != 42) {
 				System.out.printf("Bad header id character in GLF: %d\n", header.m_idChar);
@@ -440,7 +522,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				int ok = readGlfRecord(glfImage, dis, true);
 				if (ok == 0) {
 //					imageRecords.add(glfImage);
-					streamObserver.newImageRecord(glfImage);
+					continueStream = streamObserver.newImageRecord(glfImage);
+					
 					/**
 					 * And make a copy for the stored catalogue, because we're about to delete the raw data and 
 					 * don't want it to dissapear from glfImage while it's waiting in a queue for a processing
@@ -464,12 +547,14 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		}
 
 		// and save the catalogue of clones ...
-		if (newCatalog) {
+		// but only if streaming wasn't interrupted, in which case the catalog will be 
+		// incomplete and we don't want it. 
+		if (newCatalog && continueStream == true) {
 			analyseCatalog();
 			writeSerializedCatalog(getFilePath(), this);
 		}
 		
-		return nRec;
+		return continueStream;
 	}
 
 	@Override
@@ -484,5 +569,6 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			fastInput = null;
 		}
 	}
+
 
 }

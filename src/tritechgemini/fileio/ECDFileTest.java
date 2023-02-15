@@ -148,14 +148,15 @@ public class ECDFileTest implements CatalogStreamObserver {
 	}
 
 	@Override
-	public void newImageRecord(GeminiImageRecordI glfImage) {
+	public boolean newImageRecord(GeminiImageRecordI glfImage) {
 		System.out.println("Image record " + glfImage.getRecordNumber());
+		return true;
 	}
 
 	@Override
-	public void newStatusData(GLFStatusData statusData) {
+	public boolean newStatusData(GLFStatusData statusData) {
 		// TODO Auto-generated method stub
-		
+		return true;
 	}
 
 

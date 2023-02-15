@@ -28,7 +28,7 @@ public class LittleEndianDataOutputStream extends OutputStream implements DataOu
 	public void writeShort(int v) throws IOException {
 		// TODO Auto-generated method stub
 		short s = Short.reverseBytes((short) v);
-		o.writeShort(v);		
+		o.writeShort(s);		
 	}
 
 	@Override

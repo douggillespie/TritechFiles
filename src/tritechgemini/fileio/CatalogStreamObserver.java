@@ -5,8 +5,18 @@ import tritechgemini.imagedata.GeminiImageRecordI;
 
 public interface CatalogStreamObserver {
 
-	void newImageRecord(GeminiImageRecordI glfImage);
+	/**
+	 * Process a new image record. 
+	 * @param glfImage
+	 * @return true if process streaming should continue, false otherwise. 
+	 */
+	boolean newImageRecord(GeminiImageRecordI glfImage);
 
-	void newStatusData(GLFStatusData statusData);
+	/**
+	 * Process new status data
+	 * @param statusData
+	 * @return true if process streaming should continue, false otherwise. 
+	 */
+	boolean newStatusData(GLFStatusData statusData);
 
 }

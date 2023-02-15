@@ -1,6 +1,7 @@
 package tritechgemini.fileio;
 
 import java.io.DataInput;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,6 +44,22 @@ public class GLFGenericHeader implements Serializable {
 			throw (new CatalogException(ioEx.getMessage()));
 		}
 		return 21;
+	}
+	
+	/**
+	 * Write the header data to a data output stream.
+	 * @param dos This should always be a LittleEndian output stream. 
+	 * @throws IOException
+	 */
+	public void write(LittleEndianDataOutputStream dos) throws IOException {
+		dos.writeByte(m_idChar);
+		dos.writeByte(m_version);
+		dos.writeInt(m_length);
+		dos.writeDouble(m_timestamp);
+		dos.writeByte(m_dataType);
+		dos.writeShort(tm_deviceId);
+		dos.writeShort(m_node_ID);
+		dos.writeShort(m_spare);
 	}
 	
 	public GLFGenericHeader create(DataInput dis) throws CatalogException {

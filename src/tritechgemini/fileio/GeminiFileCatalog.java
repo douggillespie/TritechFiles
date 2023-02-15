@@ -246,7 +246,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @return number of records read. 
 	 * @throws CatalogException 
 	 */
-	abstract public int streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException;
+	abstract public boolean streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException;
 	
 	/**
 	 * Stop streaming the catalog.
@@ -263,7 +263,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		}
 		return imageRecords.get(0).getRecordTime();
 	}
-
+	
 	/**
 	 * Get the time of the last record
 	 * @return the time of the first record
