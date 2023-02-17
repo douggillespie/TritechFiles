@@ -12,6 +12,8 @@ import tritechgemini.imagedata.ECDImageRecord;
 
 public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 
+	private static final long serialVersionUID = 1L;
+
 	public static final int HEAD_VERSION = 0x0F0F;
 
 	public static final String HEAD_MSG = "Main Data";
