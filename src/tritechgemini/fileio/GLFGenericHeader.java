@@ -12,7 +12,13 @@ import java.io.Serializable;
  *
  */
 public class GLFGenericHeader implements Serializable {
-
+	
+	/**
+	 * SVID. Added May 2023. Wasn't in earlier versions which has caused
+	 * no end of trouble with serialised data maps. This  
+	 */
+	private static final long serialVersionUID = -5260692970291352675L;
+	
 	public byte m_idChar;
 	public int m_version;
 	public int m_length;
