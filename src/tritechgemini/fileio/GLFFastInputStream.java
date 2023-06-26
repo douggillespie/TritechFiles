@@ -250,7 +250,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		if (currentlyAvailable() <= 0) {
 			loadNextBlock(currentLoadedBlock+1);
 		}
-		int data = currentBlockData[(int) (currentAbsPos-blockStartByte)];
+		int data = Byte.toUnsignedInt(currentBlockData[(int) (currentAbsPos-blockStartByte)]);
 		currentAbsPos++;
 		return data;
 	}
