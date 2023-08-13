@@ -43,6 +43,8 @@ public class GLFCatalogCheck {
 		String glfCatPath = GeminiFileCatalog.getCatalogName(filePath);
 		File gemCatFile = new File(glfCatPath);
 		if (gemCatFile.exists() == false) {
+			added |= ADD_DATFILECATALOG;
+		}
 			try {
 				GeminiFileCatalog geminiCatalog = GeminiFileCatalog.getFileCatalog(filePath, true);
 			} catch (CatalogException e) {
@@ -50,8 +52,7 @@ public class GLFCatalogCheck {
 				return -1;
 			}
 //			geminiCatalog.freeAllImageData();
-			added |= ADD_DATFILECATALOG;
-		}
+		
 		
 		return added;
 	}
