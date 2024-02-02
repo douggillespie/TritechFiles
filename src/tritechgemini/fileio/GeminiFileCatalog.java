@@ -515,7 +515,24 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		if (currentRecord == null) {
 			return -1;
 		}
-		return imageRecords.indexOf(currentRecord);
+		int recordIndex = imageRecords.indexOf(currentRecord);
+		if (recordIndex >= 0) {
+			return recordIndex;
+		}
+		// search by time. 
+		long recordTime = currentRecord.getRecordTime();
+		for (int i = 0; i < imageRecords.size(); i++) {
+			if (imageRecords.get(i).getDeviceId() != currentRecord.getDeviceId()) {
+				continue;
+			}
+			if (imageRecords.get(i).getRecordTime() == recordTime) {
+				return i;
+			}
+			if (imageRecords.get(i).getRecordTime() > recordTime) {
+				break;
+			}
+		}
+		return -1;		
 	}
 
 	/**
