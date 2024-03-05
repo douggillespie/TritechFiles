@@ -13,6 +13,8 @@ public class BackgroundSub {
 
 	private int[] background;
 	
+	private int[] variance;
+	
 	/**
 	 * Store number of bins in background so we can handle resizing sensibly. 
 	 */
@@ -38,6 +40,10 @@ public class BackgroundSub {
 	 */
 	private int updateConst = 20; 
 
+	/**
+	 * Flag to say variance should also be calculated. 
+	 */
+	private boolean calculateVariance;
 	/**
 	 * Remove background from an image record. 
 	 * @param geminiRecord Image record
@@ -79,12 +85,37 @@ public class BackgroundSub {
 		if (data == null) {
 			return background;
 		}
-		for (int i = 0; i < data.length; i++) {
-			background[i] += ((Byte.toUnsignedInt(data[i])*internalScale-background[i]) / updateConst);
+		/*
+		 *  a bit daft having two loops here, but only want to
+		 *  convert the byte data once and don't want an if within
+		 *  every loop.  
+		 */
+		int dataPoint;
+		if (calculateVariance) {
+			int var;
+			for (int i = 0; i < data.length; i++) {
+				dataPoint = Byte.toUnsignedInt(data[i])*internalScale;
+				var = dataPoint-background[i];
+				var *= var;
+				background[i] += ((dataPoint-background[i]) / updateConst);
+				variance[i] += ((var-variance[i]) / updateConst);
+			}
+		}
+		else {
+			for (int i = 0; i < data.length; i++) {
+				dataPoint = Byte.toUnsignedInt(data[i])*internalScale;
+				background[i] += ((dataPoint-background[i]) / updateConst);
+			}
 		}
 		return background;
 	}
-	
+		
+	/**
+	 * Check array dimensions. Only calculate the variance if
+	 * flagged to do so in calculateVariance
+	 * @param nBearing
+	 * @param nRange
+	 */
 	private void checkArray(int nBearing, int nRange) {
 		/**
 		 * If there was no background, or if the number of bearing bins has changed at all
@@ -94,6 +125,9 @@ public class BackgroundSub {
 			background = new int[nBearing*nRange];
 			backgroundNBearing = nBearing;
 			backgroundNRange = nRange;
+		}
+		if (calculateVariance && variance == null && background != null) {
+			variance = new int[background.length];
 		}
 		// here we at least know we have the same number of bearings
 		if (nRange < backgroundNRange) {
@@ -112,11 +146,26 @@ public class BackgroundSub {
 					background[oldEnd + i* nBearing + b] = background[oldEnd - nBearing + b];
 				}
 			}
+			if (calculateVariance) {
+				variance = Arrays.copyOf(variance, nRange*nBearing);
+				for (int i = 0; i < extraRanges; i++) {
+					for (int b = 0; b < nBearing; b++) {
+						variance[oldEnd + i* nBearing + b] = variance[oldEnd - nBearing + b];
+					}
+				}
+			}
 			backgroundNBearing = nBearing;
 			backgroundNRange = nRange;
 		}
 	}
 	
+	/**
+	 * Get the current background. 
+	 * <br>Note that this 
+	 * may be greater in dimension than the current image
+	 * size, but should never be smaller
+	 * @return background converted to byte. 
+	 */
 	public byte[] getBackground() {
 		if (background == null) {
 			return null;
@@ -127,6 +176,62 @@ public class BackgroundSub {
 		}
 		return data;
 		
+	}
+	
+	/**
+	 * Get the variance of the data. 
+	 * <br>Note that this 
+	 * may be greater in dimension than the current image
+	 * size, but should never be smaller
+	 * @return variance
+	 */
+	public int[] getVariance() {
+		if (variance == null || calculateVariance == false) {
+			return null;
+		}
+		int scale = internalScale*internalScale;
+		int[] data = new int[variance.length];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = variance[i]/scale;
+		}
+		return data;
+	}
+	
+	/**
+	 * Get the standard deviation of the data in short integers.
+	 * <br>Note that this 
+	 * may be greater in dimension than the current image
+	 * size, but should never be smaller 
+	 * @return the standard deviation of the data. 
+	 */
+	public short[] getSTDI() {
+		if (variance == null || calculateVariance == false) {
+			return null;
+		}
+		short[] data = new short[variance.length];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (short) (Math.sqrt(variance[i])/internalScale);
+		}
+		return data;
+	}
+	/**
+	 * Get the standard deviation of the data.
+	 * <br>Note that this 
+	 * may be greater in dimension than the current image
+	 * size, but should never be smaller 
+	 * @return the standard deviation of the data. 
+	 */
+	public byte[] getSTD() {
+		if (variance == null || calculateVariance == false) {
+			return null;
+		}
+		int scale = internalScale*internalScale;
+		byte[] data = new byte[variance.length];
+		for (int i = 0; i < data.length; i++) {
+			int pt = (int) Math.sqrt(variance[i])/internalScale;
+			data[i] = (byte) (pt & 0xFF);
+		}
+		return data;
 	}
 
 	/**
@@ -164,5 +269,23 @@ public class BackgroundSub {
 	 */
 	public double getRemovalScale() {
 		return (double) internalScale / (double) removalFactor;
+	}
+
+	/**
+	 * Check whether or not calculating the variance (and STD) in the levels as
+	 * the means. Only worth doing this if you want these stats for your detector 
+	 * @return the calculateVariance
+	 */
+	public boolean isCalculateVariance() {
+		return calculateVariance;
+	}
+
+	/**
+	 * Say whether or not to calculate the variance (and STD) in the levels as
+	 * the means. Only worth doing this if you want these stats for your detector 
+	 * @param calculateVariance the calculateVariance to set
+	 */
+	public void setCalculateVariance(boolean calculateVariance) {
+		this.calculateVariance = calculateVariance;
 	}
 }

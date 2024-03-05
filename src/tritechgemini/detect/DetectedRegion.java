@@ -1,5 +1,6 @@
 package tritechgemini.detect;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -11,7 +12,7 @@ import tritechgemini.imagedata.GeminiImageRecordI;
  * @author dg50
  *
  */
-public class DetectedRegion extends RegionDetector {
+public class DetectedRegion extends TwoThresholdDetector {
 	
 	private GeminiImageRecordI geminiRecord;
 	
@@ -130,7 +131,7 @@ public class DetectedRegion extends RegionDetector {
 		this.totalValue = totV;
 		this.maxValue = maxV;
 		this.occupancy = occupancy;
-		this.nPoints = Math.round(totalValue/meanV);
+		this.nPoints = Math.round((totalValue+1)/(meanV+1));
 	}
 
 	/**
@@ -174,8 +175,9 @@ public class DetectedRegion extends RegionDetector {
 		}
 		nPoints = pointIndexes.size();
 		double[] bearingTable = geminiRecord.getBearingTable();
-		minBearing = bearingTable[minBearingBin];
-		maxBearing = bearingTable[maxBearingBin];
+		// reverse these since the tabel is backwards. 
+		maxBearing = bearingTable[minBearingBin];
+		minBearing = bearingTable[maxBearingBin];
 		minRange = geminiRecord.getMaxRange() * (double) minRangeBin / (double) geminiRecord.getnRange();
 		maxRange = geminiRecord.getMaxRange() * (double) maxRangeBin / (double) geminiRecord.getnRange();
 		peakRange = geminiRecord.getMaxRange() * (double) peakRangeBin / (double) geminiRecord.getnRange();
@@ -316,5 +318,49 @@ public class DetectedRegion extends RegionDetector {
 	private void calcPeakXY() {
 		peakX = peakRange * Math.sin(peakBearing);
 		peakY = peakRange * Math.cos(peakBearing);		
+	}
+	
+	public void merge(DetectedRegion other) {
+		minBearing = Math.min(minBearing, other.minBearing);
+		maxBearing = Math.max(maxBearing, other.maxBearing);
+		minRange = Math.min(minRange,  other.minRange);
+		maxRange = Math.max(maxRange, other.maxRange);
+		if (other.maxValue > this.maxValue) {
+			this.maxValue = other.maxValue;
+			this.peakBearing = other.peakBearing;
+			this.peakRange = other.peakRange;
+		}
+		this.totalValue = this.totalValue+other.totalValue;
+		double w1 = (double) this.nPoints / (double) (this.nPoints+other.nPoints);
+		double w2 = 1-w1;
+		this.occupancy = this.occupancy*w1 + other.occupancy*w2;
+	}
+	
+	/**
+	 * check to see if another region overlaps this one in bearing or range. 
+	 * @param other
+	 * @return true if overlapping
+	 */
+	public boolean overlaps(DetectedRegion other) {
+		if (this.getMinRange() > other.getMaxRange()) {
+			return false;
+		}
+		if (this.getMaxRange() < other.getMinRange()) {
+			return false;
+		}
+		if (this.getMinBearing() > other.getMaxBearing()) {
+			return false;
+		}
+		if (this.getMaxBearing() < other.getMinBearing()) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		String str = String.format("Region: %3.1f-%3.1f deg, %3.1f-%3.1fm",
+				Math.toDegrees(minBearing), Math.toDegrees(maxBearing), minRange, maxRange);
+		return str;
 	}
 }
