@@ -27,7 +27,10 @@ public class ECDFileTest implements CatalogStreamObserver {
 	// corrupt	
 //	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\Corruptfile\\data_2022-05-22-031938.ecd";
 //	private static final String ecdFile = "E:\\GeminiData\\20220523\\data_2022-05-23-062933.ecd";
-	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\BadGLFFiles\\log_2022-07-21-094511.glf";
+//	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\BadGLFFiles\\log_2022-07-21-094511.glf";
+//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\PingRatesJan24\\20231213 Gemini Yr4\\log_2023-12-13-170125.glf";
+//	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\PingRatesJan24\\20220202 Gemini Yr2\\log_2022-02-02-012959.glf";
+	private static final String ecdFile = "C:\\ProjectData\\RobRiver\\PingRatesJan24\\20231213 Pamguard Yr4\\log_2023-12-13-165208.glf";
 //	not corrupt
 //	private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220521\\ecd\\data_2022-05-21-185110.ecd";
 //		private static final String ecdFile = "C:\\ProjectData\\meyGenMayData\\AAM\\20220524\\log_2022-05-24-114346.glf";
@@ -155,7 +158,7 @@ public class ECDFileTest implements CatalogStreamObserver {
 
 	@Override
 	public boolean newStatusData(GLFStatusData statusData) {
-		// TODO Auto-generated method stub
+		System.out.println("Status record " + statusData);
 		return true;
 	}
 

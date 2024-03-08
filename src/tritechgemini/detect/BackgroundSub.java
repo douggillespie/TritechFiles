@@ -34,6 +34,8 @@ public class BackgroundSub {
 	 */
 	private int removalFactor = internalScale;
 	
+	private int stdRemovalFactor = 0;
+
 	/**
 	 * update time constant in frames. should be about 1/20.
 	 * but it's stored as pos integer, so will be about 20.  
@@ -44,6 +46,7 @@ public class BackgroundSub {
 	 * Flag to say variance should also be calculated. 
 	 */
 	private boolean calculateVariance;
+
 	/**
 	 * Remove background from an image record. 
 	 * @param geminiRecord Image record
@@ -73,10 +76,20 @@ public class BackgroundSub {
 		}
 		byte[] cleanData = new byte[data.length];
 		int val;
-		for (int i = 0; i < data.length; i++) {
-			val =  Math.max(Byte.toUnsignedInt(data[i])-background[i]/removalFactor,0);
-			cleanData[i] = (byte) (val & 0xFF);
+		if (stdRemovalFactor > 0) {
+			for (int i = 0; i < data.length; i++) {
+				int std = (int) Math.sqrt(variance[i]/stdRemovalFactor);
+				val =  Math.max(Byte.toUnsignedInt(data[i])-background[i]/removalFactor - std,0);
+				cleanData[i] = (byte) (val & 0xFF);
+			}
 		}
+		else {
+			for (int i = 0; i < data.length; i++) {
+				val =  Math.max(Byte.toUnsignedInt(data[i])-background[i]/removalFactor,0);
+				cleanData[i] = (byte) (val & 0xFF);
+			}
+		}
+		
 		return cleanData;
 	}
 	
@@ -259,6 +272,12 @@ public class BackgroundSub {
 	 */
 	public void setRemovalScale(double removalScale) {
 		this.removalFactor = (int) Math.round(internalScale / removalScale);
+	}
+
+	public void setRemovalScale(double backgroundScale, double backgroundSTDs) {
+		this.removalFactor = (int) Math.round(internalScale / backgroundScale);
+		this.calculateVariance = backgroundSTDs > 0;
+		this.stdRemovalFactor = (int) Math.round(Math.pow(internalScale / backgroundSTDs,2));
 	}
 	
 	/**

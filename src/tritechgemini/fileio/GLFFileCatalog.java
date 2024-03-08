@@ -542,7 +542,11 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				GLFStatusData statusData = new GLFStatusData(header);
 				statusData.read(dis, false);
 				streamObserver.newStatusData(statusData);
+				break;
+			default:
+				System.out.println("Other record type " + header.m_dataType);
 			}
+				
 
 		}
 
