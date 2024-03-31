@@ -456,7 +456,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	@Override
-	public boolean streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
+	public CatalogStreamSummary streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
 
 		/**
 		 * Stream the catalogue to the stream observer, but at the same time, build and store a 
@@ -505,6 +505,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		int nRec = 0;
 		long t1 = System.currentTimeMillis();
 		int badRec = 0;
+		long firstRecordTime = 0, lastRecordTime = 0;
 		while (continueStream) {
 
 			GLFGenericHeader header = readNextHeader(dis);
@@ -534,7 +535,10 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 					if (newCatalog) {
 						catalogRecords.add(clonedRecord);
 					}
-					
+					if (firstRecordTime == 0) {
+						firstRecordTime = glfImage.getRecordTime();
+					}
+					lastRecordTime = glfImage.getRecordTime();
 					nRec++;
 				}
 				break;
@@ -557,8 +561,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			analyseCatalog();
 			writeSerializedCatalog(getFilePath(), this);
 		}
-		
-		return continueStream;
+		return new CatalogStreamSummary(nRec, firstRecordTime, lastRecordTime,
+				continueStream ? CatalogStreamSummary.FILEEND : CatalogStreamSummary.PROCESSSTOP);
 	}
 
 	@Override

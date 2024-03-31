@@ -325,9 +325,11 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 	}
 
 	@Override
-	public boolean streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
+	public CatalogStreamSummary streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException {
 		int frameNumber = 0;
 		continueStream = true;
+		int recordsRead = 0;
+		long firstRecordTime = 0, lastRecordTime = 0;
 		try {
 			File ecdFile = new File(getFilePath());
 			FileInputStream fis = new FileInputStream(ecdFile);
@@ -367,6 +369,11 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 					boolean recOK = readTargetImageRecord(ecdRecord, type, ver, dis, true);
 					// imageRecords.add(ecdRecord);
 					if (recOK) {
+						recordsRead++;
+						if (firstRecordTime == 0) {
+							firstRecordTime = ecdRecord.getRecordTime();
+						}
+						lastRecordTime = ecdRecord.getRecordTime();
 						continueStream = streamObserver.newImageRecord(ecdRecord);
 					}
 
@@ -395,7 +402,8 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 			throw new CatalogException(e.getMessage());
 		}
 
-		return continueStream;
+		return new CatalogStreamSummary(recordsRead, firstRecordTime, lastRecordTime,
+				continueStream ? CatalogStreamSummary.FILEEND : CatalogStreamSummary.PROCESSSTOP);
 	}
 
 	@Override

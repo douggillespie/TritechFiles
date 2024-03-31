@@ -138,9 +138,9 @@ public class BackgroundSub {
 			background = new int[nBearing*nRange];
 			backgroundNBearing = nBearing;
 			backgroundNRange = nRange;
-		}
-		if (calculateVariance && variance == null && background != null) {
-			variance = new int[background.length];
+			if (calculateVariance) {
+				variance = new int[background.length];
+			}
 		}
 		// here we at least know we have the same number of bearings
 		if (nRange < backgroundNRange) {
@@ -169,6 +169,10 @@ public class BackgroundSub {
 			}
 			backgroundNBearing = nBearing;
 			backgroundNRange = nRange;
+		}
+		if (variance != null && variance.length != background.length) {
+			System.out.println("Ariance size error!");
+			variance = Arrays.copyOf(variance, background.length);
 		}
 	}
 	

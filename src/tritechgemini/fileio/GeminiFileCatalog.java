@@ -252,7 +252,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @return number of records read.
 	 * @throws CatalogException
 	 */
-	abstract public boolean streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException;
+	abstract public CatalogStreamSummary streamCatalog(CatalogStreamObserver streamObserver) throws CatalogException;
 
 	/**
 	 * Stop streaming the catalog.
