@@ -149,4 +149,30 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 		}
 	}
 
+	@Override
+	public int getBearingIndex(double bearing) {
+		if (bearingTable == null) {
+			return -1;
+		}
+		double dist = 1000;
+		int bestInd = -1;
+		for (int i = 0; i < bearingTable.length; i++) {
+			if (Math.abs(bearing-bearingTable[i]) < dist) {
+				dist = Math.abs(bearing-bearingTable[i]);
+				bestInd = i;
+			}
+		}
+		return bestInd;
+	}
+
+	@Override
+	public int getRangeIndex(double range) {
+		int nR = getnRange();
+		double mR = getMaxRange();
+		int rangeInd = (int) Math.round(range/mR*nR);
+		rangeInd = Math.max(0,  rangeInd);
+		rangeInd = Math.min(nR-1, rangeInd);
+		return rangeInd;
+	}
+
 }

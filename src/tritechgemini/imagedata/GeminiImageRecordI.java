@@ -115,5 +115,21 @@ public interface GeminiImageRecordI extends GeminiRecordI, Cloneable, Serializab
 	 * @return cloned record. 
 	 */
 	public GeminiImageRecordI clone();
+
+	/**
+	 * Get the index from the bearing table of the bearing closest 
+	 * to the given bearing. 
+	 * @param bearing in radians
+	 * @return index of closest bearing. 
+	 */
+	public int getBearingIndex(double bearing);
+
+	
+	/**
+	 * Get the index of the range bin closest to the given range
+	 * @param range range in metres
+	 * @return index of closest range bin. 
+	 */
+	public int getRangeIndex(double range);
 	
 }
