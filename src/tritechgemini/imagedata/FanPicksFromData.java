@@ -161,8 +161,12 @@ public class FanPicksFromData extends ImageFanMaker {
 							if (bearInd1 < 0) {
 								continue; // angle out of range
 							}
+							int bearInd2 = bearInd1+1;
+							if (bearInd2 >= bearingTable.length) {
+								bearInd2 = bearingTable.length-1;
+							}
 							double db1 = Math.abs(pixAng-bearingTable[bearInd1]);
-							double db2 = Math.abs(pixAng-bearingTable[bearInd1]);
+							double db2 = Math.abs(pixAng-bearingTable[bearInd2]);
 							if (nP == 1) {
 								int iR = (int) Math.round(pixRng);
 								dataPutLUT[ix][usedColumnLength[ix]] = iy;
@@ -195,19 +199,26 @@ public class FanPicksFromData extends ImageFanMaker {
 								if (iR >= nRange) {
 									continue;
 								}
+								double dr1 = pixRng-iR;
 								dataPutLUT[ix][usedColumnLength[ix]] = iy;
+								// first bearing, first range 
 								dataPickLUT[ix][usedColumnLength[ix]][0] = iR*nBearing + bearInd1;
-								dataPickLUT[ix][usedColumnLength[ix]][1] = iR*nBearing + bearInd1+1;
+								// second bearing, first range 
+								dataPickLUT[ix][usedColumnLength[ix]][1] = iR*nBearing + bearInd2;
 								iR = (int) Math.ceil(pixRng);
 								if (iR >= nRange) {
 									iR--;
 								}
+								double dr2 = Math.abs(iR-pixRng);
+								// first bearing, second range 
 								dataPickLUT[ix][usedColumnLength[ix]][2] = iR*nBearing + bearInd1;
-								dataPickLUT[ix][usedColumnLength[ix]][3] = iR*nBearing + bearInd1+1;
-								dataLUTScale[ix][usedColumnLength[ix]][0] = db2/(db1+db2)/2.;
-								dataLUTScale[ix][usedColumnLength[ix]][1] = db1/(db1+db2)/2.;
-								dataLUTScale[ix][usedColumnLength[ix]][2] = dataLUTScale[ix][usedColumnLength[ix]][0];
-								dataLUTScale[ix][usedColumnLength[ix]][3] = dataLUTScale[ix][usedColumnLength[ix]][1];
+								// second bearing, second range 
+								dataPickLUT[ix][usedColumnLength[ix]][3] = iR*nBearing + bearInd2;
+								// weights. 
+								dataLUTScale[ix][usedColumnLength[ix]][0] = db2/(db1+db2)*dr2/(dr2+dr1);
+								dataLUTScale[ix][usedColumnLength[ix]][1] = db1/(db1+db2)*dr2/(dr2+dr1);
+								dataLUTScale[ix][usedColumnLength[ix]][2] = db2/(db1+db2)*dr1/(dr2+dr1);;
+								dataLUTScale[ix][usedColumnLength[ix]][3] = db1/(db1+db2)*dr1/(dr2+dr1);
 							}
 							usedColumnLength[ix]++;
 						}
