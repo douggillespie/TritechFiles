@@ -140,6 +140,13 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 	}
 
 	@Override
+	public void freeImageData() {
+		imageData = null;
+//		bearingTable = null;
+		isFullyRead = false;
+	}
+
+	@Override
 	public GeminiImageRecord clone() {
 		try {
 			return (GeminiImageRecord) super.clone();

@@ -210,9 +210,10 @@ I would try to avoid using the PingTail Extension record, unless you think there
 
 	@Override
 	public void freeImageData() {
-	  cData = null;
-	  imageData = null;
-//	  bearingTable = null;
+		super.freeImageData();
+		cData = null;
+		imageData = null;
+		//	  bearingTable = null;
 	}
 
 	@Override

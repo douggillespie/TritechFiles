@@ -60,7 +60,7 @@ public class FanPicksFromData extends ImageFanMaker {
 		}
 		
 		short[][] image = new short[nPixX][nPixY];
-
+		
 		Thread[] threads = new Thread[nThread];
 		for (int t = 0; t < nThread; t++) {
 			int pos = t;

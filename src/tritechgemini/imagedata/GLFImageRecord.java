@@ -74,12 +74,6 @@ public class GLFImageRecord extends GeminiImageRecord implements Serializable {
 		return genericHeader.tm_deviceId;
 	}
 
-	@Override
-	public void freeImageData() {
-		imageData = null;
-//		bearingTable = null;
-		isFullyRead = false;
-	}
 
 	@Override
 	public int getnRange() {
