@@ -48,6 +48,12 @@ public class BackgroundSub {
 	private boolean calculateVariance;
 
 	/**
+	 * Count of background updates. Can be used to prevent detection 
+	 * for a while as the background settles. 
+	 */
+	private int updateCount;
+
+	/**
 	 * Remove background from an image record. 
 	 * @param geminiRecord Image record
 	 * @param updateFirst  update the background measurement before subtraction
@@ -120,6 +126,7 @@ public class BackgroundSub {
 				background[i] += ((dataPoint-background[i]) / updateConst);
 			}
 		}
+		updateCount = getUpdateCount() + 1;
 		return background;
 	}
 		
@@ -141,6 +148,7 @@ public class BackgroundSub {
 			if (calculateVariance) {
 				variance = new int[background.length];
 			}
+			updateCount = 0;
 		}
 		// here we at least know we have the same number of bearings
 		if (nRange < backgroundNRange) {
@@ -310,5 +318,14 @@ public class BackgroundSub {
 	 */
 	public void setCalculateVariance(boolean calculateVariance) {
 		this.calculateVariance = calculateVariance;
+	}
+
+	/**
+	 * Count of background updates. Can be used to prevent detection 
+	 * for a while as the background settles. 
+	 * @return the updateCount
+	 */
+	public int getUpdateCount() {
+		return updateCount;
 	}
 }

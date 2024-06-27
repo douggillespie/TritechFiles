@@ -315,6 +315,11 @@ public class DetectedRegion extends TwoThresholdDetector {
 		return peakY;
 	}
 
+	/**
+	 * note that these are using the sonar coordinate frame which has x -ve. 
+	 * A hangover from the Tritech data where this made everything OK
+	 * due to the flip. 
+	 */
 	private void calcPeakXY() {
 		peakX = peakRange * Math.sin(peakBearing);
 		peakY = peakRange * Math.cos(peakBearing);		
