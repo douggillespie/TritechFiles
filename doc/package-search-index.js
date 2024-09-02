@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"tritechgemini.detect"},{"l":"tritechgemini.fileio"},{"l":"tritechgemini.imagedata"}];updateSearchResults();
