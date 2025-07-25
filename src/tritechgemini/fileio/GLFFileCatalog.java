@@ -325,8 +325,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		Deflater deflater = new Deflater();
 		byte[] imageRaw = glfImage.getImageData();
 		deflater.setInput(imageRaw);
+		deflater.finish();
 		byte[] zippedData = new byte[imageRaw.length];
-		int packedSize = deflater.deflate(zippedData);
+		int packedSize = deflater.deflate(zippedData, 0, imageRaw.length, Deflater.FULL_FLUSH);
 		
 		dos.writeInt(packedSize);
 //		glfImage.dataSize = dis.readInt();
