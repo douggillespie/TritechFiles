@@ -159,6 +159,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	private synchronized boolean createGlfFastInput() {
 		int foundFiles = 0;
 		glfFastData = new GLFFastData();
+		boolean isDatFile = false;
 		try {
 			while (true) {
 				int sig = glfInputStream.readInt();
@@ -183,16 +184,19 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 					glfFastData.cfgFileName = fileName;
 					glfFastData.cfgFilePos = countingInputStream.getPos();
 					glfFastData.cfgFileLen = uSize;
+					isDatFile = false;
 				}
 				else if (fileName.endsWith(".dat")) {
 					glfFastData.datFileName = fileName;
 					glfFastData.datFilePos = countingInputStream.getPos();
 					glfFastData.datFileLen = uSize;
+					isDatFile = true;
 				}
 				else if (fileName.endsWith(".xml")) {
 					glfFastData.xmlFileName = fileName;
 					glfFastData.xmlFilePos = countingInputStream.getPos();
 					glfFastData.xmlFileLen = uSize;
+					isDatFile = false;
 				}
 				else {
 					return false;
@@ -217,7 +221,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 //					if (lastBlock == false && blockSize != BLOCKDATALENGTH) {
 //						System.out.printf("irregular block length %d at byte %d\n", blockSize, bCount);
 //					}
-					if (foundFiles == 1) {
+					if (isDatFile) {
 						glfFastData.datBlockStarts.add(new GLFFastBlockData(totalBlockBytes, blockSize, bCount));
 					}
 					int spares = glfInputStream.readUnsignedShort();
@@ -226,7 +230,9 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 				}
 				
 				if (totalBlockBytes != uSize) {
-					System.out.println("Total data size not as expected");
+					System.out.printf("Total data size not as expected (%d/%d) at block %d in %s\n",
+							totalBlockBytes, uSize,
+							glfFastData.datBlockStarts.size() + 1, glfFile.getName());
 					return false;
 				}
 				
@@ -399,7 +405,12 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	private synchronized boolean loadNextBlock(int blockNumber) throws IOException {
 		loadMonitor.start();
 		currentLoadedBlock = blockNumber;
-		blockStartByte = glfFastData.datBlockStarts.get(blockNumber).getVirtualStartByte();
+		ArrayList<GLFFastBlockData> blockStarts = glfFastData.datBlockStarts;
+		if (blockNumber >= blockStarts.size()) {
+			System.out.printf("Unavailable block number %d in GLF has %d: %s\n", blockNumber, blockStarts.size(), this.glfFile.getName());		
+			return false;
+		}
+		blockStartByte = blockStarts.get(blockNumber).getVirtualStartByte();
 		int bMap = glfInputStream.readUnsignedByte();
 //		boolean lastBlock = ((bMap & 0x1) == 0x1);
 		boolean isRaw = ((bMap & 0x6) == 0);
