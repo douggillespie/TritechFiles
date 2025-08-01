@@ -151,6 +151,29 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	/**
+	 * Write an image record header. Not 100% sure this is entirely accurate, 
+	 * but it has the main information and does create a valid GLF file. 
+	 * @param glfRecord
+	 * @param outputStream
+	 */
+	public void writeGLFHeader(GLFImageRecord glfRecord, LittleEndianDataOutputStream outputStream) {
+
+		try {
+			outputStream.writeByte(42); // idChar
+			outputStream.writeByte(2); // m_version
+			outputStream.writeInt(168); // m_length seems to have little relation to reality
+			outputStream.writeDouble(glfRecord.m_dbTxtime); // m_timestamp take from GLF
+			outputStream.writeByte(0); // m_datatype: 0 for image data, 3 for status
+			outputStream.writeShort(glfRecord.getDeviceId()); // tm_deviceid device id  
+			outputStream.writeShort(100); // tm_nodeid ???
+			outputStream.writeShort(0); // spare 2 bytes. 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	/**
 	 * Read a GLF record which may or may not have already been partially read.
 	 * 
 	 * @param glfImage
