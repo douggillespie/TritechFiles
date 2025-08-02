@@ -24,4 +24,12 @@ public class GLFFastData implements Serializable {
 	 * the actual input file plus the file start offset datFilePos. 
 	 */
 	protected ArrayList<GLFFastBlockData> datBlockStarts = new ArrayList<GLFFastBlockData>();
+	
+	public long getFileBytes() {
+		if (datBlockStarts.size() == 0) {
+			return 0;
+		}
+		GLFFastBlockData last = datBlockStarts.get(datBlockStarts.size()-1);
+		return last.getInputStreamPos() + last.getThisBlockBytes();
+	}
 }

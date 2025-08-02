@@ -2,6 +2,7 @@ package tritechgemini.fileio;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -67,6 +68,8 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	 */
 	private long currentAbsPos;
 	
+	private long totalFileBytes;
+	
 
 	public GLFFastInputStream(File glfFile) throws FileNotFoundException {
 		super();
@@ -87,8 +90,13 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		isOk = (glfFastData != null);
 		if (glfFastData == null) {
 			isOk = createGlfFastInput();
-			saveGlfFastData(glfFastData);
+			if (isOk) {
+				saveGlfFastData(glfFastData);
+			}
 //			makeNew = true;
+		}
+		if (glfFastData != null) {
+			totalFileBytes = glfFastData.getFileBytes();
 		}
 //		long t2 = System.nanoTime();
 //		if (makeNew) {
@@ -163,6 +171,11 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		try {
 			while (true) {
 				int sig = glfInputStream.readInt();
+				System.out.printf("Sig 0x%08X\n", sig);
+				if (sig == 0x02014b50) {
+					System.out.println("Sig CDFH");
+					break;
+				}
 				int version = glfInputStream.readUnsignedShort();
 				int bitFlag = glfInputStream.readUnsignedShort();
 				int method = glfInputStream.readUnsignedShort();
@@ -199,6 +212,8 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 					isDatFile = false;
 				}
 				else {
+					// tends to crap out here when reading the general directory footer
+					// since there isn't one of the three valid file names. 
 					return false;
 				}
 //				glfInputStream.skipBytes(cSize);
@@ -210,14 +225,14 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 					int bMap = glfInputStream.readUnsignedByte();
 					lastBlock = ((bMap & 0x1) == 0x1);
 					isRaw = ((bMap & 0x6) == 0);
-					if (!isRaw) {
-						return false;
-					}
 					long bCount = countingInputStream.getPos();
 //					if (bCount > 430070990 && bCount < 430070990 + 65536*2) {
 //						System.out.println("Block data start at byte " + bCount);
 //					}
 					int blockSize = glfInputStream.readUnsignedShort();
+					if (!isRaw) {
+						return false;
+					}
 //					if (lastBlock == false && blockSize != BLOCKDATALENGTH) {
 //						System.out.printf("irregular block length %d at byte %d\n", blockSize, bCount);
 //					}
@@ -229,7 +244,9 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 					glfInputStream.skipBytes(blockSize);
 				}
 				
-				if (totalBlockBytes != uSize) {
+				long currentCount = countingInputStream.getPos();
+				
+				if (totalBlockBytes != uSize && uSize > 0) {
 					System.out.printf("Total data size not as expected (%d/%d) at block %d in %s\n",
 							totalBlockBytes, uSize,
 							glfFastData.datBlockStarts.size() + 1, glfFile.getName());
@@ -246,9 +263,8 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
 		}
-
+		return glfFastData.datFileName != null;
 	}
 
 	@Override
@@ -282,16 +298,24 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		readMonitor.start();
 		long endByte = currentAbsPos + len;
 		int bytesRead = 0;
+		boolean pastEnd = false;
 		while (bytesRead < len) {
 			int toRead = Math.min(len-bytesRead, currentlyAvailable());
 			System.arraycopy(currentBlockData, (int) (currentAbsPos-blockStartByte), b, off + bytesRead, toRead);
 			currentAbsPos += toRead;
 			bytesRead += toRead;
 			if (currentAbsPos >= blockEndByte) {
-				loadNextBlock(currentLoadedBlock+1);
+				boolean loaded = loadNextBlock(currentLoadedBlock+1);
+				if (loaded == false) {
+					pastEnd = true;
+					break;
+				}
 			}
 		}
 		readMonitor.stop();
+		if (pastEnd && bytesRead == 0) {
+			throw new EOFException();
+		}
 		return bytesRead;
 	}
 

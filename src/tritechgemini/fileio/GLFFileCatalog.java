@@ -40,6 +40,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 	private volatile boolean continueStream;
 
+	private boolean stopStreaming;
+
 	public GLFFileCatalog(String filePath) {
 		super(filePath);
 	}
@@ -111,8 +113,13 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	private GLFGenericHeader readNextHeader(DataInput dis) throws CatalogException {
 		GLFGenericHeader header = new GLFGenericHeader();
 		try {
-			header.m_idChar = dis.readByte();
+			header.m_idChar = dis.readByte(); // should always be '*' (=42)
 			header.m_version = dis.readUnsignedByte();
+			// at end of file idChar and version are both DE. 
+			if (Byte.toUnsignedInt(header.m_idChar) == DE && header.m_version == DE) {
+//				System.out.println("Endoffile");
+				return null; // end of file marker. 
+			}
 			// if (glfImage.m_version == DE || glfImage.m_idChar != 42) {
 			// return false;
 			// }
@@ -463,6 +470,13 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		throw new IOException("Input stream unavailable in archive file " + file);
 	}
 
+	/**
+	 * open a normal zipped input stream. This is used whenever the fast
+	 * catalogue is not working - which actually seems to be most of the time
+	 * since Robs files were failing on the fast stuff in any case. 
+	 * @return
+	 * @throws IOException
+	 */
 	private InputStream openZippedinputStream() throws IOException {
 		String filePath = getFilePath();//.toLowerCase();
 		File file = new File(filePath);
@@ -503,8 +517,14 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			setImageRecords(catalogRecords);
 			newCatalog = true;
 //		}
-		
-		continueStream = true;
+
+//			System.out.println("Start stream catalog");
+			/* 
+			 * need two different variables here, if there is one, it writes
+			 * overitself in the different thread. 
+			 */
+			continueStream = true;
+		stopStreaming = false;
 
 		InputStream inputStream;
 		try {
@@ -531,7 +551,10 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		int badRec = 0;
 		long firstRecordTime = 0, lastRecordTime = 0;
 		while (continueStream) {
-
+			if (stopStreaming) {
+				continueStream = false;
+				break;
+			}
 			GLFGenericHeader header = readNextHeader(dis);
 			if (header == null) {
 				break; // should be EOF. Exits loop at end of file. 
@@ -547,7 +570,11 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				int ok = readGlfRecord(glfImage, dis, true);
 				if (ok == 0) {
 //					imageRecords.add(glfImage);
-					continueStream = streamObserver.newImageRecord(glfImage);
+					continueStream &= streamObserver.newImageRecord(glfImage);
+					if (continueStream == false) {
+//						System.out.println("GLF Continue stream = " + continueStream);
+						break;
+					}
 					
 					/**
 					 * And make a copy for the stored catalogue, because we're about to delete the raw data and 
@@ -591,7 +618,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 
 	@Override
 	public void stopCatalogStream() {
-		continueStream = false;
+		stopStreaming = true;
+//		System.out.println("GLF Setting stopStreaming = true");
 	}
 
 	@Override
