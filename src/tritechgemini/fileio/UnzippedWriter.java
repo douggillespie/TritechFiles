@@ -129,7 +129,7 @@ public class UnzippedWriter {
 		}
 		nBlocks = (fileSize + BLOCKLEN-1)/BLOCKLEN;
 		compressedSize = (nBlocks+1) * 5 + fileSize;// + getHeadSize(dataFile) + getFootSize(dataFile);
-
+		dis.close();
 	}
 
 	/**
@@ -205,7 +205,6 @@ public class UnzippedWriter {
 			los.writeByte(1);
 			los.writeShort(0);
 			los.writeShort(65535);
-			
 		}
 		catch (EOFException e) {
 //			System.out.println("EOF");
