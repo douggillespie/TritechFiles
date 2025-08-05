@@ -88,4 +88,14 @@ public class LittleEndianDataOutputStream extends OutputStream implements DataOu
 		o.write(b, off, len);
 	}
 
+	@Override
+	public void flush() throws IOException {
+		o.flush();
+	}
+
+	@Override
+	public void close() throws IOException {
+		o.close();
+	}
+
 }

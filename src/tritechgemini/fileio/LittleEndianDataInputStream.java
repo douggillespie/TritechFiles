@@ -42,7 +42,20 @@ public class LittleEndianDataInputStream extends InputStream implements DataInpu
 					 (w[1]&0xff) << 8 |
 					 (w[0]&0xff));
 		 }
-	 
+		 /**
+		  * Note, returns long even though it reads a int so it doesn't wrap.
+		  */
+		 public final long readUnsignedInt() throws IOException
+		 {
+			 d.readFully(w, 0, 4);
+			 int val = (
+					 (w[3]&0xff) << 24 |
+					 (w[2]&0xff) << 16 |
+					 (w[1]&0xff) << 8 |
+					 (w[0]&0xff));
+			 return Integer.toUnsignedLong(val);
+		 }
+
 		 /**
 		  * like DataInputStream.readChar except little endian.
 		  */

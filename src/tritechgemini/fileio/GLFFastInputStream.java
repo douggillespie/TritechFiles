@@ -2,6 +2,8 @@ package tritechgemini.fileio;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,14 +15,27 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * Fast reading of uncompressed GLF files. GLF files are a zip archive of 
+ * sonar data with the main .dat data file and one or two configuration files.
+ * so far as I can tell, only the .dat file is important. This class makes it 
+ * possible to read the dat file from the GLF file without actually unzipping
+ * the archive.  
+ * @author dg50
+ *
+ */
 public class GLFFastInputStream extends InputStream implements Serializable {
 
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private transient LittleEndianDataInputStream glfInputStream;
 	private transient CountingInputStream countingInputStream;
 
@@ -171,96 +186,163 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		try {
 			while (true) {
 				int sig = glfInputStream.readInt();
-				System.out.printf("Sig 0x%08X\n", sig);
-				if (sig == 0x02014b50) {
-					System.out.println("Sig CDFH");
-					break;
-				}
-				int version = glfInputStream.readUnsignedShort();
-				int bitFlag = glfInputStream.readUnsignedShort();
-				int method = glfInputStream.readUnsignedShort();
-				int modTime = glfInputStream.readUnsignedShort();
-				int modDate = glfInputStream.readUnsignedShort();
-				int crc = glfInputStream.readInt();
-				int cSize = glfInputStream.readInt();
-				int uSize = glfInputStream.readInt();
-				if (cSize < uSize) {
-					//				compressed is smaller, so it IS compressed
-					return false;
-				}
-				int fNameLen = glfInputStream.readUnsignedShort();
-				int exf = glfInputStream.readUnsignedShort(); // no idea !
-				byte[] nameData = new byte[fNameLen];
-				glfInputStream.read(nameData);
-				String fileName = new String(nameData);
-				if (fileName.endsWith(".cfg")) {
-					glfFastData.cfgFileName = fileName;
-					glfFastData.cfgFilePos = countingInputStream.getPos();
-					glfFastData.cfgFileLen = uSize;
-					isDatFile = false;
-				}
-				else if (fileName.endsWith(".dat")) {
-					glfFastData.datFileName = fileName;
-					glfFastData.datFilePos = countingInputStream.getPos();
-					glfFastData.datFileLen = uSize;
-					isDatFile = true;
-				}
-				else if (fileName.endsWith(".xml")) {
-					glfFastData.xmlFileName = fileName;
-					glfFastData.xmlFilePos = countingInputStream.getPos();
-					glfFastData.xmlFileLen = uSize;
-					isDatFile = false;
-				}
-				else {
-					// tends to crap out here when reading the general directory footer
-					// since there isn't one of the three valid file names. 
-					return false;
-				}
-//				glfInputStream.skipBytes(cSize);
-				// now need to go through all the blocks ...
-				boolean lastBlock = false;
-				boolean isRaw;
-				long totalBlockBytes = 0;
-				while (!lastBlock) {
-					int bMap = glfInputStream.readUnsignedByte();
-					lastBlock = ((bMap & 0x1) == 0x1);
-					isRaw = ((bMap & 0x6) == 0);
-					long bCount = countingInputStream.getPos();
-//					if (bCount > 430070990 && bCount < 430070990 + 65536*2) {
-//						System.out.println("Block data start at byte " + bCount);
-//					}
-					int blockSize = glfInputStream.readUnsignedShort();
-					if (!isRaw) {
+//				System.out.printf("Zip maginc number = 0x%08x at %d\n", sig, countingInputStream.getPos());
+				//				sig = Integer.reverseBytes(sig);
+				if (sig == ZipInputStream.LOCSIG) { // file data
+//					System.out.println("ZipInputStream.LOCSIG");
+//					System.out.printf("Sig 0x%08X\n", sig);
+					int version = glfInputStream.readUnsignedShort();
+					int bitFlag = glfInputStream.readUnsignedShort();
+					int method = glfInputStream.readUnsignedShort();
+					int modTime = glfInputStream.readUnsignedShort();
+					int modDate = glfInputStream.readUnsignedShort();
+					long crc = glfInputStream.readUnsignedInt();
+					long cSize = glfInputStream.readUnsignedInt();
+					long uSize = glfInputStream.readUnsignedInt();
+					if (cSize < uSize) {
+						//				compressed is smaller, so it IS compressed
+//						return false;
+					}
+					int fNameLen = glfInputStream.readUnsignedShort();
+					int exf = glfInputStream.readUnsignedShort(); // no idea !
+					byte[] nameData = new byte[fNameLen];
+					glfInputStream.read(nameData);
+					byte[] extraData = new byte[exf];
+					glfInputStream.read(extraData);
+					String fileName = new String(nameData);
+					if (fileName.endsWith(".cfg")) {
+						glfFastData.cfgFileName = fileName;
+						glfFastData.cfgFilePos = countingInputStream.getPos();
+						glfFastData.cfgFileLen = uSize;
+						isDatFile = false;
+					}
+					else if (fileName.endsWith(".dat")) {
+						glfFastData.datFileName = fileName;
+						glfFastData.datFilePos = countingInputStream.getPos();
+						glfFastData.datFileLen = uSize;
+						isDatFile = true;
+					}
+					else if (fileName.endsWith(".xml")) {
+						glfFastData.xmlFileName = fileName;
+						glfFastData.xmlFilePos = countingInputStream.getPos();
+						glfFastData.xmlFileLen = uSize;
+						isDatFile = false;
+					}
+					else {
+						// tends to crap out here when reading the general directory footer
+						// since there isn't one of the three valid file names. 
 						return false;
 					}
-//					if (lastBlock == false && blockSize != BLOCKDATALENGTH) {
-//						System.out.printf("irregular block length %d at byte %d\n", blockSize, bCount);
-//					}
-					if (isDatFile) {
-						glfFastData.datBlockStarts.add(new GLFFastBlockData(totalBlockBytes, blockSize, bCount));
+//					glfInputStream.skipBytes(cSize);
+					// now need to go through all the blocks ...
+					boolean lastBlock = false;
+					boolean isRaw;
+					long totalBlockBytes = 0;
+					int nBlocks = 0;
+					while (!lastBlock) {
+						nBlocks++;
+						int bMap = glfInputStream.readUnsignedByte();
+						lastBlock = ((bMap & 0x1) == 0x1);
+						isRaw = ((bMap & 0x6) == 0);
+//						isRaw = true;
+						long bCount = countingInputStream.getPos();
+//						if (bCount > 430070990 && bCount < 430070990 + 65536*2) {
+//							System.out.println("Block data start at byte " + bCount);
+//						}
+						int blockSize = glfInputStream.readUnsignedShort();
+						if (!isRaw) {
+//							return false;
+						}
+//						if (lastBlock == false && blockSize != BLOCKDATALENGTH) {
+//							System.out.printf("irregular block length %d at byte %d\n", blockSize, bCount);
+//						}
+						if (isDatFile) {
+							glfFastData.datBlockStarts.add(new GLFFastBlockData(bMap, totalBlockBytes, blockSize, bCount));
+						}
+						int spares = glfInputStream.readUnsignedShort();
+//						if (lastBlock || spares > 4) {
+//							System.out.printf("Spares in %s = %d \n", fileName,  spares);
+//						}
+						totalBlockBytes += blockSize;
+						glfInputStream.skipBytes(blockSize);
 					}
-					int spares = glfInputStream.readUnsignedShort();
-					totalBlockBytes += blockSize;
-					glfInputStream.skipBytes(blockSize);
+//					System.out.println("blocks read from archive: " + nBlocks);
+					
+					long currentCount = countingInputStream.getPos();
+					
+					if (totalBlockBytes != uSize && uSize > 0) {
+//						System.out.printf("Total data size not as expected (%d/%d) at block %d in %s\n",
+//								totalBlockBytes, uSize,
+//								glfFastData.datBlockStarts.size() + 1, glfFile.getName());
+//						return false;
+					}
 				}
-				
-				long currentCount = countingInputStream.getPos();
-				
-				if (totalBlockBytes != uSize && uSize > 0) {
-					System.out.printf("Total data size not as expected (%d/%d) at block %d in %s\n",
-							totalBlockBytes, uSize,
-							glfFastData.datBlockStarts.size() + 1, glfFile.getName());
-					return false;
+				else if (sig == ZipInputStream.CENSIG) { // central directory file header
+//					System.out.println("ZipInputStream.CENSIG");
+					int vMade = glfInputStream.readUnsignedShort();
+					int vNeeded = glfInputStream.readUnsignedShort();
+					int bitFlags = glfInputStream.readUnsignedShort();
+					int method = glfInputStream.readUnsignedShort();
+					int lastDate = glfInputStream.readUnsignedShort();
+					int lastTime = glfInputStream.readUnsignedShort();
+					long crcAll = glfInputStream.readUnsignedInt();
+					long cmpSize = glfInputStream.readUnsignedInt();
+					long unCmpSize = glfInputStream.readUnsignedInt();
+					int nameLen = glfInputStream.readUnsignedShort();
+					int exLen = glfInputStream.readUnsignedShort();
+					int commentLen = glfInputStream.readUnsignedShort();
+					int diskNo = glfInputStream.readUnsignedShort();
+					int intlFileAttr = glfInputStream.readUnsignedShort();
+					long fileAttr = glfInputStream.readUnsignedInt();
+					long relOffset = glfInputStream.readUnsignedInt();
+					byte[] nB = new byte[nameLen];
+					glfInputStream.read(nB);
+					String fileName = new String(nB);
+					byte[] eB = new byte[exLen];
+					glfInputStream.read(eB);
+					String extraName = new String(eB);
+					byte[] cB = new byte[commentLen];
+					glfInputStream.read(cB);
+					String comment = new String(cB);
+//					if (comment != null) {
+//						System.out.println(comment);
+//					}
 				}
-				
-				if (++foundFiles == 3) {
-					return true;
+				else if (sig == ZipInputStream.EXTSIG) {
+//					System.out.println("ZipInputStream.EXTSIG");
 				}
+				else if (sig == ZipInputStream.ENDSIG) {
+//					System.out.println("ZipInputStream.ENDSIG");
+					int diskNo = glfInputStream.readUnsignedShort();
+					int dirStart = glfInputStream.readUnsignedShort();
+					int nCenDirThis = glfInputStream.readUnsignedShort();
+					int nCenDir = glfInputStream.readUnsignedShort();
+					long dirLen = glfInputStream.readUnsignedInt();
+					long cenDirStart = glfInputStream.readUnsignedInt();
+					int comLen = glfInputStream.readUnsignedShort();
+					byte[] cD = new byte[comLen];
+					String comment = new String(cD);
+//					if (comment != null && comment.length() > 0) {
+//						System.out.println(comment);
+//					}
+				}
+				else {
+					System.out.printf("Unknown sig in GLF file: 0x%08X\n", sig);
+				}
+//				
+				
+//				if (++foundFiles == 3) {
+//					return true;
+//				}
 
 			}
 
 
-		} catch (IOException e) {
+		} 
+		catch (EOFException eof) {
+			
+		}
+		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -270,7 +352,9 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 	@Override
 	public int read() throws IOException {
 		if (currentlyAvailable() <= 0) {
-			loadNextBlock(currentLoadedBlock+1);
+			if (loadNextBlock(currentLoadedBlock+1) == false) {
+				return -1;
+			};
 		}
 		int data = Byte.toUnsignedInt(currentBlockData[(int) (currentAbsPos-blockStartByte)]);
 		currentAbsPos++;
@@ -431,31 +515,74 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 		currentLoadedBlock = blockNumber;
 		ArrayList<GLFFastBlockData> blockStarts = glfFastData.datBlockStarts;
 		if (blockNumber >= blockStarts.size()) {
-			System.out.printf("Unavailable block number %d in GLF has %d: %s\n", blockNumber, blockStarts.size(), this.glfFile.getName());		
+//			System.out.printf("Unavailable block number %d in GLF has %d: %s\n", blockNumber, blockStarts.size(), this.glfFile.getName());		
 			return false;
 		}
-		blockStartByte = blockStarts.get(blockNumber).getVirtualStartByte();
-		int bMap = glfInputStream.readUnsignedByte();
-//		boolean lastBlock = ((bMap & 0x1) == 0x1);
-		boolean isRaw = ((bMap & 0x6) == 0);
-		if (!isRaw) {
-			throw new IOException("Data in GLF block are not raw data at bytes " + countingInputStream.getPos());
-			/*
-			 * Probably if bytes 2 and 3 as 10, it's Huffman coding, so will need a decoder for that. 
-			 * Also note that the skipblocks won't work any more since this block size will be a lot smaller. 
-			 * So basically need to write something a whole lot more complicated, making it V hard to skip to 
-			 * where we want to in a file. 
-			 */
+		GLFFastBlockData blockData = blockStarts.get(blockNumber);
+		int bMap = blockData.getbMap();
+		boolean isRaw = ((bMap & 6) == 0);
+		if (isRaw) {
+			return loadRawBlock(blockData);
 		}
+		else {
+			return loadRawBlock(blockData);
+		}
+	}
+	private synchronized boolean loadCompressedBlock(GLFFastBlockData blockData) throws IOException {
+		blockStartByte = blockData.getVirtualStartByte();
+		int bScan = glfInputStream.readUnsignedByte();
+		int compSize = glfInputStream.readUnsignedShort();
+		int spares = glfInputStream.readUnsignedShort();
+		byte[] data = new byte[5 + compSize + spares];
+		ByteArrayOutputStream bos;
+		LittleEndianDataOutputStream ls = new LittleEndianDataOutputStream(bos = new ByteArrayOutputStream(5 + compSize));
+		ls.writeByte(bScan);
+		ls.writeShort(compSize);
+		ls.writeShort(spares);
+		byte[] fileData = new byte[compSize + spares];
+		int fileRead = glfInputStream.read(fileData);
+		ls.write(fileData);
+//		bos.
+		byte[] byteData = bos.toByteArray();
+		
+		byte[] inflated = new byte[65536];
+		Inflater inflater = new Inflater();
+		inflater.setInput(byteData);
+		int decompSize = 0;
+		try {
+			decompSize = inflater.inflate(inflated);
+		} catch (DataFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return false;
+//		int maxSize = 65536;
+//		byte[] data = new byte[maxSize];
+//		int bytesRead = glfInputStream.read(data);
+//		LittleEndianDataInputStream lis = new LittleEndianDataInputStream(new ByteArrayInputStream(data));
+////		int bScan = lis.readUnsignedByte();
+//		Inflater inflater = new Inflater();
+//		inflater.setInput(data, 0, bytesRead);
+//		inflater.
+		
+	}
+	private synchronized boolean loadRawBlock(GLFFastBlockData blockData) throws IOException {
+				
+		blockStartByte = blockData.getVirtualStartByte();
+		int bMap = glfInputStream.readUnsignedByte();
+		boolean isRaw = ((bMap & 0x6) == 0);
+		int bytesRead = 0;
+		// raw data, don't really need to do anything. 
 		currentBlockLength = glfInputStream.readUnsignedShort();
 		int spares = glfInputStream.readShort();
 		if (currentBlockData == null || currentBlockData.length < currentBlockLength) {
 			currentBlockData = new byte[currentBlockLength];
 		}
-		int read = glfInputStream.read(currentBlockData, 0, currentBlockLength);
-		blockEndByte = blockStartByte + read;
+		bytesRead = glfInputStream.read(currentBlockData, 0, currentBlockLength);
+		blockEndByte = blockStartByte + bytesRead;
 		loadMonitor.stop();
-		return read == currentBlockLength;
+		return bytesRead == currentBlockLength;
 	}
 
 	/**

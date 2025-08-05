@@ -12,14 +12,17 @@ public class GLFFastBlockData implements Serializable {
 	
 	private long inputStreamPos;
 
+	private int bMap;
+
 	/**
 	 * Make information about a block in a zipped input file. 
 	 * @param totalVirtualBytes
 	 * @param thisBlockBytes
 	 * @param inputStreamPos
 	 */
-	public GLFFastBlockData(long virtualStartByte, int thisBlockBytes, long inputStreamPos) {
+	public GLFFastBlockData(int bMap, long virtualStartByte, int thisBlockBytes, long inputStreamPos) {
 		super();
+		this.bMap = bMap;
 		this.virtualStartByte = virtualStartByte;
 		this.thisBlockBytes = thisBlockBytes;
 		this.inputStreamPos = inputStreamPos;
@@ -39,6 +42,13 @@ public class GLFFastBlockData implements Serializable {
 
 	public long getInputStreamPos() {
 		return inputStreamPos;
+	}
+
+	/**
+	 * @return the bMap
+	 */
+	public int getbMap() {
+		return bMap;
 	}
 
 
