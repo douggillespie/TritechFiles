@@ -201,7 +201,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 					long uSize = glfInputStream.readUnsignedInt();
 					if (cSize < uSize) {
 						//				compressed is smaller, so it IS compressed
-//						return false;
+						return false;
 					}
 					int fNameLen = glfInputStream.readUnsignedShort();
 					int exf = glfInputStream.readUnsignedShort(); // no idea !
@@ -251,7 +251,7 @@ public class GLFFastInputStream extends InputStream implements Serializable {
 //						}
 						int blockSize = glfInputStream.readUnsignedShort();
 						if (!isRaw) {
-//							return false;
+							return false;
 						}
 //						if (lastBlock == false && blockSize != BLOCKDATALENGTH) {
 //							System.out.printf("irregular block length %d at byte %d\n", blockSize, bCount);
