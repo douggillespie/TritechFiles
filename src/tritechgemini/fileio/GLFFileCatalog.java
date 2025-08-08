@@ -63,6 +63,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		int nRec = 0;
 		long t1 = System.currentTimeMillis();
 		int badRec = 0;
+		int nStatus = 0;
 		try {
 			while (true) {
 
@@ -87,9 +88,11 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				case 3: // status
 					GLFStatusData statusData = new GLFStatusData(header);
 					statusData.read(dis, false);
+					nStatus ++;
 					break;
 				default:
 					System.out.println("Unknown record type in file " + this.getFilePath());
+					break;
 				}
 
 			}
@@ -177,6 +180,26 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+	}
+
+	/**
+	 * Write a status data header. 
+	 * @param statusPacket
+	 * @param outputStream
+	 */
+	public void writeStatusHeader(GLFStatusData statusPacket, LittleEndianDataOutputStream outputStream) {try {
+		outputStream.writeByte(42); // idChar
+		outputStream.writeByte(2); // m_version
+		outputStream.writeInt(168); // m_length seems to have little relation to reality
+		outputStream.writeDouble(statusPacket.m_txT); // m_timestamp take from GLF
+		outputStream.writeByte(3); // m_datatype: 0 for image data, 3 for status
+		outputStream.writeShort(statusPacket.m_deviceID); // tm_deviceid device id  
+		outputStream.writeShort(100); // tm_nodeid ???
+		outputStream.writeShort(0); // spare 2 bytes. 
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
 		
 	}
 
@@ -398,6 +421,11 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		dos.writeShort(0xDEDE);
 //		glfImage.dede = dis.readUnsignedShort();
 	}
+	public void writeStatusRecord(GLFStatusData statusPacket, LittleEndianDataOutputStream outputStream) throws CatalogException {
+		statusPacket.writeStatusData(outputStream, false);
+		
+	}
+
 	/**
 	 * Unzip the data which is in a standard zipped archive format.
 	 * 

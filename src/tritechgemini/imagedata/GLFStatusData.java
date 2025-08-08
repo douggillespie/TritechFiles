@@ -1,12 +1,14 @@
 package tritechgemini.imagedata;
 
 import java.io.DataInput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
 import tritechgemini.fileio.CatalogException;
 import tritechgemini.fileio.GLFGenericHeader;
 import tritechgemini.fileio.LittleEndianDataInputStream;
+import tritechgemini.fileio.LittleEndianDataOutputStream;
 
 /**
  * This works reading from the latest GLF files and seems to get reasonable values. 
@@ -254,6 +256,135 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 			throw new CatalogException(e.getMessage());
 		}
 		
+		return true;
+	}
+	
+	public boolean writeStatusData(LittleEndianDataOutputStream outputStream, boolean isOnline) throws CatalogException {
+		try {
+			/*
+			 * if (isOnline == false) {
+				int something1 = dis.readShort();
+			}
+			m_bfVersion = dis.readShort();
+			m_daVer = dis.readShort();
+			m_flags = dis.readShort();
+			m_deviceID = dis.readShort();
+			m_xdSelected = dis.readByte();
+//			reserved = dis.readByte();
+			m_vgaT1 = dis.readDouble();
+			m_vgaT2 = dis.readDouble();
+			m_vgaT3 = dis.readDouble();
+			m_vgaT4 = dis.readDouble();
+			m_psuT = dis.readDouble();
+			m_dieT = dis.readDouble();
+			m_txT = dis.readDouble();
+
+			 */
+
+			 if (isOnline == false) {
+				 outputStream.writeShort(0);
+			 }
+			 outputStream.writeShort(m_bfVersion);
+			 outputStream.writeShort(m_daVer);
+			 outputStream.writeShort(m_flags);
+			 outputStream.writeShort(m_deviceID);
+			 outputStream.writeByte(m_xdSelected);
+//			 outputStream.writeByte(reserved);
+			 outputStream.writeDouble(m_vgaT1);
+			 outputStream.writeDouble(m_vgaT2);
+			 outputStream.writeDouble(m_vgaT3);
+			 outputStream.writeDouble(m_vgaT4);
+			 outputStream.writeDouble(m_psuT);
+			 outputStream.writeDouble(m_dieT);
+			 outputStream.writeDouble(m_txT);
+			 /*
+			  * 
+			m_afe0TopTemp = dis.readDouble();
+			m_afe0BotTemp = dis.readDouble();
+			m_afe1TopTemp = dis.readDouble();
+			m_afe1BotTemp = dis.readDouble();
+			m_afe2TopTemp = dis.readDouble();
+			m_afe2BotTemp = dis.readDouble();
+			m_afe3TopTemp = dis.readDouble();
+			m_afe3BotTemp = dis.readDouble();
+			m_linkType = dis.readShort();
+			m_uplinkSpeedMbps = dis.readDouble();
+			m_downlinkSpeedMbps = dis.readDouble();
+			m_linkQuality = dis.readShort();
+			  */
+			 outputStream.writeDouble(m_afe0TopTemp);
+			 outputStream.writeDouble(m_afe0BotTemp);
+			 outputStream.writeDouble(m_afe1TopTemp);
+			 outputStream.writeDouble(m_afe1BotTemp);
+			 outputStream.writeDouble(m_afe2TopTemp);
+			 outputStream.writeDouble(m_afe2BotTemp);
+			 outputStream.writeDouble(m_afe3TopTemp);
+			 outputStream.writeDouble(m_afe3BotTemp);
+			 outputStream.writeShort(m_linkType);
+			 outputStream.writeDouble(m_uplinkSpeedMbps);
+			 outputStream.writeDouble(m_downlinkSpeedMbps);
+			 outputStream.writeShort(m_linkQuality);
+			 /*
+			  * 
+			m_packetCount = dis.readInt();
+			m_recvErrorCount = dis.readInt();
+			m_resentPacketCount = dis.readInt();
+			m_droppedPacketCount = dis.readInt();
+			m_unknownPacketCount = dis.readInt();
+			m_lostLineCount = dis.readInt();
+			m_generalCount = dis.readInt();
+			  */
+			 outputStream.writeInt(m_packetCount);
+			 outputStream.writeInt(m_recvErrorCount);
+			 outputStream.writeInt(m_resentPacketCount);
+			 outputStream.writeInt(m_droppedPacketCount);
+			 outputStream.writeInt(m_unknownPacketCount);
+			 outputStream.writeInt(m_lostLineCount);
+			 outputStream.writeInt(m_generalCount);
+
+			 /*
+			m_sonarAltIp = (dis.readInt());
+			m_surfaceIp = dis.readInt();
+			m_subNetMask = dis.readInt();
+			m_macAddress1 = dis.readShort();
+			m_macAddress2 = dis.readShort();
+			m_macAddress3 = dis.readShort();
+			m_BOOTSTSRegister = dis.readInt();
+			m_BOOTSTSRegisterDA = dis.readInt();
+			m_fpgaTime = dis.readLong();
+			m_dipSwitch = dis.readShort();
+			m_shutdownStatus = dis.readShort();
+			m_networkAdaptorFound = dis.readByte() != 0;
+			  */
+			 outputStream.writeInt(m_sonarAltIp);
+			 outputStream.writeInt(m_surfaceIp);
+			 outputStream.writeInt(m_subNetMask);
+			 outputStream.writeShort(m_macAddress1);
+			 outputStream.writeShort(m_macAddress2);
+			 outputStream.writeShort(m_macAddress3);
+			 outputStream.writeInt(m_BOOTSTSRegister);
+			 outputStream.writeInt(m_BOOTSTSRegisterDA);
+			 outputStream.writeLong(m_fpgaTime);
+			 outputStream.writeShort(m_dipSwitch);
+			 outputStream.writeShort(m_shutdownStatus);
+			 outputStream.writeByte(m_networkAdaptorFound ? 1 : 0);
+
+			 /*
+			  * if (isOnline) {
+				m_subSeaInternalTemp = dis.readDouble();
+				m_subSeaCpuTemp = dis.readDouble();
+				m_uiFrame = dis.readInt();
+			}
+			  */
+			 if (isOnline) {
+				 outputStream.writeDouble(m_subSeaInternalTemp);
+				 outputStream.writeDouble(m_subSeaCpuTemp);
+				 outputStream.writeInt(m_uiFrame);
+			 }
+			
+		} catch (IOException e) {
+			throw new CatalogException(e.getMessage());
+		}
 		return true;
 	}
 	
