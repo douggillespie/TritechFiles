@@ -126,7 +126,7 @@ public class BackgroundSub {
 				background[i] += ((dataPoint-background[i]) / updateConst);
 			}
 		}
-		updateCount = getUpdateCount() + 1;
+		updateCount++;
 		return background;
 	}
 		
@@ -327,5 +327,16 @@ public class BackgroundSub {
 	 */
 	public int getUpdateCount() {
 		return updateCount;
+	}
+	
+	/**
+	 * Rest the updatecount to zero. 
+	 * this gets called after an OOW has finished, which can cause 
+	 * a lot of false dets when it goes back in the water. 
+	 * This will cause anything using the data to know the background isn't
+	 * stable and to wait a bit before trying to detect. 
+	 */
+	public void resetUpdateCount() {
+		updateCount = 0;
 	}
 }
