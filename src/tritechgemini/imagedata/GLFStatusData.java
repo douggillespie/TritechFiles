@@ -22,7 +22,9 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 	/*
 	 * bit in m_shutdownStatus indicating out of water
 	 */
-	private static final int OUT_OF_WATER = 0x4;
+	public static final int OUT_OF_WATER = 0x4;
+	public static final int OUT_OF_WATERSHUTDOWN = 0x2;
+	public static final int OVER_TEMPERATURE = 0x1;
 	
 	public short m_bfVersion;
 	public short m_daVer;
@@ -77,6 +79,11 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 	public byte m_xdSelected;
 
 	public int m_uiFrame;
+
+	/**
+	 * Source of data. file name or software. 
+	 */
+	public String source;
 	
 	// variable list copied from the C CGemStatusPacket.
 //	public short m_firmwareVer;
@@ -414,8 +421,9 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 		return typ;
 	}
 
-	public GLFStatusData(GLFGenericHeader genericHeader) {
+	public GLFStatusData(GLFGenericHeader genericHeader, String source) {
 		super(genericHeader);
+		this.source = source;
 	}
 	
 	/**

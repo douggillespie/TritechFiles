@@ -59,6 +59,9 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		//		BufferedInputStream bis = new BufferedInputStream(inputStream);
 		CountingInputStream cis = new CountingInputStream(inputStream);
 		DataInput dis = new LittleEndianDataInputStream(cis);
+		
+		File file = new File(getFilePath());
+		String fileName = file.getName();
 
 		int nRec = 0;
 		long t1 = System.currentTimeMillis();
@@ -86,7 +89,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 					}
 					break;
 				case 3: // status
-					GLFStatusData statusData = new GLFStatusData(header);
+					GLFStatusData statusData = new GLFStatusData(header, fileName);
 					statusData.read(dis, false);
 					nStatus ++;
 					break;
@@ -536,6 +539,8 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		 */
 		boolean newCatalog = false;
 		ArrayList<GLFImageRecord> catalogRecords = getImageRecords();
+		File file = new File(getFilePath());
+		String fileName = file.getName();
 		//		if (catalogRecords == null) {
 		/*
 		 *  mess up whereby it was adding records to the catalog multiple times if files
@@ -622,7 +627,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				}
 				break;
 			case 3: // status
-				GLFStatusData statusData = new GLFStatusData(header);
+				GLFStatusData statusData = new GLFStatusData(header, fileName);
 				statusData.read(dis, false);
 				streamObserver.newStatusData(statusData);
 				break;
