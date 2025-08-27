@@ -431,7 +431,40 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 	 * @return true if sonar is flagged as out of water. 
 	 */
 	public boolean isOutOfWater() {
-		return ((m_shutdownStatus & OUT_OF_WATER) != 0);
+//		return ((m_shutdownStatus & OUT_OF_WATER) != 0);
+		return (m_shutdownStatus != 0);
+	}
+	
+	/**
+	 * return error string for shutdown. 
+	 * @return null if no shutdown code, a string otherwise. 
+	 */
+	public String getShutdownError() {
+		if (m_shutdownStatus == 0) {
+			return null;
+		}
+		String err = "";
+		if ((m_shutdownStatus & OUT_OF_WATER) != 0) {
+			if (err.length()>0) {
+				err += ",";
+			}
+			err += "Out of water";
+		}
+		if ((m_shutdownStatus & OUT_OF_WATERSHUTDOWN) != 0) {
+			if (err.length()>0) {
+				err += ",";
+			}
+			err += "Out of water shutdown";
+		}
+		if ((m_shutdownStatus & OVER_TEMPERATURE) != 0) {
+			if (err.length()>0) {
+				err += ",";
+			}
+			err += "Over temperature";
+		}
+		
+		return err;
+			
 	}
 
 	@Override
