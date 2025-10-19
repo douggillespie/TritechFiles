@@ -130,7 +130,7 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 //	public short m_macAddress3;
 //	public short m_VDSLUpstreamSpeed1;
 //	public short m_VDSLUpstreamSpeed2;
-//	
+	//	
 	public boolean read(DataInput dis, boolean isOnline) throws CatalogException {
 		
 //		try {
@@ -263,6 +263,23 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 			throw new CatalogException(e.getMessage());
 		}
 		
+		return true;
+	}
+	
+	public boolean readCGemStatus(DataInput dis) throws CatalogException {
+		try {
+			m_bfVersion = dis.readShort();
+			m_deviceID = dis.readShort();
+			dis.skipBytes(4);
+			m_sonarAltIp = dis.readInt();
+			m_surfaceIp = dis.readInt();
+			m_flags = dis.readShort();
+//			m_
+					
+		} catch (IOException e) {
+			throw new CatalogException(e.getMessage());
+		}
+
 		return true;
 	}
 	

@@ -137,7 +137,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 	}
 
 	@Override
-	boolean loadFullRecord(ECDImageRecord geminiRecord) throws IOException {
+	public boolean loadFullRecord(ECDImageRecord geminiRecord) throws IOException {
 		File ecdFile = new File(getFilePath());
 		if (ecdFile.exists() == false) {
 			return false;

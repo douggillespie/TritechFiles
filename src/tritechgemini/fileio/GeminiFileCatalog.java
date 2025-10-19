@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import aris.fileio.ARISFileCatalog;
+
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -49,6 +52,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	public static final String ECDEND = ".ecd";
 	public static final String GLFEND = ".glf";
 	public static final String DATEND = ".dat";
+	public static final String ARISEND = "aris";
 
 	public GeminiFileCatalog(String filePath) {
 		this.filePath = filePath;
@@ -89,6 +93,9 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		case GLFEND:
 		case DATEND:
 			fileCatalog = new GLFFileCatalog(filePath);
+			break;
+		case ARISEND:
+			fileCatalog = new ARISFileCatalog(filePath);
 			break;
 		}
 		if (fileCatalog != null && create) {
@@ -239,7 +246,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @return true if load sucessful.
 	 * @throws IOException
 	 */
-	abstract boolean loadFullRecord(RecordClass geminiRecord) throws IOException;
+	abstract public boolean loadFullRecord(RecordClass geminiRecord) throws IOException;
 
 	/**
 	 * Start a full forwards only read of the catalog from start to end, sending all

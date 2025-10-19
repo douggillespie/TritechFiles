@@ -64,9 +64,12 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 		String fileName = file.getName();
 
 		int nRec = 0;
+		int totalRecords = 0; // count of records of any type
 		long t1 = System.currentTimeMillis();
 		int badRec = 0;
 		int nStatus = 0;
+		GLFGenericHeader previousHeader = null;
+		GLFImageRecord previousImage = null;
 		try {
 			while (true) {
 
@@ -74,6 +77,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 				if (header == null) {
 					break; // should be EOF.
 				}
+				totalRecords++;
 				if (header.m_idChar != 42) {
 					System.out.printf("Bad header id character in GLF: %d\n", header.m_idChar);
 				}
@@ -87,17 +91,25 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 						imageRecords.add(glfImage);
 						nRec++;
 					}
+					previousImage = glfImage;
+//					if (imageRecords.size() == 74) {
+//						System.out.println("Debug pause");
+//					}
 					break;
 				case 3: // status
 					GLFStatusData statusData = new GLFStatusData(header, fileName);
 					statusData.read(dis, false);
 					nStatus ++;
+					break; 
+				case 1: //V4 Protocol (e.g. SeaKing, SeaPrince, Micron)
+					int len = header.m_length;
+					dis.skipBytes(len);
 					break;
 				default:
-					System.out.println("Unknown record type in file " + this.getFilePath());
+					System.out.printf("Unknown record type %d in file %s\n", header.m_dataType, this.getFilePath());
 					break;
 				}
-
+				previousHeader = header;
 			}
 		} catch (CatalogException e) {
 			e.printStackTrace();
@@ -144,7 +156,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 	}
 
 	@Override
-	boolean loadFullRecord(GLFImageRecord geminiRecord) throws IOException {
+	public boolean loadFullRecord(GLFImageRecord geminiRecord) throws IOException {
 		InputStream inputStream;
 		if (fastInput != null) {
 			fastInput.resetDataStream();

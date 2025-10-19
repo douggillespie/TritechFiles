@@ -28,7 +28,6 @@ public class GLFGenericHeader implements Serializable {
 	public int m_node_ID;
 	public int m_spare;
 
-
 	public int read(DataInput dis) throws CatalogException {
 		try {
 			m_idChar = dis.readByte();
