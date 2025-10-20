@@ -53,6 +53,8 @@ public class BackgroundSub {
 	 */
 	private int updateCount;
 
+	private GeminiImageRecordI lastBackgroundRecord;
+
 	/**
 	 * Remove background from an image record. 
 	 * @param geminiRecord Image record
@@ -62,6 +64,7 @@ public class BackgroundSub {
 	public GeminiImageRecordI removeBackground(GeminiImageRecordI geminiRecord, boolean updateFirst) {
 		byte[] data = geminiRecord.getImageData();
 		byte[] newData = removeBackground(data, geminiRecord.getnBeam(), geminiRecord.getnRange(), updateFirst);
+		lastBackgroundRecord = geminiRecord;
 		GeminiImageRecordI newRecord = geminiRecord.clone();
 		newRecord.setImageData(newData);
 		return newRecord;
@@ -338,5 +341,13 @@ public class BackgroundSub {
 	 */
 	public void resetUpdateCount() {
 		updateCount = 0;
+	}
+
+	/**
+	 * Get the last record used for a background subtraction. 
+	 * @return last record used in background subtraction. 
+	 */
+	public GeminiImageRecordI getLastBackgroundRecord() {
+		return lastBackgroundRecord;
 	}
 }
