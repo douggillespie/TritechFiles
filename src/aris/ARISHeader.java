@@ -9,7 +9,6 @@ public abstract class ARISHeader implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public ARISHeader() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public abstract void readHeader(DataInput dis) throws IOException;

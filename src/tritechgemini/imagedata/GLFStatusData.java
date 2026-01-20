@@ -444,12 +444,43 @@ public class GLFStatusData extends PublicMessageHeader implements Serializable {
 	}
 	
 	/**
+	 * Is it in an alarm state we shouldn't ignore. 
+	 * @param ignoreOOW
+	 * @return
+	 */
+	public boolean isAlarm(boolean ignoreOOW) {
+		if (ignoreOOW) {
+			return ((m_shutdownStatus & (OUT_OF_WATERSHUTDOWN | OVER_TEMPERATURE)) != 0);
+		}
+		else {
+			return (m_shutdownStatus != 0);
+		}
+	}
+	
+	/**
 	 * Out of water flag (0x4) in m_shutdownStatus is set.
 	 * @return true if sonar is flagged as out of water. 
 	 */
 	public boolean isOutOfWater() {
-//		return ((m_shutdownStatus & OUT_OF_WATER) != 0);
-		return (m_shutdownStatus != 0);
+		return ((m_shutdownStatus & OUT_OF_WATER) != 0);
+//		return (m_shutdownStatus != 0);
+	}
+	
+	/**
+	 * Is outofwater shutdown set
+	 * @return
+	 */
+	public boolean isOutOfWaterShutdown() {
+		return ((m_shutdownStatus & OUT_OF_WATERSHUTDOWN) != 0);
+//		return (m_shutdownStatus != 0);
+	}
+	
+	/**
+	 * is overtemp alarm bit set. 
+	 * @return
+	 */
+	public boolean isOverTemp() {
+		return ((m_shutdownStatus & OVER_TEMPERATURE) != 0);
 	}
 	
 	/**

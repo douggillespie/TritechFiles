@@ -24,6 +24,8 @@ import tritechgemini.imagedata.GeminiRecordI;
 
 /**
  * Catalog of information that's in a single Gemini ECD of GLF file.
+ * These objects are serialized into index files for each data file
+ * so don't add anything that can't be serialized.
  * 
  * @author dg50
  *
@@ -105,6 +107,14 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		return fileCatalog;
 	}
 
+	/**
+	 * Called just after a catalogue object has been deserialised, giving 
+	 * the opportunity to check anything. note that the file path is 
+	 * set elsewhere to allow for the possibility that the absolute path
+	 * to the file may have changed, so it's probably not necessary
+	 * to do anything here. 
+	 * @param filePath2
+	 */
 	protected abstract void checkDeserialisedCatalog(String filePath2);
 
 	/**

@@ -114,6 +114,9 @@ public class FanPicksFromData extends ImageFanMaker {
 		if (dataPickLUT.length != nPixX) {
 			return true;
 		}
+		if (dataPickLUT.length == 0) {
+			return true;
+		}
 		if (dataPickLUT[0].length != nPixY) {
 			return true;
 		}

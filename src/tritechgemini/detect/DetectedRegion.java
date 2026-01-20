@@ -316,12 +316,17 @@ public class DetectedRegion extends TwoThresholdDetector {
 	}
 
 	/**
-	 * note that these are using the sonar coordinate frame which has x -ve. 
-	 * A hangover from the Tritech data where this made everything OK
+	 * note that these were changed in January 2026 to have a more 
+	 * rational xy coordinate with x positive to the right. The Tritech 
+	 * sonar angles are anticlockwise with 0 in the middle of the frame, so
+	 * need to negate this to get a positive x. 
+	 * If other sonars use a different rotation direction, something is going
+	 * to have to be done to manage that. Perhaps move these functions out of 
+	 * the region to where there is more information about the sonar ? 
 	 * due to the flip. 
 	 */
 	private void calcPeakXY() {
-		peakX = peakRange * Math.sin(peakBearing);
+		peakX = peakRange * -Math.sin(peakBearing);
 		peakY = peakRange * Math.cos(peakBearing);		
 	}
 	

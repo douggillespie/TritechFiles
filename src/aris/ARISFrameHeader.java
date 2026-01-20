@@ -4,6 +4,11 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.io.Serializable;
 
+/**
+ * ARIS Frame header. https://github.com/SoundMetrics/aris-file-sdk/blob/master/type-definitions/C/FrameHeader.h
+ * @author dg50
+ *
+ */
 public class ARISFrameHeader extends ARISHeader implements Serializable {
 
 	private static final long serialVersionUID = 1L;

@@ -21,6 +21,12 @@ import tritechgemini.fileio.LittleEndianDataInputStream;
 import tritechgemini.imagedata.GLFImageRecord;
 import tritechgemini.imagedata.GeminiImageRecordI;
 
+/**
+ * File catalog for ARIS sonar files. file format is very simple compared
+ * to Tritech files. Details are at https://github.com/SoundMetrics/aris-file-sdk/tree/master
+ * @author dg50
+ *
+ */
 public class ARISFileCatalog extends GeminiFileCatalog<ARISImageRecord> {
 
 	private static final long serialVersionUID = 1L;
@@ -33,7 +39,7 @@ public class ARISFileCatalog extends GeminiFileCatalog<ARISImageRecord> {
 	}
 
 	@Override
-	protected void checkDeserialisedCatalog(String filePath2) {
+	protected void checkDeserialisedCatalog(String filePath) {
 		// TODO Auto-generated method stub
 
 	}
