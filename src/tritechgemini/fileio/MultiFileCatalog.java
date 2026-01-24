@@ -210,6 +210,37 @@ public class MultiFileCatalog implements Serializable {
 	}
 	
 	/**
+	 * Find the catalog for a given record. 
+	 * @param geminiRecord
+	 * @return
+	 */
+	public GeminiFileCatalog findRecordCatalog(GeminiImageRecordI geminiRecord) {
+		return findRecordCatalog(geminiRecord.getDeviceId(), geminiRecord.getRecordTime());
+	}
+	
+	/**
+	 * find which catalog it is for the sonar id and time
+	 * @param deviceId
+	 * @param recordTime
+	 * @return catalog reference or null
+	 */
+	public GeminiFileCatalog findRecordCatalog(int deviceId, long recordTime) {
+		for (int i = 0; i < catalogList.size(); i++) {
+			GeminiFileCatalog catalog = catalogList.get(i);
+			long firstTime = catalog.getFirstRecordTime() ;
+			long lastTime = catalog.getLastRecordTime() ;
+			if (recordTime < firstTime ) {
+				continue;
+			}
+			if (recordTime > lastTime) {
+				break;
+			}
+			return catalog;
+		}
+		return null;
+	}
+
+	/**
 	 * Find the closest record for the given sonar id to the time in milliseconds
 	 * @param sonarID sonar ID
 	 * @param timeMillis time milliseconds
@@ -336,6 +367,26 @@ public class MultiFileCatalog implements Serializable {
 
 	public void stopCataloging() {
 		stopCataloging = true;
+	}
+
+	/**
+	 * call if a record has not been loaded fully. will need to find 
+	 * the right catalog, then load. 
+	 * @param imageRecord
+	 * @return
+	 */
+	public boolean loadFully(GeminiImageRecordI imageRecord) {
+		GeminiFileCatalog catalog = findRecordCatalog(imageRecord);
+		boolean loaded = false;
+		if (catalog == null) {
+			return false;
+		}
+		try {
+			loaded = catalog.loadFullRecord(imageRecord);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return loaded;
 	}
 	
 	

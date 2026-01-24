@@ -1,5 +1,6 @@
 package aris;
 
+import tritechgemini.echogram.EchoLineStore;
 import tritechgemini.imagedata.GeminiImageRecordI;
 
 public class ARISImageRecord implements GeminiImageRecordI {
@@ -13,6 +14,8 @@ public class ARISImageRecord implements GeminiImageRecordI {
 	private double[] bearingTable;
 	private long loadTime;
 	private int extraRanges;
+
+	private transient EchoLineStore echoLineStore;
 
 	public ARISImageRecord(ARISFileHeader fileHeader, ARISFrameHeader frameHeader, double[] bearingTable) {
 		this.fileHeader = fileHeader;
@@ -182,6 +185,14 @@ public class ARISImageRecord implements GeminiImageRecordI {
 
 	public void setExtraRanges(int extras) {
 		extraRanges = extras;
+	}
+
+	@Override
+	public EchoLineStore getEchoLineStore() {
+		if (echoLineStore == null) {
+			echoLineStore = new EchoLineStore();
+		}
+		return echoLineStore;
 	}
 
 }

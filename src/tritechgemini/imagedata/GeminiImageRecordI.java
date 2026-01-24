@@ -2,6 +2,8 @@ package tritechgemini.imagedata;
 
 import java.io.Serializable;
 
+import tritechgemini.echogram.EchoLineStore;
+
 public interface GeminiImageRecordI extends GeminiRecordI, Cloneable, Serializable {
 
 	/**
@@ -131,5 +133,11 @@ public interface GeminiImageRecordI extends GeminiRecordI, Cloneable, Serializab
 	 * @return index of closest range bin. 
 	 */
 	public int getRangeIndex(double range);
+	
+	/**
+	 * Get storage for echogram lines. 
+	 * @return
+	 */
+	public EchoLineStore getEchoLineStore();
 	
 }
