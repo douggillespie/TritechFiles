@@ -45,7 +45,7 @@ public class StandardEchogramLineMaker implements EchogramLineMaker {
 	 * @return
 	 */
 	public EchogramLine makeEchogramLine(GeminiImageRecordI imageRecord, EchoLineDef echoLineDef) {
-		boolean hasIm = imageRecord.isFullyLoaded();
+		boolean hasIm = imageRecord.getImageData() != null;
 		if (hasIm == false && multiFileCatalog != null) {
 			if (multiFileCatalog.loadFully(imageRecord) == false) {
 				return null;

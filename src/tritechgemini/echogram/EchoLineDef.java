@@ -52,6 +52,11 @@ public class EchoLineDef implements Serializable, Cloneable {
 		return this.bearingBin1 == other.bearingBin1 && this.bearingBin2 == other.bearingBin2;
 	}
 
+	@Override
+	public int hashCode() {
+		return bearingBin1<<12 + bearingBin2;
+	}
+
 	
 
 }

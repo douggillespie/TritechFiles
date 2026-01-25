@@ -233,7 +233,7 @@ public class MultiFileCatalog implements Serializable {
 				continue;
 			}
 			if (recordTime > lastTime) {
-				break;
+				continue;
 			}
 			return catalog;
 		}

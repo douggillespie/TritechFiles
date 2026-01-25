@@ -35,4 +35,8 @@ public class EchogramLine {
 		return data;
 	}
 
+	public void setGeminiRecord(GeminiImageRecordI imageRecord) {
+		this.geminiRecord = imageRecord;		
+	}
+
 }
