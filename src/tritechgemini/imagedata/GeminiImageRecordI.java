@@ -64,6 +64,13 @@ public interface GeminiImageRecordI extends GeminiRecordI, Cloneable, Serializab
 	public int getRecordNumber();
 	
 	/**
+	 * Set the record number
+	 * @param recordNumber
+	 */
+	public void setRecordNumber(int recordNumber);
+	
+	
+	/**
 	 * Generic type of sonar<br>
 	 * Imager = 0<br>
 	 * Profiler = 1<br>

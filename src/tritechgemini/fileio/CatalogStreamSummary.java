@@ -12,6 +12,7 @@ public class CatalogStreamSummary {
 	public static final int PROCESSSTOP = 1;
 	public static final int FILEEND = 2;
 	public static final int READERROR = 3;
+	public static final int DATAGAP =4;
 	
 	public long firstRecordTime;
 	public long lastRecordTime;

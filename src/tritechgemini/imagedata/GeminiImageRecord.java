@@ -126,6 +126,11 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 	}
 
 	@Override
+	public void setRecordNumber(int recordNumber) {
+		this.recordIndex = recordNumber;
+	}
+
+	@Override
 	public boolean isFullyLoaded() {
 		return isFullyRead;
 	}

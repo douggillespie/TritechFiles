@@ -9,6 +9,9 @@ public class EchoLineDef implements Serializable, Cloneable {
 	int bearingBin1;
 	
 	int bearingBin2;
+	
+	int meanOf;
+
 
 	/**
 	 * Create a echo line definition using two bearing bins, which 
@@ -17,10 +20,11 @@ public class EchoLineDef implements Serializable, Cloneable {
 	 * @param bearingBin1
 	 * @param bearingBin2
 	 */
-	public EchoLineDef(int bearingBin1, int bearingBin2) {
+	public EchoLineDef(int bearingBin1, int bearingBin2, int meanOf) {
 		super();
 		this.bearingBin1 = bearingBin1;
 		this.bearingBin2 = bearingBin2;
+		this.meanOf = meanOf;
 	}
 	
 	/**
@@ -49,12 +53,12 @@ public class EchoLineDef implements Serializable, Cloneable {
 			return false;
 		}
 		EchoLineDef other = (EchoLineDef) arg0;
-		return this.bearingBin1 == other.bearingBin1 && this.bearingBin2 == other.bearingBin2;
+		return this.bearingBin1 == other.bearingBin1 && this.bearingBin2 == other.bearingBin2 && this.meanOf == other.meanOf;
 	}
 
 	@Override
 	public int hashCode() {
-		return bearingBin1<<12 + bearingBin2;
+		return bearingBin1<<12 + bearingBin2 + meanOf<<20;
 	}
 
 	

@@ -1,5 +1,7 @@
 package tritechgemini.echogram;
 
+import java.util.Arrays;
+
 import tritechgemini.fileio.MultiFileCatalog;
 import tritechgemini.imagedata.GeminiImageRecordI;
 
@@ -83,10 +85,35 @@ public class StandardEchogramLineMaker implements EchogramLineMaker {
 		 *  consider other options (mean, mean of max few values, etc. in future) 
 		 */
 		short val = 0;
-		for (int i = s0; i < s1; i++) {
-			if (shortData[i] > val) {
-				val = shortData[i];
+		if (echoLineDef.meanOf == (s1-s0) ) {
+			// it's a straight mean. 
+			int tot = 0;
+			for (int i = s0; i < s1; i++) {
+				tot += shortData[i];
 			}
+			val = (short) (tot/echoLineDef.meanOf);
+		}
+		else if (echoLineDef.meanOf == 1) {
+			// it's a straight forward maximum
+			for (int i = s0; i < s1; i++) {
+				if (shortData[i] > val) {
+					val = shortData[i];
+				}
+			}
+		}
+		else {
+			/*
+			 *  need to get the mean of the max few. Just sort it and be done
+			 *  though for small n it might be easier to repeat search  
+			 */
+			short[] copy = Arrays.copyOfRange(shortData, s0, s1);
+			Arrays.sort(copy);
+			int n = copy.length;
+			int tot = 0;
+			for (int i = n-echoLineDef.meanOf; i < n; i++) {
+				tot += copy[i];
+			}
+			val = (short) (tot/echoLineDef.meanOf);
 		}
 		return val;
 	}
