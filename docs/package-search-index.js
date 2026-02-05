@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"tritechgemini.fileio"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"aris"},{"l":"aris.beams"},{"l":"aris.fileio"},{"l":"tritechgemini.detect"},{"l":"tritechgemini.echogram"},{"l":"tritechgemini.fileio"},{"l":"tritechgemini.imagedata"}];updateSearchResults();
