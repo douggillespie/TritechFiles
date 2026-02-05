@@ -24,9 +24,13 @@ Full Java documentation on the library is available at <https://douggillespie.gi
 
 Conversion of the rectangular image data to a fan image requires a number of transforms to map from the beam/distance data to an x,y grid. To speed this up, the code uses a system of lookup tables that tell each point in the generated xy grid where to take data from the raw data. This is all handled in the Java object [FanPicksFromData](https://douggillespie.github.io/TritechFiles/tritechgemini/imagedata/FanPicksFromData.html). The constructor is passed either 1,2 or 4 telling it how many adjacent points in the raw data to use in each output point and will use a weighted average of up to four raw data points to generate a value for each point in the xy grid. An example of usage is in the accompanying Python notebook.
 
-![Raw data](./rawimage.jpeg)
+Raw data image
 
-![Fan image](./fanimage.jpeg)
+<img src="rawimage.jpeg" alt="Fan data" height="300"/>
+
+Fan data image
+
+<img src="fanimage.jpeg" alt="Raw data" height="300"/>
 
 ## Detectors and background subtraction
 
