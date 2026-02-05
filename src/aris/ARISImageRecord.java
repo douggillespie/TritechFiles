@@ -1,5 +1,8 @@
 package aris;
 
+import java.util.Arrays;
+
+import tritechgemini.echogram.EchoLineStore;
 import tritechgemini.imagedata.GeminiImageRecordI;
 
 public class ARISImageRecord implements GeminiImageRecordI {
@@ -13,6 +16,8 @@ public class ARISImageRecord implements GeminiImageRecordI {
 	private double[] bearingTable;
 	private long loadTime;
 	private int extraRanges;
+
+	private transient EchoLineStore echoLineStore;
 
 	public ARISImageRecord(ARISFileHeader fileHeader, ARISFrameHeader frameHeader, double[] bearingTable) {
 		this.fileHeader = fileHeader;
@@ -159,8 +164,18 @@ public class ARISImageRecord implements GeminiImageRecordI {
 
 	@Override
 	public ARISImageRecord clone() {
-		ARISImageRecord aClone = new ARISImageRecord(fileHeader, frameHeader, bearingTable);
-		aClone.setImageData(getImageData());
+//		ARISImageRecord aClone = new ARISImageRecord(fileHeader, frameHeader, bearingTable);
+//		aClone.setImageData(getImageData());
+		ARISImageRecord aClone = null;
+		try {
+			aClone = (ARISImageRecord) super.clone();
+			if (imageData != null) {
+				aClone.setImageData(Arrays.copyOf(imageData, imageData.length));
+			}
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return aClone;
 	}
 
@@ -182,6 +197,20 @@ public class ARISImageRecord implements GeminiImageRecordI {
 
 	public void setExtraRanges(int extras) {
 		extraRanges = extras;
+	}
+
+	@Override
+	public EchoLineStore getEchoLineStore() {
+		if (echoLineStore == null) {
+			echoLineStore = new EchoLineStore();
+		}
+		return echoLineStore;
+	}
+
+	@Override
+	public void setRecordNumber(int recordNumber) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

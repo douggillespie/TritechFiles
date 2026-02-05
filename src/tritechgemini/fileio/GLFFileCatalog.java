@@ -658,7 +658,7 @@ public class GLFFileCatalog extends GeminiFileCatalog<GLFImageRecord> {
 			writeSerializedCatalog(getFilePath(), this);
 		}
 		return new CatalogStreamSummary(nRec, firstRecordTime, lastRecordTime,
-				continueStream ? CatalogStreamSummary.FILEEND : CatalogStreamSummary.PROCESSSTOP);
+				continueStream ? CatalogStreamSummary.FILEEND : CatalogStreamSummary.DATAGAP);
 	}
 
 	@Override

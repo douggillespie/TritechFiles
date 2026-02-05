@@ -403,7 +403,7 @@ public class ECDFileCatalog extends GeminiFileCatalog<ECDImageRecord> {
 		}
 
 		return new CatalogStreamSummary(recordsRead, firstRecordTime, lastRecordTime,
-				continueStream ? CatalogStreamSummary.FILEEND : CatalogStreamSummary.PROCESSSTOP);
+				continueStream ? CatalogStreamSummary.FILEEND : CatalogStreamSummary.DATAGAP);
 	}
 
 	@Override

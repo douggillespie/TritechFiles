@@ -2,6 +2,7 @@ package tritechgemini.imagedata;
 
 import java.io.Serializable;
 
+import tritechgemini.echogram.EchoLineStore;
 import tritechgemini.fileio.GLFGenericHeader;
 
 abstract public class GeminiImageRecord extends PublicMessageHeader implements GeminiImageRecordI, Cloneable, Serializable {
@@ -61,6 +62,8 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 	 * time taken to load the record from file in nanoseconds. 
 	 */
 	private long recordLoadNanos;
+
+	private transient EchoLineStore echoLineStore;
 	
 
 	/**
@@ -123,6 +126,11 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 	}
 
 	@Override
+	public void setRecordNumber(int recordNumber) {
+		this.recordIndex = recordNumber;
+	}
+
+	@Override
 	public boolean isFullyLoaded() {
 		return isFullyRead;
 	}
@@ -180,6 +188,14 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements G
 		rangeInd = Math.max(0,  rangeInd);
 		rangeInd = Math.min(nR-1, rangeInd);
 		return rangeInd;
+	}
+
+	@Override
+	public EchoLineStore getEchoLineStore() {
+		if (echoLineStore == null) {
+			echoLineStore = new EchoLineStore();
+		}
+		return echoLineStore;
 	}
 
 }

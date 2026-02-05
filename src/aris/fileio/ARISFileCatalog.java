@@ -154,16 +154,17 @@ public class ARISFileCatalog extends GeminiFileCatalog<ARISImageRecord> {
 		catch (Exception e) {
 			throw new CatalogException(e);
 		}
+		CatalogStreamSummary cs;
 		if (continueStream == false) {
 			// if we told it to stop. If it was EOF, continueStream will still be true
-			return null;
+			cs = new CatalogStreamSummary(nFrames, firstTime, lastTime, CatalogStreamSummary.DATAGAP);
 		}
 		else {
 			analyseCatalog();
 			writeSerializedCatalog(getFilePath(), this);
+			cs = new CatalogStreamSummary(nFrames, firstTime, lastTime, CatalogStreamSummary.FILEEND);
 		}
 
-		CatalogStreamSummary cs = new CatalogStreamSummary(nFrames, firstTime, lastTime, CatalogStreamSummary.FILEEND);
 		return cs;
 	}
 

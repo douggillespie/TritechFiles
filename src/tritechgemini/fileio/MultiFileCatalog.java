@@ -1,5 +1,6 @@
 package tritechgemini.fileio;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,7 +35,36 @@ public class MultiFileCatalog implements Serializable {
 		catalogList = new ArrayList<>();
 		catalogObservers = new ArrayList<>();
 	}
-	
+
+	/**
+	 * Catalog a single file or a folder of files
+	 * @param fileOrFolder a single file or folder name If it's a folder, will automaticall do sub folders. 
+	 */
+	public boolean catalogFiles(String fileOrFolder) {
+		return catalogFiles(fileOrFolder, true);
+	}
+	/**
+	 * Catalog a single file or a folder of files
+	 * @param fileOrFolder a single file or folder name
+	 * @param subFolders only applies if cataloging a folder
+	 */
+	public boolean catalogFiles(String fileOrFolder, boolean subFolders) {
+		File file = new File(fileOrFolder) ;
+		if (file.exists() == false) {
+			return false;
+		}
+		String[] fileList;
+		if (file.isDirectory()) {
+			SonarFileList sfl = new SonarFileList(fileOrFolder, subFolders);
+			fileList = sfl.getFiles();
+		}
+		else {
+			fileList = new String[1];
+			fileList[0] = fileOrFolder;
+		}
+		catalogFiles(fileList);
+		return true;
+	}
 	/**
 	 * Build a catalog from a list of files. 
 	 * @param fileList
@@ -210,6 +240,37 @@ public class MultiFileCatalog implements Serializable {
 	}
 	
 	/**
+	 * Find the catalog for a given record. 
+	 * @param geminiRecord
+	 * @return
+	 */
+	public GeminiFileCatalog findRecordCatalog(GeminiImageRecordI geminiRecord) {
+		return findRecordCatalog(geminiRecord.getDeviceId(), geminiRecord.getRecordTime());
+	}
+	
+	/**
+	 * find which catalog it is for the sonar id and time
+	 * @param deviceId
+	 * @param recordTime
+	 * @return catalog reference or null
+	 */
+	public GeminiFileCatalog findRecordCatalog(int deviceId, long recordTime) {
+		for (int i = 0; i < catalogList.size(); i++) {
+			GeminiFileCatalog catalog = catalogList.get(i);
+			long firstTime = catalog.getFirstRecordTime() ;
+			long lastTime = catalog.getLastRecordTime() ;
+			if (recordTime < firstTime ) {
+				continue;
+			}
+			if (recordTime > lastTime) {
+				continue;
+			}
+			return catalog;
+		}
+		return null;
+	}
+
+	/**
 	 * Find the closest record for the given sonar id to the time in milliseconds
 	 * @param sonarID sonar ID
 	 * @param timeMillis time milliseconds
@@ -336,6 +397,26 @@ public class MultiFileCatalog implements Serializable {
 
 	public void stopCataloging() {
 		stopCataloging = true;
+	}
+
+	/**
+	 * call if a record has not been loaded fully. will need to find 
+	 * the right catalog, then load. 
+	 * @param imageRecord
+	 * @return
+	 */
+	public boolean loadFully(GeminiImageRecordI imageRecord) {
+		GeminiFileCatalog catalog = findRecordCatalog(imageRecord);
+		boolean loaded = false;
+		if (catalog == null) {
+			return false;
+		}
+		try {
+			loaded = catalog.loadFullRecord(imageRecord);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return loaded;
 	}
 	
 	
