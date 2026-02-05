@@ -1,5 +1,6 @@
 package tritechgemini.fileio;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,7 +35,36 @@ public class MultiFileCatalog implements Serializable {
 		catalogList = new ArrayList<>();
 		catalogObservers = new ArrayList<>();
 	}
-	
+
+	/**
+	 * Catalog a single file or a folder of files
+	 * @param fileOrFolder a single file or folder name If it's a folder, will automaticall do sub folders. 
+	 */
+	public boolean catalogFiles(String fileOrFolder) {
+		return catalogFiles(fileOrFolder, true);
+	}
+	/**
+	 * Catalog a single file or a folder of files
+	 * @param fileOrFolder a single file or folder name
+	 * @param subFolders only applies if cataloging a folder
+	 */
+	public boolean catalogFiles(String fileOrFolder, boolean subFolders) {
+		File file = new File(fileOrFolder) ;
+		if (file.exists() == false) {
+			return false;
+		}
+		String[] fileList;
+		if (file.isDirectory()) {
+			SonarFileList sfl = new SonarFileList(fileOrFolder, subFolders);
+			fileList = sfl.getFiles();
+		}
+		else {
+			fileList = new String[1];
+			fileList[0] = fileOrFolder;
+		}
+		catalogFiles(fileList);
+		return true;
+	}
 	/**
 	 * Build a catalog from a list of files. 
 	 * @param fileList

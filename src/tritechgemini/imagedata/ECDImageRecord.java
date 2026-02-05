@@ -128,7 +128,12 @@ I would try to avoid using the PingTail Extension record, unless you think there
 
 	@Override
 	public int getSonarIndex() {
-		return m_pid2;
+		/**
+		 * THis seems OK for glf data, but for ECD data this is often giving a big
+		 * number, which mashes the system. For now set at 0 so we can work, but beaware 
+		 * that this will mess and ECD analysis with multiple sonars.  
+		 */
+		return 0;// m_pid2 & 0x255;
 	}
 
 	@Override
