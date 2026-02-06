@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 /**
  * A connected region of points found by the detector. 
@@ -14,7 +14,7 @@ import tritechgemini.imagedata.GeminiImageRecordI;
  */
 public class DetectedRegion extends TwoThresholdDetector {
 	
-	private GeminiImageRecordI geminiRecord;
+	private SonarImageRecordI geminiRecord;
 	
 	private ArrayList<Integer> pointIndexes;
 	
@@ -96,7 +96,7 @@ public class DetectedRegion extends TwoThresholdDetector {
 	 * @param geminiRecord
 	 * @param pointIndex
 	 */
-	public DetectedRegion(GeminiImageRecordI geminiRecord, int pointIndex) {
+	public DetectedRegion(SonarImageRecordI geminiRecord, int pointIndex) {
 		this.geminiRecord = geminiRecord;
 		this.timeMilliseconds = geminiRecord.getRecordTime();
 		pointIndexes = new ArrayList<Integer>();
@@ -206,7 +206,7 @@ public class DetectedRegion extends TwoThresholdDetector {
 	/**
 	 * @return the geminiRecord
 	 */
-	public GeminiImageRecordI getGeminiRecord() {
+	public SonarImageRecordI getGeminiRecord() {
 		return geminiRecord;
 	}
 

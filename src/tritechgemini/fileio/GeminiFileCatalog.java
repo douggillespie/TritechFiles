@@ -19,8 +19,8 @@ import aris.fileio.ARISFileCatalog;
 import java.util.Set;
 import java.util.TimeZone;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
-import tritechgemini.imagedata.GeminiRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
+import tritechgemini.imagedata.SonarRecordI;
 
 /**
  * Catalog of information that's in a single Gemini ECD of GLF file.
@@ -30,7 +30,7 @@ import tritechgemini.imagedata.GeminiRecordI;
  * @author dg50
  *
  */
-public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> implements Serializable {
+public abstract class GeminiFileCatalog<RecordClass extends SonarImageRecordI> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -324,7 +324,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 		long bestT = Math.abs(recordTime - imageRecords.get(0).getRecordTime());
 		int closest = 0;
 		for (int i = 1; i < imageRecords.size(); i++) {
-			GeminiImageRecordI imRec = imageRecords.get(i);
+			SonarImageRecordI imRec = imageRecords.get(i);
 			if (imRec.getRecordTime() < recordTime) {
 				// if the records are before our record, then we always want it.
 				bestT = imRec.getRecordTime();
@@ -470,7 +470,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @param timeMillis time in milliseconds
 	 * @return closest record or null
 	 */
-	public GeminiImageRecordI findRecordForIDandTime(int sonarID, long timeMillis) {
+	public SonarImageRecordI findRecordForIDandTime(int sonarID, long timeMillis) {
 		long dT = Long.MAX_VALUE;
 		RecordClass bestRec = null;
 		for (RecordClass aRec : imageRecords) {
@@ -512,7 +512,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @param recordOffest
 	 * @return relative image record in list.
 	 */
-	public GeminiImageRecordI findRelativeRecord(GeminiImageRecordI baseRecord, int recordOffset) {
+	public SonarImageRecordI findRelativeRecord(SonarImageRecordI baseRecord, int recordOffset) {
 		long dT = Long.MAX_VALUE;
 		RecordClass bestRec = null;
 		if (baseRecord == null) {
@@ -528,7 +528,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	/*
 	 * Get the index of a record within the catalog.
 	 */
-	public int getRecordIndex(GeminiRecordI currentRecord) {
+	public int getRecordIndex(SonarRecordI currentRecord) {
 		if (currentRecord == null) {
 			return -1;
 		}
@@ -558,7 +558,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @param index
 	 * @return record index (or -1 if not found)
 	 */
-	public GeminiImageRecordI getRecordByIndex(int index) {
+	public SonarImageRecordI getRecordByIndex(int index) {
 		if (index < 0 || index >= imageRecords.size()) {
 			return null;
 		}
@@ -581,7 +581,7 @@ public abstract class GeminiFileCatalog<RecordClass extends GeminiImageRecordI> 
 	 * @param timeMillis time in milliseconds
 	 * @return closest record or null
 	 */
-	public GeminiImageRecordI findRecordForIndexandTime(int sonarIndex, long timeMillis) {
+	public SonarImageRecordI findRecordForIndexandTime(int sonarIndex, long timeMillis) {
 		long dT = Long.MAX_VALUE;
 		RecordClass bestRec = null;
 		for (RecordClass aRec : imageRecords) {

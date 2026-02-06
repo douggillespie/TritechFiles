@@ -3,9 +3,9 @@ package aris;
 import java.util.Arrays;
 
 import tritechgemini.echogram.EchoLineStore;
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
-public class ARISImageRecord implements GeminiImageRecordI {
+public class ARISImageRecord implements SonarImageRecordI {
 
 	private static final long serialVersionUID = 1L;
 	

@@ -3,7 +3,7 @@ package tritechgemini.echogram;
 import java.util.Arrays;
 
 import tritechgemini.fileio.MultiFileCatalog;
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 public class StandardEchogramLineMaker implements EchogramLineMaker {
 
@@ -24,7 +24,7 @@ public class StandardEchogramLineMaker implements EchogramLineMaker {
 	 * @param echoLineDef
 	 * @return
 	 */
-	public EchogramLine getEchogramLine(GeminiImageRecordI imageRecord, EchoLineDef echoLineDef) {
+	public EchogramLine getEchogramLine(SonarImageRecordI imageRecord, EchoLineDef echoLineDef) {
 		echoStore = imageRecord.getEchoLineStore();
 		if (echoStore == null) {
 			return null;
@@ -46,7 +46,7 @@ public class StandardEchogramLineMaker implements EchogramLineMaker {
 	 * @param echoLineDef
 	 * @return
 	 */
-	public EchogramLine makeEchogramLine(GeminiImageRecordI imageRecord, EchoLineDef echoLineDef) {
+	public EchogramLine makeEchogramLine(SonarImageRecordI imageRecord, EchoLineDef echoLineDef) {
 		boolean hasIm = imageRecord.getImageData() != null;
 		if (hasIm == false && multiFileCatalog != null) {
 			if (multiFileCatalog.loadFully(imageRecord) == false) {

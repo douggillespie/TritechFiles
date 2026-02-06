@@ -51,7 +51,7 @@ public class FanPicksFromData extends ImageFanMaker {
 	}
 	
 	@Override
-	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, int nPixY, byte[] data) {
+	public FanImageData createFanData(SonarImageRecordI geminiRecord, int nPixX, int nPixY, byte[] data) {
 		if (geminiRecord == null || geminiRecord.getImageData() == null) {
 			return null;
 		}
@@ -104,7 +104,7 @@ public class FanPicksFromData extends ImageFanMaker {
 		return new FanImageData(geminiRecord, image, mPerPixX, mPerPixY);
 	}
 
-	private boolean needNewLUT(GeminiImageRecordI geminiRecord, int nPixX, int nPixY) {
+	private boolean needNewLUT(SonarImageRecordI geminiRecord, int nPixX, int nPixY) {
 		if (geminiRecordLength != geminiRecord.getImageData().length) {
 			return true;
 		}
@@ -130,7 +130,7 @@ public class FanPicksFromData extends ImageFanMaker {
 	 * @param nPixX n x Pixels in image
 	 * @param nPixY n y Pixels in image
 	 */
-	private void createLUTs(GeminiImageRecordI geminiRecord, int nPixX, int nPixY) {
+	private void createLUTs(SonarImageRecordI geminiRecord, int nPixX, int nPixY) {
 		double[] bearingTable = geminiRecord.getBearingTable();
 		if (bearingTable == null) {
 			return;

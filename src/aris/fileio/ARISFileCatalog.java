@@ -19,7 +19,7 @@ import tritechgemini.fileio.CountingInputStream;
 import tritechgemini.fileio.GeminiFileCatalog;
 import tritechgemini.fileio.LittleEndianDataInputStream;
 import tritechgemini.imagedata.GLFImageRecord;
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 /**
  * File catalog for ARIS sonar files. file format is very simple compared

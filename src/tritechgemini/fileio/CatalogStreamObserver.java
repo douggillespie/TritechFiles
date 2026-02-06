@@ -1,7 +1,7 @@
 package tritechgemini.fileio;
 
 import tritechgemini.imagedata.GLFStatusData;
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 public interface CatalogStreamObserver {
 
@@ -10,7 +10,7 @@ public interface CatalogStreamObserver {
 	 * @param glfImage
 	 * @return true if process streaming should continue, false otherwise. 
 	 */
-	boolean newImageRecord(GeminiImageRecordI glfImage);
+	boolean newImageRecord(SonarImageRecordI glfImage);
 
 	/**
 	 * Process new status data

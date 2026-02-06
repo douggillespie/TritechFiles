@@ -1,14 +1,14 @@
 package tritechgemini.echogram;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 public class EchogramLine {
 
-	private GeminiImageRecordI geminiRecord;
+	private SonarImageRecordI geminiRecord;
 	private EchoLineDef echoLineDef;
 	private short[] data;
 
-	public EchogramLine(GeminiImageRecordI geminiRecord, EchoLineDef echoLineDef, short[] data) {
+	public EchogramLine(SonarImageRecordI geminiRecord, EchoLineDef echoLineDef, short[] data) {
 		this.geminiRecord = geminiRecord;
 		this.echoLineDef = echoLineDef;
 		this.data = data;
@@ -17,7 +17,7 @@ public class EchogramLine {
 	/**
 	 * @return the geminiRecord
 	 */
-	public GeminiImageRecordI getGeminiRecord() {
+	public SonarImageRecordI getGeminiRecord() {
 		return geminiRecord;
 	}
 
@@ -35,7 +35,7 @@ public class EchogramLine {
 		return data;
 	}
 
-	public void setGeminiRecord(GeminiImageRecordI imageRecord) {
+	public void setGeminiRecord(SonarImageRecordI imageRecord) {
 		this.geminiRecord = imageRecord;		
 	}
 

@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import tritechgemini.imagedata.FanPicksFromData;
 import tritechgemini.imagedata.GLFStatusData;
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 import tritechgemini.imagedata.ImageFanMaker;
 
 
@@ -151,7 +151,7 @@ public class ECDFileTest implements CatalogStreamObserver {
 	}
 
 	@Override
-	public boolean newImageRecord(GeminiImageRecordI glfImage) {
+	public boolean newImageRecord(SonarImageRecordI glfImage) {
 		System.out.println("Image record " + glfImage.getRecordNumber());
 		return true;
 	}

@@ -2,7 +2,7 @@ package tritechgemini.detect;
 
 import java.util.ArrayList;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 /**
  * Detector which searches for detected regions in data. Uses two thresholds, a "minimum maximum" (thHigh) 
@@ -66,7 +66,7 @@ public class TwoThresholdDetector implements RegionDetector {
 	 * @return
 	 */
 	@Override
-	public ArrayList<DetectedRegion> detectRegions(GeminiImageRecordI rawGeminiRecord, GeminiImageRecordI denoisedRecord, int thHigh, int thLow, int nConnect) {
+	public ArrayList<DetectedRegion> detectRegions(SonarImageRecordI rawGeminiRecord, SonarImageRecordI denoisedRecord, int thHigh, int thLow, int nConnect) {
 		return detectRegions(denoisedRecord, denoisedRecord.getImageData(), thHigh, thLow, nConnect);
 	}
 
@@ -80,7 +80,7 @@ public class TwoThresholdDetector implements RegionDetector {
 	 * @param thLow
 	 * @return
 	 */
-	public ArrayList<DetectedRegion> detectRegions(GeminiImageRecordI denoisedRecord, byte[] recordData, int thHigh, int thLow, int nConnect) {
+	public ArrayList<DetectedRegion> detectRegions(SonarImageRecordI denoisedRecord, byte[] recordData, int thHigh, int thLow, int nConnect) {
 		/*
 		 * First copy the data since it's going to be destroyed.
 		 */

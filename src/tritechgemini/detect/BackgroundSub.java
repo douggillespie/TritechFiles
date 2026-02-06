@@ -2,7 +2,7 @@ package tritechgemini.detect;
 
 import java.util.Arrays;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 /**
  * Really simple background subtraction class
@@ -53,7 +53,7 @@ public class BackgroundSub {
 	 */
 	private int updateCount;
 
-	private GeminiImageRecordI lastBackgroundRecord;
+	private SonarImageRecordI lastBackgroundRecord;
 
 	/**
 	 * Remove background from an image record. 
@@ -61,11 +61,11 @@ public class BackgroundSub {
 	 * @param updateFirst  update the background measurement before subtraction
 	 * @return clone of the input record with updated background. 
 	 */
-	public GeminiImageRecordI removeBackground(GeminiImageRecordI geminiRecord, boolean updateFirst) {
+	public SonarImageRecordI removeBackground(SonarImageRecordI geminiRecord, boolean updateFirst) {
 		byte[] data = geminiRecord.getImageData();
 		byte[] newData = removeBackground(data, geminiRecord.getnBeam(), geminiRecord.getnRange(), updateFirst);
 		lastBackgroundRecord = geminiRecord;
-		GeminiImageRecordI newRecord = geminiRecord.clone();
+		SonarImageRecordI newRecord = geminiRecord.clone();
 		newRecord.setImageData(newData);
 		return newRecord;
 	}
@@ -347,7 +347,7 @@ public class BackgroundSub {
 	 * Get the last record used for a background subtraction. 
 	 * @return last record used in background subtraction. 
 	 */
-	public GeminiImageRecordI getLastBackgroundRecord() {
+	public SonarImageRecordI getLastBackgroundRecord() {
 		return lastBackgroundRecord;
 	}
 }

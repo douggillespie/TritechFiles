@@ -17,7 +17,7 @@ abstract public class ImageFanMaker {
 	 * @param geminiRecord
 	 * @return Fan image data
 	 */
-	public FanImageData createFanData(GeminiImageRecordI geminiRecord) {
+	public FanImageData createFanData(SonarImageRecordI geminiRecord) {
 		return createFanData(geminiRecord, getDefaultXbins(geminiRecord));
 	}
 	/**
@@ -27,7 +27,7 @@ abstract public class ImageFanMaker {
 	 * @param raw image data
 	 * @return Fan image data
 	 */
-	public FanImageData createFanData(GeminiImageRecordI geminiRecord, byte[] imageData) {
+	public FanImageData createFanData(SonarImageRecordI geminiRecord, byte[] imageData) {
 		return createFanData(geminiRecord, getDefaultXbins(geminiRecord), imageData);
 	}
 	
@@ -38,7 +38,7 @@ abstract public class ImageFanMaker {
 	 * @param nXbins number of x pixels
 	 * @return Fan image data
 	 */
-	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nXbins) {
+	public FanImageData createFanData(SonarImageRecordI geminiRecord, int nXbins) {
 		return createFanData(geminiRecord, nXbins, geminiRecord.getImageData());
 	}
 
@@ -50,7 +50,7 @@ abstract public class ImageFanMaker {
 	 * @param raw image data
 	 * @return Fan image data
 	 */
-	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, byte[] imageData) {
+	public FanImageData createFanData(SonarImageRecordI geminiRecord, int nPixX, byte[] imageData) {
 		double[] bearingTable = geminiRecord.getBearingTable();
 		if (bearingTable == null || bearingTable.length == 0) {
 			return null;
@@ -68,7 +68,7 @@ abstract public class ImageFanMaker {
 	 * @param nPixY number of Y pixels
 	 * @return Fan image data
 	 */
-	public FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, int nPixY) {
+	public FanImageData createFanData(SonarImageRecordI geminiRecord, int nPixX, int nPixY) {
 		return createFanData(geminiRecord, nPixX, nPixY, geminiRecord.getImageData());
 	}
 
@@ -81,7 +81,7 @@ abstract public class ImageFanMaker {
 	 * @param raw image data
 	 * @return Fan image data
 	 */
-	public abstract FanImageData createFanData(GeminiImageRecordI geminiRecord, int nPixX, int nPixY, byte[] imageData);
+	public abstract FanImageData createFanData(SonarImageRecordI geminiRecord, int nPixX, int nPixY, byte[] imageData);
 	
 	/**
 	 * Get the default number of X bins. Default default is the number of beams
@@ -89,7 +89,7 @@ abstract public class ImageFanMaker {
 	 * @param geminiRecord Gemini data record
 	 * @return default image width
 	 */
-	public int getDefaultXbins(GeminiImageRecordI geminiRecord) {
+	public int getDefaultXbins(SonarImageRecordI geminiRecord) {
 		return geminiRecord.getnBeam();
 	}
 

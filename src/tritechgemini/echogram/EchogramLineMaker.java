@@ -1,11 +1,11 @@
 package tritechgemini.echogram;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 public interface EchogramLineMaker {
 
-	public EchogramLine getEchogramLine(GeminiImageRecordI imageRecord, EchoLineDef echoLineDef);
+	public EchogramLine getEchogramLine(SonarImageRecordI imageRecord, EchoLineDef echoLineDef);
 	
-	public EchogramLine makeEchogramLine(GeminiImageRecordI imageRecord, EchoLineDef echoLineDef);
+	public EchogramLine makeEchogramLine(SonarImageRecordI imageRecord, EchoLineDef echoLineDef);
 	
 }

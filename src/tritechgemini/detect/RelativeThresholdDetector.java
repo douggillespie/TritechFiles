@@ -2,7 +2,7 @@ package tritechgemini.detect;
 
 import java.util.ArrayList;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 /**
  * Start of some other detector ideas, but they ain't going to work very well. 
@@ -37,8 +37,8 @@ public class RelativeThresholdDetector implements RegionDetector {
 	}
 
 	@Override
-	public ArrayList<DetectedRegion> detectRegions(GeminiImageRecordI rawGeminiRecord,
-			GeminiImageRecordI denoisedRecord, int thHigh, int thLow, int nConnect) {
+	public ArrayList<DetectedRegion> detectRegions(SonarImageRecordI rawGeminiRecord,
+			SonarImageRecordI denoisedRecord, int thHigh, int thLow, int nConnect) {
 
 		ArrayList<DetectedRegion> detectedRegions = null;
 		short[] denoised = denoisedRecord.getShortImageData();

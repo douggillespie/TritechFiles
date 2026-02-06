@@ -7,10 +7,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 /**
- * Catalog of gemini data which can take multiple files. 
+ * Catalog of sonar data which can take multiple files. 
+ * This can catalogue all supported file file types using 
+ * maps of different catalogues for different underlying file types. 
+ * Generally, it's easiest just to program to this, and let it handle
+ * the catalogues of the specific file types. 
  * @author dg50
  *
  */
@@ -38,7 +42,7 @@ public class MultiFileCatalog implements Serializable {
 
 	/**
 	 * Catalog a single file or a folder of files
-	 * @param fileOrFolder a single file or folder name If it's a folder, will automaticall do sub folders. 
+	 * @param fileOrFolder a single file or folder name If it's a folder, will automatically do sub folders. 
 	 */
 	public boolean catalogFiles(String fileOrFolder) {
 		return catalogFiles(fileOrFolder, true);
@@ -46,7 +50,7 @@ public class MultiFileCatalog implements Serializable {
 	/**
 	 * Catalog a single file or a folder of files
 	 * @param fileOrFolder a single file or folder name
-	 * @param subFolders only applies if cataloging a folder
+	 * @param subFolders only applies if cataloguing a folder
 	 */
 	public boolean catalogFiles(String fileOrFolder, boolean subFolders) {
 		File file = new File(fileOrFolder) ;
@@ -66,7 +70,7 @@ public class MultiFileCatalog implements Serializable {
 		return true;
 	}
 	/**
-	 * Build a catalog from a list of files. 
+	 * Build a catalogue from a list of files. 
 	 * @param fileList
 	 */
 	public void catalogFiles(String[] fileList) {
@@ -128,7 +132,7 @@ public class MultiFileCatalog implements Serializable {
 	}
 	
 	/**
-	 * Get the total number of records. 
+	 * Get the total number of records in all files. 
 	 * @return
 	 */
 	public int getTotalRecords() {
@@ -153,36 +157,22 @@ public class MultiFileCatalog implements Serializable {
 	}
 	
 	/**
-	 * Get the ith record from the total catalog.  Load full record. 
+	 * Get the ith record from the total catalogue.  Load full record. 
 	 * @param iRecord record index. 
 	 * @return ith record or null if it doesn't exit. 
 	 */
-	public GeminiImageRecordI getRecord(int iRecord) {
-//		int n = 0;
-//		int counted1 = 0, counted2;
-//		for (int i = 0; i < catalogList.size(); i++) {
-//			counted2 = counted1 + catalogList.get(i).getNumRecords();
-//			if (iRecord >= counted1 && iRecord < counted2) {
-//				try {
-//					return catalogList.get(i).getFullRecord(iRecord-counted1);
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//					return null;
-//				}
-//			}
-//			counted1 = counted2;
-//		}
-//		return null;
+	public SonarImageRecordI getRecord(int iRecord) {
+
 		return getRecord(iRecord, true);
 	}
 
 	/**
-	 * Get the ith record from the total catalog.. 
+	 * Get the ith record from the total catalogue. 
 	 * @param iRecord record index. 
 	 * @param loadFully load the full record data (don't do this for too many units at once)
 	 * @return ith record or null if it doesn't exit. 
 	 */
-	public GeminiImageRecordI getRecord(int iRecord, boolean loadFully) {
+	public SonarImageRecordI getRecord(int iRecord, boolean loadFully) {
 		int n = 0;
 		int counted1 = 0, counted2;
 		for (int i = 0; i < catalogList.size(); i++) {
@@ -209,7 +199,7 @@ public class MultiFileCatalog implements Serializable {
 	 * 
 	 * Get the ith record for the specified sonar ...
 	 */
-	public GeminiImageRecordI getSonarRecord(int sonarID, int iRecord) {
+	public SonarImageRecordI getSonarRecord(int sonarID, int iRecord) {
 		int n = 0;
 		int counted1 = 0, counted2;
 		for (int i = 0; i < catalogList.size(); i++) {
@@ -221,7 +211,7 @@ public class MultiFileCatalog implements Serializable {
 			counted2 = counted1 + devInfo.getnFrames();
 			if (iRecord >= counted1 && iRecord < counted2) {
 				try {
-					GeminiImageRecordI record = catalog.getSonarRecord(sonarID, iRecord-counted1);
+					SonarImageRecordI record = catalog.getSonarRecord(sonarID, iRecord-counted1);
 					if (record == null) {
 						return null;
 					}
@@ -240,11 +230,11 @@ public class MultiFileCatalog implements Serializable {
 	}
 	
 	/**
-	 * Find the catalog for a given record. 
+	 * Find the catalogue for a given record. 
 	 * @param geminiRecord
 	 * @return
 	 */
-	public GeminiFileCatalog findRecordCatalog(GeminiImageRecordI geminiRecord) {
+	public GeminiFileCatalog findRecordCatalog(SonarImageRecordI geminiRecord) {
 		return findRecordCatalog(geminiRecord.getDeviceId(), geminiRecord.getRecordTime());
 	}
 	
@@ -276,7 +266,7 @@ public class MultiFileCatalog implements Serializable {
 	 * @param timeMillis time milliseconds
 	 * @return record or null
 	 */
-	public GeminiImageRecordI findRecordForTime(int sonarID, long timeMillis) {
+	public SonarImageRecordI findRecordForTime(int sonarID, long timeMillis) {
 
 		for (int i = 0; i < catalogList.size(); i++) {
 			GeminiFileCatalog catalog = catalogList.get(i);
@@ -302,7 +292,7 @@ public class MultiFileCatalog implements Serializable {
 	 * @param recordOffest
 	 * @return relative image record in list. 
 	 */
-	public GeminiImageRecordI findRelativeRecord(GeminiImageRecordI baseRecord, int recordOffset) {
+	public SonarImageRecordI findRelativeRecord(SonarImageRecordI baseRecord, int recordOffset) {
 		if (baseRecord == null) {
 			return null;
 		}
@@ -405,7 +395,7 @@ public class MultiFileCatalog implements Serializable {
 	 * @param imageRecord
 	 * @return
 	 */
-	public boolean loadFully(GeminiImageRecordI imageRecord) {
+	public boolean loadFully(SonarImageRecordI imageRecord) {
 		GeminiFileCatalog catalog = findRecordCatalog(imageRecord);
 		boolean loaded = false;
 		if (catalog == null) {

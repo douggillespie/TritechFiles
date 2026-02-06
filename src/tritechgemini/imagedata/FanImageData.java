@@ -13,11 +13,11 @@ public class FanImageData implements Cloneable {
 
 	private short[][] imageValues;
 	
-	private GeminiImageRecordI geminiRecord;
+	private SonarImageRecordI geminiRecord;
 
 	private double metresPerPixX, metresPerPixY;
 	
-	public FanImageData(GeminiImageRecordI geminiRecord, short[][] imageValues, double metresPerPixX,
+	public FanImageData(SonarImageRecordI geminiRecord, short[][] imageValues, double metresPerPixX,
 			double metresPerPixY) {
 		super();
 		this.geminiRecord = geminiRecord;
@@ -54,7 +54,7 @@ public class FanImageData implements Cloneable {
 	 * Original gemini record that created these data. 
 	 * @return Gemini data record
 	 */
-	public GeminiImageRecordI getGeminiRecord() {
+	public SonarImageRecordI getGeminiRecord() {
 		return geminiRecord;
 	}
 

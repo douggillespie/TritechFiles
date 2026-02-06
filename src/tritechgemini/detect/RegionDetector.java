@@ -2,7 +2,7 @@ package tritechgemini.detect;
 
 import java.util.ArrayList;
 
-import tritechgemini.imagedata.GeminiImageRecordI;
+import tritechgemini.imagedata.SonarImageRecordI;
 
 public interface RegionDetector {
 
@@ -24,7 +24,7 @@ public interface RegionDetector {
 	 * @param thLow lower threshold
 	 * @return 
 	 */
-	ArrayList<DetectedRegion> detectRegions(GeminiImageRecordI rawGeminiRecord, GeminiImageRecordI denoisedRecord, int thHigh, int thLow, int nConnect);
+	ArrayList<DetectedRegion> detectRegions(SonarImageRecordI rawGeminiRecord, SonarImageRecordI denoisedRecord, int thHigh, int thLow, int nConnect);
 
 //	/**
 //	 * Search for regions using a different set of raw data, which should probably be a noise reduced version of 

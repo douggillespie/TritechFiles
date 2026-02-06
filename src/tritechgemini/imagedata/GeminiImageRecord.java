@@ -5,7 +5,7 @@ import java.io.Serializable;
 import tritechgemini.echogram.EchoLineStore;
 import tritechgemini.fileio.GLFGenericHeader;
 
-abstract public class GeminiImageRecord extends PublicMessageHeader implements GeminiImageRecordI, Cloneable, Serializable {
+abstract public class GeminiImageRecord extends PublicMessageHeader implements SonarImageRecordI, Cloneable, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
