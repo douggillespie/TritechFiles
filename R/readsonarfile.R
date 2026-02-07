@@ -35,14 +35,12 @@ fanMaker <- .jnew("tritechgemini.imagedata.FanPicksFromData", as.integer(4))
 fanImage <- J(fanMaker, "createFanData", aRec, as.integer(200))
 imageData <- J(fanImage, "getImageValues")
 # imageData comes back as a 2D array of Java objects and needs to be converted
-xScale <- J(fanImage, "getMetresPerPixX")
-# plot it without any scaling
-# need to convert the type. This works found at 
-# https://stackoverflow.com/questions/17556910/accessing-data-from-java-object-in-rjava
+# This works as found at https://stackoverflow.com/questions/17556910/accessing-data-from-java-object-in-rjava
 rImage <- do.call(rbind, lapply(imageData, .jevalArray))
 # get the image dimensions
 imageDim = dim(rImage);
-# create the scales
+# create the scales, should be the same in x and y
+xScale <- J(fanImage, "getMetresPerPixX")
 xs = (seq(1, imageDim[1])-imageDim[1]/2) *xScale
 ys = seq(1, imageDim[2]) * xScale;
 # plot it
