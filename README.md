@@ -1,9 +1,12 @@
 # TritechFiles
 Tritech image data handling and file i/o 
 
+This repo contains classes which can unpack Tritech Gemini ECD and GLF files, and also ARIS data files.
+
 [Javadoc](https://douggillespie.github.io/TritechFiles/index.html)
 
-This repo contains classes which can unpack Tritech Gemini ECD and GLF files. 
+The package can be exported as a Java library and the functions for reading files and converting to 
+fan images called from Matlab and Python.
 
 Note that these functions are written in pure Java. Tritech do make a C++ SDK available which 
 may be more stable and can handle the full file format. What I've done here is a bit of a 'hack',
