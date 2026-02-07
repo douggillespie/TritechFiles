@@ -7,7 +7,8 @@ ECD and GLF files, and also [ARIS sonar](http://www.soundmetrics.com/products/ar
 [Javadoc](https://douggillespie.github.io/TritechFiles/index.html)
 
 The package can be exported as a Java library and the functions for reading files and converting to 
-fan images called from [Matlab](https://github.com/douggillespie/TritechFiles/tree/main/matlab) 
+fan images called from [Matlab](https://github.com/douggillespie/TritechFiles/tree/main/matlab),
+[R](https://github.com/douggillespie/TritechFiles/tree/main/R), 
 and [Python](https://github.com/douggillespie/TritechFiles/tree/main/python).
 
 The code makes catalogues of the files which are stored in index files alongside the original data 
