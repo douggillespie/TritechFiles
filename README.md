@@ -1,6 +1,8 @@
 # TritechFiles
 Tritech image data handling and file i/o 
 
+[Javadoc](https://douggillespie.github.io/TritechFiles/index.html)
+
 This repo contains classes which can unpack Tritech Gemini ECD and GLF files. 
 
 Note that these functions are written in pure Java. Tritech do make a C++ SDK available which 
