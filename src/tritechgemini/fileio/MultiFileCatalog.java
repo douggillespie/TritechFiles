@@ -41,6 +41,15 @@ public class MultiFileCatalog implements Serializable {
 	}
 
 	/**
+	 * Having trouble calling from R so trying a name 
+	 * for the function that isn't overloaded.
+	 * @param fileOrFolder
+	 * @return
+	 */
+	public boolean catalogFile(String fileOrFolder) {
+		return catalogFiles(fileOrFolder, true);
+	}
+	/**
 	 * Catalog a single file or a folder of files
 	 * @param fileOrFolder a single file or folder name If it's a folder, will automatically do sub folders. 
 	 */

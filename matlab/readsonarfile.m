@@ -48,7 +48,6 @@ for i = 1:6
     xlabel('Beam');
     ylabel('Range')
 
-
     for f = 1:numel(sonars) % find the fan maker
         if aRec.getDeviceId() == sonars(f)
             fm = fanMaker{f};
