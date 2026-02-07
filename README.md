@@ -1,7 +1,8 @@
 # TritechFiles
 Tritech image data handling and file i/o 
 
-This repo contains classes which can unpack Tritech Gemini ECD and GLF files, and also ARIS data files.
+This repo contains classes which can unpack [Tritech Gemini](https://www.tritech.co.uk/products/gemini)
+ECD and GLF files, and also [ARIS sonar](http://www.soundmetrics.com/products/aris-sonars) data files.
 
 [Javadoc](https://douggillespie.github.io/TritechFiles/index.html)
 
