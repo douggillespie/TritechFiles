@@ -19,7 +19,10 @@ b <- J(mfc, "catalogFiles", sampleFolder)
 nRec <- J(mfc, "getTotalRecords")
 print(paste('total number of records is', nRec))
 
-# read in the first record
+# now create the FanPicksFromData object used to transform images.
+fanMaker <- .jnew("tritechgemini.imagedata.FanPicksFromData", as.integer(4))
+
+# read in the first record.If looping through records, you'd start your loop here 
 aRec <- J(mfc, "getRecord", as.integer(0))
 # get the raw data out
 raw <- J(aRec, "getShortImageData")
@@ -29,10 +32,8 @@ nRange <- J(aRec, "getnRange")
 raw2 <- array(raw, dim=c(nBeam, nRange))
 image2D(raw2)
 
-# now get a fan image using the FanPicksFromData class
-fanMaker <- .jnew("tritechgemini.imagedata.FanPicksFromData", as.integer(4))
-# now make a fan image from the record we read in
-fanImage <- J(fanMaker, "createFanData", aRec, as.integer(200))
+# now make a fan image from the record we read in to be 500 pixels wide (quite small)
+fanImage <- J(fanMaker, "createFanData", aRec, as.integer(500))
 imageData <- J(fanImage, "getImageValues")
 # imageData comes back as a 2D array of Java objects and needs to be converted
 # This works as found at https://stackoverflow.com/questions/17556910/accessing-data-from-java-object-in-rjava
