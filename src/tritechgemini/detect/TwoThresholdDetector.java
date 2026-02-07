@@ -8,7 +8,7 @@ import tritechgemini.imagedata.SonarImageRecordI;
  * Detector which searches for detected regions in data. Uses two thresholds, a "minimum maximum" (thHigh) 
  * and a "minimum edge" thLow. 
  * Should ideally be sent data after background subtraction, can also work with raw raw data. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class TwoThresholdDetector implements RegionDetector {

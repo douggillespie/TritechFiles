@@ -15,7 +15,7 @@ import tritechgemini.fileio.LittleEndianDataInputStream;
 /**
  * Test reading of ARIS data files.
  * See https://github.com/SoundMetrics/aris-file-sdk/blob/master/docs/understanding-aris-data.md
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class ARISFile {

@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Interface for Sonar data record which can support data read from Tritech ECD and GLF files 
  * and types from other manufacturers, e.g. ARIS. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public interface SonarRecordI extends Serializable {

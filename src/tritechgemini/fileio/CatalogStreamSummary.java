@@ -4,7 +4,7 @@ package tritechgemini.fileio;
  * Lump of data to send back from a GeminiCatalog.streamCatalog function which 
  * will give (or attempt to give) the state of the streaming, which may not
  * be complete, or may have been aborted for some reason. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class CatalogStreamSummary {

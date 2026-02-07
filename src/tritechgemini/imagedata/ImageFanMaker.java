@@ -6,7 +6,7 @@ package tritechgemini.imagedata;
  * Not actually an image, but an array of numbers that can be put into an image. <br>
  * If image data specified, it can be processed data, e.g. after some sort of background subtraction,
  * otherwise it will be taken as the raw image data from within the data record
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 abstract public class ImageFanMaker {

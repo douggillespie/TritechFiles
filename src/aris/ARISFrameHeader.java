@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 /**
  * ARIS Frame header. https://github.com/SoundMetrics/aris-file-sdk/blob/master/type-definitions/C/FrameHeader.h
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class ARISFrameHeader extends ARISHeader implements Serializable {

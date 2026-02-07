@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * ARIS File Header. 
  * See https://github.com/SoundMetrics/aris-file-sdk/blob/master/type-definitions/C/FileHeader.h
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class ARISFileHeader extends ARISHeader implements Serializable {

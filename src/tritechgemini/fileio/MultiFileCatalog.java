@@ -15,7 +15,7 @@ import tritechgemini.imagedata.SonarImageRecordI;
  * maps of different catalogues for different underlying file types. 
  * Generally, it's easiest just to program to this, and let it handle
  * the catalogues of the specific file types. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class MultiFileCatalog implements Serializable {

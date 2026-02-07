@@ -2,7 +2,7 @@ package aris.beams;
 
 /**
  * Data on a single beam. Note that angles are in degrees. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class ARISBeam {

@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * Might need to flip these for compatibility with Tritech data:
  * https://github.com/SoundMetrics/aris-file-sdk/blob/master/docs/understanding-aris-data.md
  * "in ARIS acoustic sample data beam 0 is the right-most beam, and beams are numbered from right-to-left."
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public abstract class ARISBeamData {

@@ -12,7 +12,7 @@ import tritechgemini.fileio.LittleEndianDataOutputStream;
 
 /**
  * This works reading from the latest GLF files and seems to get reasonable values. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class GLFStatusData extends PublicMessageHeader implements Serializable {

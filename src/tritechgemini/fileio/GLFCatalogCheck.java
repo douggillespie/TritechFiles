@@ -8,7 +8,7 @@ import java.util.ArrayList;
 /**
  * Functions to check and if necessary create the catalogue files for 
  * glf files and the dat file with them. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class GLFCatalogCheck {

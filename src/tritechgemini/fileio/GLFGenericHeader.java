@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * Generic header structure for .dat file records. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class GLFGenericHeader implements Serializable {

@@ -7,7 +7,7 @@ import java.util.Comparator;
 /**
  * A repeat of a lot of stuff inthe PAMGUArd class OfflineFileList, but needed
  * in the standalone package, so recreating here. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class SonarFileList {

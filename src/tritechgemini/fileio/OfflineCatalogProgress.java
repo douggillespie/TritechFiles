@@ -3,7 +3,7 @@ package tritechgemini.fileio;
 /**
  * Progress info sent to observes when the offline file catalogue is being
  * updated. This is done from a multifilecatalog. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class OfflineCatalogProgress {

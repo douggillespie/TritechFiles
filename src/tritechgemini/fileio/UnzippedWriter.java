@@ -23,7 +23,7 @@ import java.util.zip.ZipInputStream;
  * Tested with a single file input. May or may not work with two or more input files. 
  * <p>
  * Format largely described at https://en.wikipedia.org/wiki/ZIP_(file_format)
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class UnzippedWriter {

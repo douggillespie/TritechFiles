@@ -24,7 +24,7 @@ import tritechgemini.imagedata.SonarImageRecordI;
 /**
  * File catalog for ARIS sonar files. file format is very simple compared
  * to Tritech files. Details are at https://github.com/SoundMetrics/aris-file-sdk/tree/master
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class ARISFileCatalog extends GeminiFileCatalog<ARISImageRecord> {

@@ -6,7 +6,7 @@ import tritechgemini.imagedata.SonarImageRecordI;
 
 /**
  * Start of some other detector ideas, but they ain't going to work very well. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class RelativeThresholdDetector implements RegionDetector {

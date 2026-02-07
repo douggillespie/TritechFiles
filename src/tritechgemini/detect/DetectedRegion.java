@@ -9,7 +9,7 @@ import tritechgemini.imagedata.SonarImageRecordI;
 /**
  * A connected region of points found by the detector. 
  * Point data consist of a list of index pointers back into the original record. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class DetectedRegion extends TwoThresholdDetector {

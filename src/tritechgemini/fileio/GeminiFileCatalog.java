@@ -23,11 +23,13 @@ import tritechgemini.imagedata.SonarImageRecordI;
 import tritechgemini.imagedata.SonarRecordI;
 
 /**
- * Catalog of information that's in a single Gemini ECD of GLF file.
+ * Catalogue of information that's in a single Sonar data file.
+ * <br>Named when we only supported Tritech GLF and ECD formats, but should
+ * also be the base class for any other sonar data catalogues.<br>
  * These objects are serialized into index files for each data file
  * so don't add anything that can't be serialized.
  * 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public abstract class GeminiFileCatalog<RecordClass extends SonarImageRecordI> implements Serializable {

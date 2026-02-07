@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 
 /**
  * Copied from https://www.peterfranza.com/2008/09/26/little-endian-input-stream/
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class LittleEndianDataInputStream extends InputStream implements DataInput {

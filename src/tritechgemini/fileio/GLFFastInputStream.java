@@ -28,7 +28,7 @@ import java.util.zip.ZipInputStream;
  * so far as I can tell, only the .dat file is important. This class makes it 
  * possible to read the dat file from the GLF file without actually unzipping
  * the archive.  
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class GLFFastInputStream extends InputStream implements Serializable {

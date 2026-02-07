@@ -6,7 +6,7 @@ import tritechgemini.imagedata.SonarImageRecordI;
 
 /**
  * Really simple background subtraction class
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class BackgroundSub {

@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Fan maker where a LUT is used to work through each point in the fan image and take 
  * data from the GeminiRecord to populate that point. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class FanPicksFromData extends ImageFanMaker {

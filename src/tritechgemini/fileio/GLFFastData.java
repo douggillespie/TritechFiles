@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
  * Class of serializable data that can be used to quick catalog 
  * the overall content of a glf file. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class GLFFastData implements Serializable {

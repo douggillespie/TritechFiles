@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * information about an individual sonar in a catalog. 
  * i.e. one of thee for single sonar, 2 for dual, etc. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class CatalogSonarInfo implements Cloneable, Serializable {

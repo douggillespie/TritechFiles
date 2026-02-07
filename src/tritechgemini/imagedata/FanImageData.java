@@ -6,7 +6,7 @@ package tritechgemini.imagedata;
  * max value from the sonars, which is 255, this allows setting all pixels outside the sonar
  * image to be set to -1, which can then be made transparent when the data are finally converted
  * into a buffered image. 
- * @author dg50
+ * @author Doug Gillespie
  *
  */
 public class FanImageData implements Cloneable {
