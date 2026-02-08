@@ -11,7 +11,7 @@ data files.
 
 Motivation is primarily to be able to efficiently read data into
 PAMGuard (www.pamguard.org) for use in the [PAMGuard sonar processing
-modules](https://github.com/douggillespie/TritechAcquisitionPlugin](https://www.pamguard.org/plugins/tritech.html).
+modules](https://www.pamguard.org/plugins/tritech.html).
 
 The package can be exported as a Java library and the functions for
 reading files and converting to fan images called from
