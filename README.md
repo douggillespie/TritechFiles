@@ -1,5 +1,8 @@
 # TritechFiles
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18526339.svg)](https://doi.org/10.5281/zenodo.18526339)
+
+
 Tritech image data handling and file i/o
 
 This repo contains classes which can unpack [Tritech
