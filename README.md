@@ -25,7 +25,7 @@ alongside the original data files. This allows random access to
 individual records in each file for rapid data browsing. In addition,
 the code can read glf files, which are a zipped archive of 2 or 3 other
 files, without unzipping. Removing the need to unzip each file before it
-is used, again providing very significant speed improvements (and disk
+is used, also provides very significant speed improvements (and disk
 space savings) when browsing large datasets. The first time a folder of
 files is accessed, it may take a while to make the catalogues, but after
 that, the stored catalogues are rapidly loaded.
