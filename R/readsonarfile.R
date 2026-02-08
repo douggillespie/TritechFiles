@@ -30,11 +30,15 @@ nBeam <- J(aRec, "getnBeam")
 nRange <- J(aRec, "getnRange")
 # data come in as a 1D array. Reshape it to 2D. 
 raw2 <- array(raw, dim=c(nBeam, nRange))
-image2D(raw2)
+plot.new()
+image2D(raw2, main="Raw image", xlab="Beam", ylab="Range")
 
 # now make a fan image from the record we read in to be 500 pixels wide (quite small)
 fanImage <- J(fanMaker, "createFanData", aRec, as.integer(500))
 imageData <- J(fanImage, "getImageValues")
+# now free the image data in the record, or you'll run out of memory
+# after a few thousand records.
+J(aRec, "freeImageData")
 # imageData comes back as a 2D array of Java objects and needs to be converted
 # This works as found at https://stackoverflow.com/questions/17556910/accessing-data-from-java-object-in-rjava
 rImage <- do.call(rbind, lapply(imageData, .jevalArray))
@@ -45,4 +49,5 @@ xScale <- J(fanImage, "getMetresPerPixX")
 xs = (seq(1, imageDim[1])-imageDim[1]/2) *xScale
 ys = seq(1, imageDim[2]) * xScale;
 # plot it
-image2D(rImage, x = xs, y = ys)
+plot.new()
+image2D(rImage, x = xs, y = ys, main="Fan Image", xlab="(m)", ylab="(m)")

@@ -24,3 +24,7 @@
 hs_err_pid*
 /bin/
 .Rproj.user
+
+# R files
+R/.Rhistory
+R/.RData

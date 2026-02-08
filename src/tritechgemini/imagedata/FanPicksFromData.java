@@ -4,8 +4,10 @@ import java.util.Arrays;
 
 /**
  * Fan maker where a LUT is used to work through each point in the fan image and take 
- * data from the GeminiRecord to populate that point. 
+ * data from the SonarRecord to populate that point. 
+ * <br>Points outside the fan are set to -1. 
  * @author Doug Gillespie
+ * @see SonarImageRecordI
  *
  */
 public class FanPicksFromData extends ImageFanMaker {
@@ -33,7 +35,7 @@ public class FanPicksFromData extends ImageFanMaker {
 	/**
 	 * Length of gemini records used with LUT's
 	 */
-	private int geminiRecordLength;
+	private int sonarRecordLength;
 	
 	/**
 	 * Number of points in each column actually used. 
@@ -42,21 +44,32 @@ public class FanPicksFromData extends ImageFanMaker {
 
 	private int xCent;
 	
+	/**
+	 * Create a fan maker that will use two nearest raw data points(closest in range, 
+	 * beam measurements either side of the fan image point). 
+	 */
 	public FanPicksFromData() {
 	}
 
-	
+	/**
+	 * Create a Fan maker. 
+	 * <br>Valid values are
+	 * <br>1. Use a single nearest point from the raw data
+	 * <br>2. Use the nearest points in range, and a beam point either side of the output point
+	 * <br>4. Weighted average of four nearest neighbours. 
+	 * @param nNearPoints. The number of raw data points to use for each point in the fan. 
+	 */
 	public FanPicksFromData(int nNearPoints) {
 		this.nNearPoints = checkNPoints(nNearPoints);
 	}
 	
 	@Override
-	public FanImageData createFanData(SonarImageRecordI geminiRecord, int nPixX, int nPixY, byte[] data) {
-		if (geminiRecord == null || geminiRecord.getImageData() == null) {
+	public FanImageData createFanData(SonarImageRecordI sonarRecord, int nPixX, int nPixY, byte[] data) {
+		if (sonarRecord == null || sonarRecord.getImageData() == null) {
 			return null;
 		}
-		if (needNewLUT(geminiRecord, nPixX, nPixY)) {
-			createLUTs(geminiRecord, nPixX, nPixY);
+		if (needNewLUT(sonarRecord, nPixX, nPixY)) {
+			createLUTs(sonarRecord, nPixX, nPixY);
 		}
 		
 		short[][] image = new short[nPixX][nPixY];
@@ -99,13 +112,13 @@ public class FanPicksFromData extends ImageFanMaker {
 				e.printStackTrace();
 			}
 		}
-		double mPerPixY = geminiRecord.getMaxRange() / nPixY;
-		double mPerPixX = geminiRecord.getMaxRange() * Math.abs(Math.sin(geminiRecord.getBearingTable()[0])) / (nPixX/2);
-		return new FanImageData(geminiRecord, image, mPerPixX, mPerPixY);
+		double mPerPixY = sonarRecord.getMaxRange() / nPixY;
+		double mPerPixX = sonarRecord.getMaxRange() * Math.abs(Math.sin(sonarRecord.getBearingTable()[0])) / (nPixX/2);
+		return new FanImageData(sonarRecord, image, mPerPixX, mPerPixY);
 	}
 
-	private boolean needNewLUT(SonarImageRecordI geminiRecord, int nPixX, int nPixY) {
-		if (geminiRecordLength != geminiRecord.getImageData().length) {
+	private boolean needNewLUT(SonarImageRecordI sonarRecord, int nPixX, int nPixY) {
+		if (sonarRecordLength != sonarRecord.getImageData().length) {
 			return true;
 		}
 		if (dataPickLUT == null) {
@@ -126,12 +139,12 @@ public class FanPicksFromData extends ImageFanMaker {
 
 	/**
 	 * Create the lookup tables required to link points in the image to points in the data
-	 * @param geminiRecord
+	 * @param sonarRecord
 	 * @param nPixX n x Pixels in image
 	 * @param nPixY n y Pixels in image
 	 */
-	private void createLUTs(SonarImageRecordI geminiRecord, int nPixX, int nPixY) {
-		double[] bearingTable = geminiRecord.getBearingTable();
+	private void createLUTs(SonarImageRecordI sonarRecord, int nPixX, int nPixY) {
+		double[] bearingTable = sonarRecord.getBearingTable();
 		if (bearingTable == null) {
 			return;
 		}
@@ -142,11 +155,11 @@ public class FanPicksFromData extends ImageFanMaker {
 		dataLUTScale = new double[nPixX][nPixY][nP];
 		xCent = (int) Math.ceil(nPixX/2.);
 		int nBearing = bearingTable.length;
-		int nRange = geminiRecord.getnRange();
+		int nRange = sonarRecord.getnRange();
 		double imageScaleY = (double) nRange / (double) nPixY;
 		double imageScaleX = (double) nRange * Math.abs(Math.sin(bearingTable[0])) / (double) nPixX * 2;
 		Thread[] threads = new Thread[nThread];
-		geminiRecordLength = geminiRecord.getnBeam() * geminiRecord.getnRange();
+		sonarRecordLength = sonarRecord.getnBeam() * sonarRecord.getnRange();
 		for (int t = 0; t < nThread; t++) {
 			int pos = t;
 			threads[t] = new Thread(new Runnable() {
