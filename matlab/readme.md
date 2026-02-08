@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # Reading Tritech and ARIS data files with Matlab
 
 The example readsonarfile.m shows you how to use the Java library to
