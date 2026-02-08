@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # TritechFiles
 
 Tritech image data handling and file i/o
