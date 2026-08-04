@@ -18,6 +18,7 @@ javaaddpath(jarFile);
 % the MultiFileCatalog can work with a single file, or a folder of files.
 % For this example, we'll just use a single file
 sampleFile = "C:\ProjectData\Meygen2022\AAM\GLFData\Drive23\11-15\log_2022-11-15-181117.glf";
+%sampleFile = "C:\ProjectData\Meygen2022\AAM\GLFData\Drive23\11-15";
 
 mfc = tritechgemini.fileio.MultiFileCatalog;
 mfc.catalogFiles(sampleFile);

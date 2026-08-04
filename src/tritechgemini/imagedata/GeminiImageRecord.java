@@ -62,6 +62,8 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements S
 	 * time taken to load the record from file in nanoseconds. 
 	 */
 	private long recordLoadNanos;
+	
+	private long recordRXNanos;
 
 	private transient EchoLineStore echoLineStore;
 	
@@ -196,6 +198,20 @@ abstract public class GeminiImageRecord extends PublicMessageHeader implements S
 			echoLineStore = new EchoLineStore();
 		}
 		return echoLineStore;
+	}
+
+	/**
+	 * @return the recordRXNanos
+	 */
+	public long getRecordRXNanos() {
+		return recordRXNanos;
+	}
+
+	/**
+	 * @param recordRXNanos the recordRXNanos to set
+	 */
+	public void setRecordRXNanos(long recordRXNanos) {
+		this.recordRXNanos = recordRXNanos;
 	}
 
 }
